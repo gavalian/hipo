@@ -1,50 +1,48 @@
-ROOTCFLAGS  := $(shell root-config --cflags)
-ROOTLDFLAGS := $(shell root-config --ldflags)
-ROOTLIBS    := $(shell root-config --libs) -lEG
-ROOTGLIBS   := $(shell root-config --glibs)
-
-HIPOCFLAGS  := -I../Hipo4
-#HIPOLIBS    := -L../lib -lhipo4 -lclas12banks
+#********************************************************
+# MAKEFILE for BUILDING EXAMPLES FOR HIPO4 LIBRARY
+# AUTHOR: GAVALIAN DATE: 10/24/2018
+#********************************************************
+HIPOCFLAGS  := -I../hipo4
 HIPOLIBS    := -L../lib -lhipo4
 
-LZ4LIBS     := -L../Lz4/lib -llz4
-LZ4INCLUDES := -I../Lz4/lib
+LZ4LIBS     := -L../lz4/lib -llz4
+LZ4INCLUDES := -I../lz4/lib
 
 CXX       := g++
-CXXFLAGS  += -Wall -fPIC $(ROOTCFLAGS) -std=c++11
+CXXFLAGS  += -Wall -fPIC -std=c++11
 LD        := g++
-LDFLAGS   := $(ROOTLDFLAGS)
+LDFLAGS   :=
 
 
 all:  writeFile readFile
 
 readEvents: readEvents.o
-	$(CXX) -o readEvents $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
+	$(CXX) -o readEvents $<  $(HIPOLIBS) $(LZ4LIBS)
 
 writeEvents: writeEvents.o
-	$(CXX) -o writeEvents $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
+	$(CXX) -o writeEvents $<   $(HIPOLIBS) $(LZ4LIBS)
 
 readFile: readFile.o
-	$(CXX) -o readFile $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
+	$(CXX) -o readFile $<   $(HIPOLIBS) $(LZ4LIBS)
 
 writeFile: writeFile.o
-	$(CXX) -o writeFile $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
+	$(CXX) -o writeFile $<   $(HIPOLIBS) $(LZ4LIBS)
 
 schema: schema.o
-	$(CXX) -o schema $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
+	$(CXX) -o schema $<   $(HIPOLIBS) $(LZ4LIBS)
 
 builder: builder.o
-	$(CXX) -o builder $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
+	$(CXX) -o builder $<   $(HIPOLIBS) $(LZ4LIBS)
 
 #analysis: analysis.o
-#	$(CXX) -o analysis $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
+#	$(CXX) -o analysis $<   $(HIPOLIBS) $(LZ4LIBS)
 
 #clas12event_example: clas12event_example.o
-#	$(CXX) -o clas12event_example $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
+#	$(CXX) -o clas12event_example $<   $(HIPOLIBS) $(LZ4LIBS)
 
 clean:
 	@echo 'Removing all build files'
 	@rm -rf *.o readEvents schema *~ builder writeEvents writeFile readFile
 
 %.o: %.cc
-	$(CXX) -c $< -O2 $(ROOTCFLAGS) $(HIPOCFLAGS) $(LZ4INCLUDES)
+	$(CXX) -c $< -O2 $(CXXFLAGS) $(HIPOCFLAGS) $(LZ4INCLUDES)
