@@ -12,17 +12,22 @@
 #endif
 
 namespace hipo {
-
+  /**
+  * Default constructor sets number of max events to 100000
+  * and the buffer size to 8MB.
+  */
   recordbuilder::recordbuilder(){
     bufferIndex.resize(4*defaultNumberOfEvents);
     bufferEvents.resize(defaultRecordSize);
     bufferData.resize(defaultRecordSize+4*defaultNumberOfEvents);
     bufferRecord.resize(defaultRecordSize+4*defaultNumberOfEvents+512*1024);
-
     bufferIndexEntries   = 0;
     bufferEventsPosition = 0;
   }
-
+  /**
+   * Constructor with custom max event size and maximum record
+   * size provided by user.
+   */
   recordbuilder::recordbuilder(int maxEvents, int maxLength){
     bufferIndex.resize(4*maxEvents);
     bufferEvents.resize(maxLength);
@@ -32,10 +37,17 @@ namespace hipo {
     bufferEventsPosition = 0;
   }
 
+  /**
+   * add event object to the record builder buffer.
+  */
   bool recordbuilder::addEvent(hipo::event &evnt){
       return addEvent(evnt.getEventBuffer(),0,evnt.getSize());
   }
-
+  /**
+   * add a content of a vector to the record builder buffer.
+   * offset in the buffer and number of bytes to add provided
+   * by user.
+   */
   bool recordbuilder::addEvent(std::vector<char> &vec, int start, int length){
       if((bufferEventsPosition+length)>=bufferEvents.size()) return false;
       if((bufferIndexEntries+1)*4>=bufferIndex.size()) return false;
@@ -45,24 +57,35 @@ namespace hipo {
       bufferEventsPosition += length;
       return true;
   }
-
+  /**
+   * Resets the counters for number of events and sets the
+   * position for writing new events to the begining of the
+   * event buffer.
+   */
   void recordbuilder::reset(){
     bufferIndexEntries   = 0;
     bufferEventsPosition = 0;
   }
-
+  /**
+   * returns record length in bytes rounded to first integer.
+   * the length comes out divisible by 4.
+   */
   int  recordbuilder::getRecordLengthRounding(int bufferSize){
     if(bufferSize%4==0) return 0;
     int nwords = bufferSize/4;
     int nbytes = 4*(nwords+1);
     return (nbytes-bufferSize);
   }
-
+  /**
+   * Returns number of events in the record.
+   */
   int  recordbuilder::getEntries(){
     int nentries = *reinterpret_cast<int*>(&bufferRecord[12]);
     return nentries;
   }
-
+  /**
+   * returns the size of the record.
+   */
   int  recordbuilder::getRecordSize(){
       int size = *reinterpret_cast<int*>(&bufferRecord[0]);
       return size*4;
@@ -104,10 +127,13 @@ namespace hipo {
       hipo::utils::writeInt(&bufferRecord[0], 36, compressionWord);
       hipo::utils::writeLong(&bufferRecord[0], 40, 0);
       hipo::utils::writeLong(&bufferRecord[0], 48, 0);
-      printf("record::build uncompressed size = %8d, compressed size = %8d, rounding = %4d , compressed FULL = %6d, record size = %6d, version = %X, size = %5X\n",
-            uncompressedSize,compressedSize, rounding,compressedSizeToWrite, recordLength*4,versionWord,compressionWord);
+      //printf("record::build uncompressed size = %8d, compressed size = %8d, rounding = %4d , compressed FULL = %6d, record size = %6d, version = %X, size = %5X\n",
+      //      uncompressedSize,compressedSize, rounding,compressedSizeToWrite, recordLength*4,versionWord,compressionWord);
   }
-
+  /**
+   * Compresses the constructed buffer with LZ4 into internal buffer that
+   * will be written to the output.
+   */
   int  recordbuilder::compressRecord(int src_size){
 
     #ifdef __LZ4__
