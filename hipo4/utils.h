@@ -60,9 +60,11 @@ namespace hipo {
 
        long running_time;
        int  counter;
+       int  printoutFrequency;
 
      public:
-        benchmark(){ running_time = 0;counter = 0;}
+        benchmark(){ running_time = 0;counter = 0; printoutFrequency = -1;}
+        benchmark(int freq){ running_time = 0;counter = 0; printoutFrequency = freq;}
        ~benchmark(){}
 
        void    resume();

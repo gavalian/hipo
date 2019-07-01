@@ -47,6 +47,10 @@ extern "C" {
          printf("---> map : initializing bank \"%24s\" (%6d, %5d) to the store\n",
             buffer,hipo_FORT_Dictionary.getSchema(buffer).getGroup(),
             hipo_FORT_Dictionary.getSchema(buffer).getItem() );
+      } else {
+         *bankRows = 0;
+         free(buffer);
+         return;
       }
     }
 
@@ -73,8 +77,6 @@ extern "C" {
             }
         }
     }
-
-
   }*/
 
   void get_bank_rows_(int *group, int *bankRows){
@@ -105,6 +107,13 @@ extern "C" {
 	       if(i<max) buffer[i] = vec[i];
       }
       *nread = vec.size();*/
+      if(eventStore.count(buffer_group)==0){
+         *nread = 0;
+         free(buffer_group);
+         free(buffer_item);
+         return;
+      }
+
       hipo::bank *bank = eventStore[buffer_group];
       int  nrows = bank->getRows();
       if(nrows>(*maxRows)) nrows = *(maxRows);
@@ -129,6 +138,12 @@ extern "C" {
       memcpy(buffer_item,item,length_item);
       buffer_item[length_item] = '\0';
 
+      if(eventStore.count(buffer_group)==0){
+         *nread = 0;
+         free(buffer_group);
+         free(buffer_item);
+         return;
+      }
 
       hipo::bank *bank = eventStore[buffer_group];
       int  nrows = bank->getRows();
@@ -153,7 +168,13 @@ extern "C" {
         memcpy(buffer_item,item,length_item);
         buffer_item[length_item] = '\0';
 
-
+        if(eventStore.count(buffer_group)==0){
+           *nread = 0;
+           free(buffer_group);
+           free(buffer_item);
+           return;
+        }
+        
         hipo::bank *bank = eventStore[buffer_group];
         int  nrows = bank->getRows();
         if(nrows>(*maxRows)) nrows = *(maxRows);
