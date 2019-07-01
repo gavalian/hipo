@@ -5,7 +5,7 @@
  */
 
 /*
- * File:   hiporecord.h
+ * File:   recordbuilder.h
  * Author: gavalian
  *
  * Created on April 11, 2017, 4:47 PM
@@ -55,7 +55,7 @@ namespace hipo {
 
         long getUserWordOne();
         long getUserWordTwo();
-        
+
         int  getRecordSize();
         int  getEntries();
         std::vector<char> &getRecordBuffer(){ return bufferRecord;};

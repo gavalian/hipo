@@ -110,6 +110,7 @@ void bank::reset(){
    setSize(0);
    bankRows = 0;
 }
+
 void bank::notify(){
   int size = bankSchema.getRowLength();
   bankRows = getSize()/size;
