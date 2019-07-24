@@ -14,7 +14,7 @@ LD        := g++
 LDFLAGS   :=
 
 
-all:  writeFile readFile
+all:  writeFile readFile readFileTags
 
 readEvents: readEvents.o
 	$(CXX) -o readEvents $<  $(HIPOLIBS) $(LZ4LIBS)
@@ -24,6 +24,9 @@ writeEvents: writeEvents.o
 
 readFile: readFile.o
 	$(CXX) -o readFile $<   $(HIPOLIBS) $(LZ4LIBS)
+
+readFileTags: readFileTags.o
+	$(CXX) -o readFileTags $<   $(HIPOLIBS) $(LZ4LIBS)
 
 writeFile: writeFile.o
 	$(CXX) -o writeFile $<   $(HIPOLIBS) $(LZ4LIBS)

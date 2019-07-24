@@ -130,10 +130,23 @@ void  reader::readIndex(){
        long uid2     = base.getLongAt( rows*24 + i*8);
        //printf("record # %4d POSITION = %12lu , LENGTH = %12d , ENTRIES = %6d , UID = %12lu %12lu\n",
           //i,position,length,entries, uid1,uid2);
-       readerEventIndex.addSize(entries);
-       readerEventIndex.addPosition(position);
+          if(tagsToRead.size()==0){
+            readerEventIndex.addSize(entries);
+            readerEventIndex.addPosition(position);
+          } else {
+            bool accept = false;
+            for(int jr = 0; jr < tagsToRead.size(); jr++){
+              if(tagsToRead[jr]==uid1) accept = true;
+            }
+            if(accept==true){
+              readerEventIndex.addSize(entries);
+              readerEventIndex.addPosition(position);
+            }
+          }
     }
     readerEventIndex.rewind();
+    //printf("**** reader:: header version   : %d \n",readerEventIndex.getMaxEvents());
+    printf("**** reader::  # of events     : %d \n",readerEventIndex.getMaxEvents());
 }
 
 bool  reader::hasNext(){ return readerEventIndex.canAdvance();}

@@ -174,6 +174,7 @@ class readerIndex {
 
         hipo::record       inputRecord;
         hipo::readerIndex  readerEventIndex;
+        std::vector<long>  tagsToRead;
 
         void  readHeader();
         void  readIndex();
@@ -184,6 +185,7 @@ class readerIndex {
 
         void  readDictionary(hipo::dictionary &dict);
         void  open(const char *filename);
+        void setTags(int tag){ tagsToRead.push_back(tag);}
         bool  hasNext();
         bool  next();
         bool  next(hipo::event &dataevent);
