@@ -139,6 +139,10 @@ class readerIndex {
       bool canAdvance();
       bool advance();
 
+      //dglazier
+      bool canAdvanceInRecord();
+      bool loadRecord(int irec);
+
       int  getEventNumber() { return currentEvent;}
       int  getRecordNumber() { return currentRecord;}
       int  getRecordEventNumber() { return currentRecordEvent;}
@@ -146,6 +150,9 @@ class readerIndex {
       void addSize(int size);
       void addPosition(long position){ recordPosition.push_back(position);}
       long getPosition(int index) { return recordPosition[index];}
+
+      //dglazier
+      int getNRecords() const {return recordEvents.size();}
 
       void rewind(){
         currentRecord = -1;
@@ -186,11 +193,18 @@ class readerIndex {
         void  readDictionary(hipo::dictionary &dict);
         void  open(const char *filename);
         void setTags(int tag){ tagsToRead.push_back(tag);}
-        bool  hasNext();
+	//dglazier
+	void setTags(std::vector<long> tags){ tagsToRead=tags;}
+
+	bool  hasNext();
         bool  next();
         bool  next(hipo::event &dataevent);
         void  read(hipo::event &dataevent);
         void  printWarning();
+	//dglazier
+ 	int getNRecords() const {return readerEventIndex.getNRecords()-1;}
+	bool  nextInRecord();
+	bool loadRecord(int irec);
       };
 }
 #endif /* HIPOFILE_H */

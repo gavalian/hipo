@@ -203,7 +203,20 @@ bool  reader::next(){
     }
     return true;
 }
-
+  //dglazier
+  bool  reader::loadRecord(int irec){
+    
+    long position = readerEventIndex.getPosition(irec);
+    inputRecord.readRecord(inputStream,position,0);
+    return readerEventIndex.loadRecord(irec);
+  }
+  //dglazier
+  bool  reader::nextInRecord(){
+    if(readerEventIndex.canAdvanceInRecord()==false) return false;
+    readerEventIndex.advance();
+    return true;
+  }
+  
 void reader::printWarning(){
     #ifndef __LZ4__
       std::cout << "******************************************************" << std::endl;
@@ -254,6 +267,26 @@ namespace hipo {
   int readerIndex::getMaxEvents(){
     if(recordEvents.size()==0) return 0;
     return recordEvents[recordEvents.size()-1];
+  }
+  //dglazier
+  bool readerIndex::loadRecord(int irec){
+    if(irec==0){
+      currentEvent=-1;
+      currentRecord=0;
+      currentRecordEvent = -1;
+      return true;
+    }
+    if(irec+1>(int)recordEvents.size())
+      return false;
+    
+    currentEvent = recordEvents[irec]-1;
+    currentRecord=irec;
+    currentRecordEvent = -1;
+    return true;
+  }
+  //dglazier
+  bool readerIndex::canAdvanceInRecord(){
+    return (currentEvent<recordEvents[currentRecord+1]-1);
   }
 
 }
