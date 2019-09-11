@@ -16,8 +16,11 @@
 #include <cstdlib>
 #include <iostream>
 #include "reader.h"
+#include "utils.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "Compression.h"
+
 
 int main(int argc, char** argv) {
 
@@ -36,6 +39,8 @@ int main(int argc, char** argv) {
    }
 
    TFile *f = TFile::Open(outputFile,"CREATE");
+   //f->SetCompressionAlgorithm(ROOT::kZLIB);
+   //f->SetCompressionAlgorithm(ROOT::kLZ4);
    TTree *tree = new TTree("clas12","CLAS12 ROOT Tree");
 
    std::vector<Int_t>    vec_pid;
@@ -75,16 +80,21 @@ int main(int argc, char** argv) {
 
    int counter = 0;
 
-   hipo::benchmark  writerBenchmark;
+   hipo::benchmark     writerBenchmark;
+   hipo::benchmark     readerBenchmark;
+   hipo::benchmark   transferBenchmark;
+   hipo::benchmark       restBenchmark;
 
    while(reader.next()==true){
-      reader.read(event);
 
+      readerBenchmark.resume();
+      reader.read(event);
+      readerBenchmark.pause();
+
+      restBenchmark.resume();
       event.getStructure(particles);
 
-
       //particles.show();
-
 
       int nrows = particles.getRows();
       vec_pid.resize(nrows);
@@ -98,8 +108,9 @@ int main(int argc, char** argv) {
       vec_chi2pid.resize(nrows);
       vec_charge.resize(nrows);
       vec_status.resize(nrows);
-
+      restBenchmark.pause();
       //printf("---------- PARTICLE BANK CONTENT -------\n");
+      transferBenchmark.resume();
       for(int row = 0; row < nrows; row++){
          vec_pid[row] = particles.getInt("pid",row);
          vec_px[row]  = particles.getFloat("px",row);
@@ -114,6 +125,8 @@ int main(int argc, char** argv) {
          vec_status[row] = (int16_t) particles.getShort("status",row);
          //printf("%6d : %6d %8.4f %8.4f %8.4f\n",row,pid,px,py,pz);
       }
+      transferBenchmark.pause();
+
       writerBenchmark.resume();
       if(vec_pid.size()>0) tree->Fill();
       writerBenchmark.pause();
@@ -121,7 +134,13 @@ int main(int argc, char** argv) {
       counter++;
    }
    f->Close();
-   printf("processed events = %d, benchmark : time = %ld , count = %d\n",
+   printf("processed events = %d, benchmark (WRITE) : time = %ld , count = %d\n",
       counter,writerBenchmark.getTime(),writerBenchmark.getCounter());
+   printf("processed events = %d, benchmark (READ)  : time = %ld , count = %d\n",
+      counter,readerBenchmark.getTime(),readerBenchmark.getCounter());
+   printf("processed events = %d, benchmark (COPY)  : time = %ld , count = %d\n",
+      counter,transferBenchmark.getTime(),transferBenchmark.getCounter());
+      printf("processed events = %d, benchmark (REST)  : time = %ld , count = %d\n",
+         counter,restBenchmark.getTime(),restBenchmark.getCounter());
 }
 //### END OF GENERATED CODE
