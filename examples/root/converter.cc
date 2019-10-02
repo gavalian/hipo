@@ -40,7 +40,9 @@ int main(int argc, char** argv) {
 
    TFile *f = TFile::Open(outputFile,"CREATE");
    //f->SetCompressionAlgorithm(ROOT::kZLIB);
-   //f->SetCompressionAlgorithm(ROOT::kLZ4);
+   //f->SetCompressionAlgorithm(ROOT::kLZMA);
+   f->SetCompressionAlgorithm(ROOT::kLZ4);
+   //f->SetCompressionAlgorithm(ROOT::kOldCompressionAlgo);
    TTree *tree = new TTree("clas12","CLAS12 ROOT Tree");
 
    std::vector<Int_t>    vec_pid;
@@ -89,13 +91,12 @@ int main(int argc, char** argv) {
 
       readerBenchmark.resume();
       reader.read(event);
+      event.getStructure(particles);
       readerBenchmark.pause();
 
+
       restBenchmark.resume();
-      event.getStructure(particles);
-
       //particles.show();
-
       int nrows = particles.getRows();
       vec_pid.resize(nrows);
       vec_px.resize(nrows);
@@ -134,13 +135,17 @@ int main(int argc, char** argv) {
       counter++;
    }
    f->Close();
-   printf("processed events = %d, benchmark (WRITE) : time = %ld , count = %d\n",
-      counter,writerBenchmark.getTime(),writerBenchmark.getCounter());
-   printf("processed events = %d, benchmark (READ)  : time = %ld , count = %d\n",
-      counter,readerBenchmark.getTime(),readerBenchmark.getCounter());
-   printf("processed events = %d, benchmark (COPY)  : time = %ld , count = %d\n",
-      counter,transferBenchmark.getTime(),transferBenchmark.getCounter());
-      printf("processed events = %d, benchmark (REST)  : time = %ld , count = %d\n",
-         counter,restBenchmark.getTime(),restBenchmark.getCounter());
+   printf("processed events = %d, benchmark (WRITE) : time = %10.2f sec , count = %d\n",
+      counter,writerBenchmark.getTimeSec(),writerBenchmark.getCounter());
+   printf("processed events = %d, benchmark (READ)  : time = %10.2f sec , count = %d\n",
+      counter,readerBenchmark.getTimeSec(),readerBenchmark.getCounter());
+   printf("processed events = %d, benchmark (COPY)  : time = %10.2f sec , count = %d\n",
+      counter,transferBenchmark.getTimeSec(),transferBenchmark.getCounter());
+      printf("processed events = %d, benchmark (REST)  : time = %10.2f sec , count = %d\n",
+         counter,restBenchmark.getTimeSec(),restBenchmark.getCounter());
+
+   double total_time = writerBenchmark.getTimeSec() + readerBenchmark.getTimeSec()
+          + transferBenchmark.getTimeSec() + restBenchmark.getTimeSec();
+    printf("\n total time = %10.2f\n",total_time);
 }
 //### END OF GENERATED CODE

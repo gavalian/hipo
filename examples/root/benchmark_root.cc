@@ -80,16 +80,19 @@ int main(int argc, char** argv) {
    printf("---> tree entries = %lld\n",nentries);
    int counter = 0;
    hipo::benchmark  readerBenchmark;
-   readerBenchmark.resume();
+   hipo::benchmark  operBenchmark;
+
    TVector3 vec;
 
    int count_positive = 0;
    int count_negative = 0;
 
    for(Long64_t jentry = 0; jentry<nentries;jentry++){
+       readerBenchmark.resume();
        Long64_t ientry = tree->LoadTree(jentry);
        int nb = tree->GetEntry(jentry);
-       
+       readerBenchmark.pause();
+       operBenchmark.resume();
        int size = vec_pid->size();
        for(int i = 0; i < size ; i++){
          vec.SetXYZ((*vec_px)[i],(*vec_py)[i],(*vec_pz)[i]);
@@ -103,16 +106,17 @@ int main(int argc, char** argv) {
          }
        }
        counter++;
+       operBenchmark.pause();
    }
-   readerBenchmark.pause();
    /*while(reader.next()==true){
 
       counter++;
    }*/
    f->Close();
-   printf("processed events = %d (%d, %d) , benchmark : time = %ld , count = %d\n",
+   printf("processed events = %d (%d, %d) , benchmark : red time = %10.2f sec , oper time = %10.2f sec , count = %d\n",
       counter,count_positive,count_negative,
-      (long) (readerBenchmark.getTime()/1e+9),readerBenchmark.getCounter());
+      readerBenchmark.getTimeSec(), operBenchmark.getTimeSec(),
+      readerBenchmark.getCounter());
 
 }
 //### END OF GENERATED CODE
