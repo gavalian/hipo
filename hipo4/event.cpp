@@ -50,8 +50,14 @@ namespace hipo {
     void    event::addStructure(hipo::structure &str){
         int str_size = str.getStructureBufferSize();
         int evt_size = getSize();
-        memcpy(&dataBuffer[evt_size], &str.getStructureBuffer()[0],str_size);
-        *(reinterpret_cast<uint32_t*>(&dataBuffer[4])) = (evt_size + str_size);
+	int evt_capacity = dataBuffer.size();
+	if((evt_size + str_size)<evt_capacity){
+	  memcpy(&dataBuffer[evt_size], &str.getStructureBuffer()[0],str_size);
+	  *(reinterpret_cast<uint32_t*>(&dataBuffer[4])) = (evt_size + str_size);
+	} else {
+	  printf("event::add : error adding structure with size = %5d (capacity = %5d, size = %5d)\n",
+		 str_size,evt_capacity, evt_size);
+	}
     }
 
     void event::init(std::vector<char> &buffer){
@@ -85,6 +91,7 @@ namespace hipo {
     int event::getSize(){
       return *(reinterpret_cast<uint32_t*>(&dataBuffer[4]));
     }
+
     void event::reset(){
         dataBuffer[0] = 'E'; dataBuffer[1] = 'V';
         dataBuffer[2] = 'N'; dataBuffer[3] = 'T';
