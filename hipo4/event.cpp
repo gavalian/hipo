@@ -15,7 +15,7 @@ namespace hipo {
         #endif
         // default allocation size for the event is 20 Kb
         //
-        dataBuffer.resize(20*1024);
+        dataBuffer.resize(128*1024);
         reset();
         //printf("creating event class.....\n");
         //hipo::node<int> *type = new hipo::node<int>();
