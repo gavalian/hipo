@@ -16,6 +16,7 @@
 #include <cstdlib>
 #include <iostream>
 #include "reader.h"
+#include "writer.h"
 #include "utils.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -24,14 +25,17 @@
 
 int main(int argc, char** argv) {
 
-   std::cout << " reading file example program (HIPO) "  << __cplusplus << std::endl;
+   std::cout << " reading file example program (HIPO) "
+   << __cplusplus << std::endl;
 
    char inputFile[512];
    char outputFile[512];
+   char outputFileHipo[512];
 
    if(argc>1) {
       sprintf(inputFile,"%s",argv[1]);
       sprintf(outputFile,"%s.root",argv[1]);
+      sprintf(outputFileHipo,"%s_writer.hipo",argv[1]);
       //sprintf(outputFile,"%s",argv[2]);
    } else {
       std::cout << " *** please provide a file name..." << std::endl;
@@ -76,6 +80,10 @@ int main(int argc, char** argv) {
 
    factory.show();
 
+   hipo::writer writer ;
+   writer.getDictionary().addSchema(factory.getSchema("REC::Particle"));
+   writer.open(outputFileHipo);
+
    hipo::bank  particles(factory.getSchema("REC::Particle"));
 
    hipo::event      event;
@@ -86,6 +94,7 @@ int main(int argc, char** argv) {
    hipo::benchmark     readerBenchmark;
    hipo::benchmark   transferBenchmark;
    hipo::benchmark       restBenchmark;
+   hipo::benchmark       writerHipoBenchmark;
 
    while(reader.next()==true){
 
@@ -131,12 +140,19 @@ int main(int argc, char** argv) {
       writerBenchmark.resume();
       if(vec_pid.size()>0) tree->Fill();
       writerBenchmark.pause();
+
+      writerHipoBenchmark.resume();
+      writer.addEvent(event);
+      writerHipoBenchmark.pause();
       //printf("---------- END OF PARTICLE BANK -------\n");
       counter++;
    }
    f->Close();
+   writer.close();
    printf("processed events = %d, benchmark (WRITE) : time = %10.2f sec , count = %d\n",
       counter,writerBenchmark.getTimeSec(),writerBenchmark.getCounter());
+  printf("processed events = %d, hipo      (WRITE) : time = %10.2f sec , count = %d\n",
+         counter,writerHipoBenchmark.getTimeSec(),writerHipoBenchmark.getCounter());
    printf("processed events = %d, benchmark (READ)  : time = %10.2f sec , count = %d\n",
       counter,readerBenchmark.getTimeSec(),readerBenchmark.getCounter());
    printf("processed events = %d, benchmark (COPY)  : time = %10.2f sec , count = %d\n",

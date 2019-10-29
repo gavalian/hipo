@@ -22,4 +22,5 @@ clean:
 	@cd Lz4; make clean
 	@cd hipo4; make clean
 	@echo "Cleaning lib directory"
-	@rm -rf lib/*
+	@rm -rf lib/* slib lib
+

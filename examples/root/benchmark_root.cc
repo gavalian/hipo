@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
 
    for(Long64_t jentry = 0; jentry<nentries;jentry++){
        readerBenchmark.resume();
-       Long64_t ientry = tree->LoadTree(jentry);
+       //Long64_t ientry = tree->LoadTree(jentry);
        int nb = tree->GetEntry(jentry);
        readerBenchmark.pause();
        operBenchmark.resume();
