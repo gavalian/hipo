@@ -152,13 +152,14 @@ int    bank::getByte(int item, int index){
   }
   return 0;
 }
+/*
 float  bank::getFloat(int item, int index){
   if(bankSchema.getEntryType(item)==4){
     int offset = bankSchema.getOffset(item, index, bankRows);
     return getFloatAt(offset);
   }
   return 0.0;
-}
+}*/
 double  bank::getDouble(int item, int index){
   if(bankSchema.getEntryType(item)==5){
     int offset = bankSchema.getOffset(item, index, bankRows);

@@ -63,7 +63,7 @@ namespace hipo {
       int8_t       getByteAt  ( int index){
         return *reinterpret_cast<int8_t*>(&structureAddress[index+8]);
       }
-      float        getFloatAt ( int index){
+      inline float        getFloatAt ( int index){
         return *reinterpret_cast<float*>(&structureAddress[index+8]);
       }
       double       getDoubleAt( int index){
@@ -146,7 +146,15 @@ namespace hipo {
         int    getInt(int item, int index);
         int    getShort(int item, int index);
         int    getByte(int item, int index);
-        float  getFloat(int item, int index);
+
+        inline float  getFloat(int item, int index){
+          if(bankSchema.getEntryType(item)==4){
+            int offset = bankSchema.getOffset(item, index, bankRows);
+            return getFloatAt(offset);
+          }
+          return 0.0;
+        }
+
         double getDouble(int item, int index);
         long   getLong(int item, int index);
 

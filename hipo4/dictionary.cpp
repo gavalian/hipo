@@ -70,15 +70,16 @@ namespace hipo {
          );
     }
   }
-
+/*
   int   schema::getOffset(int item, int order, int rows){
       int offset = rows*schemaEntries[item].offset + order*schemaEntries[item].typeSize;
       return offset;
-  }
+  }*/
+  /*
   int   schema::getOffset(const char *name, int order, int rows){
       int item = schemaEntriesMap[name];
       return getOffset(item,order,rows);
-  }
+  }*/
 
   int   schema::getEntryOrder(const char *name){
     return schemaEntriesMap[name];

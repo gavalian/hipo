@@ -72,8 +72,20 @@ class schema {
     int   getSizeForRows(int rows);
     int   getRowLength();
     int   getEntryOrder(const char *name);
-    int   getOffset(int item, int order, int rows);
-    int   getOffset(const char *name, int order, int rows);
+
+
+    //int   getOffset(int item, int order, int rows);
+    //int   getOffset(const char *name, int order, int rows);
+    inline   int  getOffset(const char *name, int order, int rows){
+          int item = schemaEntriesMap[name];
+          return getOffset(item,order,rows);
+    };
+
+    inline  int  getOffset(int item, int order, int rows){
+        int offset = rows*schemaEntries[item].offset + order*schemaEntries[item].typeSize;
+        return offset;
+    };
+
     int   getEntryType(int item){ return schemaEntries[item].typeId;}
     std::string getEntryName(int item) { return schemaEntries[item].name;}
     int   getEntries(){ return schemaEntries.size();}
@@ -81,7 +93,7 @@ class schema {
 
     std::string  getSchemaString();
     std::string  getSchemaStringJson();
-    
+
     void operator = (const schema &D ) {
          schemaName = D.schemaName;
          groupid    = D.groupid;
@@ -89,6 +101,9 @@ class schema {
          schemaEntries = D.schemaEntries;
          schemaEntriesMap = D.schemaEntriesMap;
     }
+
+
+
 };
 
   class dictionary {

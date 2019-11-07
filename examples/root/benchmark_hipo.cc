@@ -17,6 +17,7 @@
 #include <iostream>
 #include "reader.h"
 #include <TVector3.h>
+#include <TH1F.h>
 
 int main(int argc, char** argv) {
 
@@ -47,14 +48,16 @@ int main(int argc, char** argv) {
    hipo::benchmark  readerBenchmark;
    hipo::benchmark  operationBenchmark;
    //readerBenchmark.resume();
-   TVector3 vec;
+   TVector3 vec,vert;
 
    int count_positive = 0;
    int count_negative = 0;
    int ev = 0;
 
+   TH1F *h1mag = new TH1F("H1MAG","",120,0.0,10.0);
+
    //while(reader.next()==true){
-    for(int ev = 0 ; ev < 6492832; ev++){
+     for(int ev = 0 ; ev < 6492832; ev++){
        //bool flag = reader.hasNext();
     //while(1){
     //  if (reader.next()==false) break;
@@ -68,16 +71,21 @@ int main(int argc, char** argv) {
       int nrows = particles.getRows();
       //printf("---------- PARTICLE BANK CONTENT -------\n");
       for(int row = 0; row < nrows; row++){
-         vec.SetXYZ(particles.getFloat(1,row),particles.getFloat(2,row),particles.getFloat(3,row));
-        int charge = particles.getByte(8,row);
-        if(vec.Mag()>5.0){
+
+      vec.SetXYZ(particles.getFloat(1,row),particles.getFloat(2,row),particles.getFloat(3,row));
+	    vert.SetXYZ(particles.getFloat(4,row),particles.getFloat(5,row),particles.getFloat(6,row));
+
+
+	    h1mag->Fill(vec.Mag()*vert.Mag());
+	 /*int charge = particles.getByte(8,row);
+	 if(vec.Mag()>5.0){
           if(charge>0){
             count_positive++;
           } else {
             count_negative++;
           }
-        }
-      }
+	  }*/
+	}
       operationBenchmark.pause();
       counter++;
    }
