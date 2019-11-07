@@ -46,6 +46,7 @@ int main(int argc, char** argv) {
 
    int counter = 0;
    hipo::benchmark  readerBenchmark;
+   hipo::benchmark  copyBenchmark;
    hipo::benchmark  operationBenchmark;
    //readerBenchmark.resume();
    TVector3 vec,vert;
@@ -63,40 +64,45 @@ int main(int argc, char** argv) {
     //  if (reader.next()==false) break;
       readerBenchmark.resume();
       reader.next();
+      readerBenchmark.pause();
+      copyBenchmark.resume();
       reader.read(event);
       event.getStructure(particles);
-      readerBenchmark.pause();
+      copyBenchmark.pause();
 
       operationBenchmark.resume();
       int nrows = particles.getRows();
       //printf("---------- PARTICLE BANK CONTENT -------\n");
       for(int row = 0; row < nrows; row++){
 
-      vec.SetXYZ(particles.getFloat(1,row),particles.getFloat(2,row),particles.getFloat(3,row));
-	    vert.SetXYZ(particles.getFloat(4,row),particles.getFloat(5,row),particles.getFloat(6,row));
-
-
-	    h1mag->Fill(vec.Mag()*vert.Mag());
-	 /*int charge = particles.getByte(8,row);
-	 if(vec.Mag()>5.0){
+	vec.SetXYZ(particles.getFloat(1,row),particles.getFloat(2,row),particles.getFloat(3,row));
+	vert.SetXYZ(particles.getFloat(4,row),particles.getFloat(5,row),particles.getFloat(6,row));
+	
+	
+	h1mag->Fill(vec.Mag()*vert.Mag());
+	/*int charge = particles.getByte(8,row);
+	  if(vec.Mag()>5.0){
           if(charge>0){
-            count_positive++;
+	  count_positive++;
           } else {
-            count_negative++;
+	  count_negative++;
           }
 	  }*/
-	}
+      }
       operationBenchmark.pause();
       counter++;
-   }
-   //readerBenchmark.pause();
-   /*while(reader.next()==true){
-
-      counter++;
-   }*/
-   printf("processed events = %d (%d, %d) , benchmark : time = %10.2f sec , count = %d , operation : time = %10.2f sec, count = %d\n",
+     }
+     //readerBenchmark.pause();
+     /*while(reader.next()==true){
+       
+       counter++;
+       }*/
+   printf("processed events = %d (%d, %d) , \n\n\n\t benchmark : time = %10.2f sec, count = %d , \n\t operation : time = %10.2f sec, count = %d\n",
       counter,count_positive,count_negative,
        (readerBenchmark.getTimeSec()),readerBenchmark.getCounter(),
      (operationBenchmark.getTimeSec()),operationBenchmark.getCounter());
+     printf("   copy structures : time = %10.2f sec, count = %d\n\n\n", copyBenchmark.getTimeSec(), copyBenchmark.getCounter());
+     printf("total time = %10.2f sec\n\n",
+	    readerBenchmark.getTimeSec()+operationBenchmark.getTimeSec()+copyBenchmark.getTimeSec());
 }
 //### END OF GENERATED CODE
