@@ -56,6 +56,7 @@ int main(int argc, char** argv) {
    std::vector<Float_t>  vec_vx;
    std::vector<Float_t>  vec_vy;
    std::vector<Float_t>  vec_vz;
+   std::vector<Float_t>  vec_vt;
    std::vector<Char_t>   vec_charge;
    std::vector<Float_t>  vec_beta;
    std::vector<Float_t>  vec_chi2pid;
@@ -68,6 +69,7 @@ int main(int argc, char** argv) {
    tree->Branch("vx",&vec_vx);
    tree->Branch("vy",&vec_vy);
    tree->Branch("vz",&vec_vz);
+   tree->Branch("vt",&vec_vt);
    tree->Branch("beta",&vec_beta);
    tree->Branch("chi2pid",&vec_chi2pid);
    tree->Branch("charge",&vec_charge);
@@ -114,6 +116,7 @@ int main(int argc, char** argv) {
       vec_vx.resize(nrows);
       vec_vy.resize(nrows);
       vec_vz.resize(nrows);
+      vec_vt.resize(nrows);
       vec_beta.resize(nrows);
       vec_chi2pid.resize(nrows);
       vec_charge.resize(nrows);
@@ -129,6 +132,7 @@ int main(int argc, char** argv) {
          vec_vx[row]  = particles.getFloat("vx",row);
          vec_vy[row]  = particles.getFloat("vy",row);
          vec_vz[row]  = particles.getFloat("vz",row);
+         vec_vt[row]  = particles.getFloat("vt",row);
          vec_beta[row]  = particles.getFloat("beta",row);
          vec_chi2pid[row]  = particles.getFloat("chi2pid",row);
          vec_charge[row] = (int8_t) particles.getByte("charge",row);

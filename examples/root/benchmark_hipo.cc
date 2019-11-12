@@ -72,14 +72,31 @@ int main(int argc, char** argv) {
 
       operationBenchmark.resume();
       int nrows = particles.getRows();
+      float px,py,pz,vx,vy,vz,vt,beta,chi2pid;
+      int pid;
+      int16_t status;
+      int8_t  charge;
       //printf("---------- PARTICLE BANK CONTENT -------\n");
       for(int row = 0; row < nrows; row++){
 
-	vec.SetXYZ(particles.getFloat(1,row),particles.getFloat(2,row),particles.getFloat(3,row));
-	vert.SetXYZ(particles.getFloat(4,row),particles.getFloat(5,row),particles.getFloat(6,row));
-	
-	
-	h1mag->Fill(vec.Mag()*vert.Mag());
+  pid = particles.getInt(0,row);
+
+  px = particles.getFloat(1,row);
+	py = particles.getFloat(2,row);
+	pz = particles.getFloat(3,row);
+	vx = particles.getFloat(4,row);
+	vy = particles.getFloat(5,row);
+	vz = particles.getFloat(6,row);
+  vt = particles.getFloat(7,row);
+  charge = particles.getByte(8,row);
+
+  beta = particles.getFloat(9,row);
+  chi2pid = particles.getFloat(10,row);
+  status  = particles.getShort(11,row);
+
+
+	h1mag->Fill(sqrt(px*px+py*py+pz*pz) * sqrt(vx*vx+vy*vy+vz*vz)
+ + vt + pid*beta*chi2pid+status - charge);
 	/*int charge = particles.getByte(8,row);
 	  if(vec.Mag()>5.0){
           if(charge>0){
@@ -94,7 +111,7 @@ int main(int argc, char** argv) {
      }
      //readerBenchmark.pause();
      /*while(reader.next()==true){
-       
+
        counter++;
        }*/
    printf("processed events = %d (%d, %d) , \n\n\n\t benchmark : time = %10.2f sec, count = %d , \n\t operation : time = %10.2f sec, count = %d\n",

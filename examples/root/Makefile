@@ -37,7 +37,7 @@ clean:
 # COMPILE RULES
 #=====================================================================
 %.o: %.cc
-	$(CXX) -c $<  -O2 $(ROOTCFLAGS) $(HIPOCFLAGS) $(LZ4INCLUDES)
+	$(CXX) -c $<  -O3 $(ROOTCFLAGS) $(HIPOCFLAGS) $(LZ4INCLUDES)
 
 %.o:%.F
 	$(F77) -c $<
