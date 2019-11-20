@@ -34,14 +34,7 @@ namespace hipo {
       *reinterpret_cast<uint8_t *>(&structureAddress[3]) = (uint8_t) __type;
       *reinterpret_cast<uint32_t *>(&structureAddress[4]) = __size;
     }
-    /**
-    * returns the size of the structure
-    */
-    // int structure::getSize(){
-    //   int size = *reinterpret_cast<uint32_t *>(structureAddress+4);
-    //   return size;
-    // }
-
+ 
     void structure::setSize(int size){
       *reinterpret_cast<uint32_t *>(structureAddress+4) = size;
     }
