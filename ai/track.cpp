@@ -1,4 +1,5 @@
 #include "track.h"
+#include <cmath>
 
 namespace clas12 {
 
@@ -9,7 +10,7 @@ cluster::cluster(const cluster &c){
     }
 }
 
-  double cluster::getLayerCenterX(int layer){
+double cluster::getLayerCenterX(int layer){
     double center = -1;
     int    count  = 0;
     int    summ   = 0;
@@ -21,9 +22,9 @@ cluster::cluster(const cluster &c){
     }
     if(count > 0) center = ((double) summ)/count;
     return center;
-  }
+}
 
-  double cluster::getCenterX(){
+double cluster::getCenterX(){
     int   count = 0;
     double summ = 0.0;
     for(int l = 0; l < 6; l++){
@@ -41,6 +42,8 @@ cluster::cluster(const cluster &c){
   }
 
   void   cluster::print(){
+    printf("********* CLUSTER : region = %5d, sector = %5d, center X = %8.2f\n"
+            ,region, sector, getCenterX());
     for(int l = 0; l < 6; l++){
       for(int w = 0; w < 112 ; w++){
         if(wires[l][w]>0){
@@ -66,7 +69,6 @@ cluster::cluster(const cluster &c){
       }
   }
 
-
 track::track(){
   for(int i = 0; i < 6; i++){
     clusters.push_back(new cluster());
@@ -79,5 +81,27 @@ track::~track(){
 
 void track::setCluster(int superLayer, cluster &cluster){
   clusters[superLayer]->copy(cluster);
+}
+
+bool track::isValid(){
+  if(fabs(clusters[0]->getCenterX()-clusters[1]->getCenterX())>15.0) return false;
+  if(fabs(clusters[2]->getCenterX()-clusters[3]->getCenterX())>15.0) return false;
+  if(fabs(clusters[4]->getCenterX()-clusters[5]->getCenterX())>15.0) return false;
+  return true;
+}
+
+void track::getFeatures(double* buffer, int offset){
+  for(int i = 0; i < 6; i++){
+    buffer[offset + i] = clusters[i]->getCenterX()/112.0;
+  }
+}
+
+void track::print(){
+   printf("**************************************************************\n");
+   printf("*** TRACK \n");
+   printf("**************************************************************\n");
+    for(int i = 0; i < 6; i++){
+      clusters[i]->print();
+    }
 }
 }

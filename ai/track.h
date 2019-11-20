@@ -16,6 +16,7 @@ namespace clas12 {
 class cluster {
     int wires[6][112];
     int region;
+    int sector;
 
 public:
     cluster(){}
@@ -28,7 +29,10 @@ public:
     int  getWire(int layer, int wire) const {return wires[layer][wire];}
 
     int    getRegion(){ return region;}
+    int    getSector(){ return sector;}
     void   setRegion(int r) { region = r;}
+    void   setSector(int s) { sector = s;}
+
     double getLayerCenterX(int layer);
     double getCenterX();
     double getCenterY();
@@ -39,11 +43,16 @@ public:
 class track {
 
    std::vector<cluster *> clusters;
+
  public:
+
    track();
    virtual ~track();
 
-   void setCluster(int superLayer, cluster &cluster);
+   void  setCluster(int superLayer, cluster &cluster);
+   void  getFeatures(double* buffer, int offset);
+   void  print();
+   bool  isValid();
 };
 
 }
