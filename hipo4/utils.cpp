@@ -209,9 +209,5 @@ namespace hipo {
     return running_time;
   }
 
-  double  benchmark::getTimeSec(){
-    return running_time*1e-9;
-  }
-
   int   benchmark::getCounter(){ return counter;}
 }

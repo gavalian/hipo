@@ -86,9 +86,9 @@ namespace hipo {
    if(recordInfo.recordEntries>0){
       outputStream.write( reinterpret_cast<char *> (&builder.getRecordBuffer()[0]),recordInfo.recordLength);
       writerRecordInfo.push_back(recordInfo);
-      /*printf("%6ld : writing::record : size = %8d, entries = %8d, position = %12ld word = %12ld %12ld\n",
+      printf("%6ld : writing::record : size = %8d, entries = %8d, position = %12ld word = %12ld %12ld\n",
                   writerRecordInfo.size(), recordInfo.recordLength,recordInfo.recordEntries,
-                  recordInfo.recordPosition,recordInfo.userWordOne,recordInfo.userWordTwo);*/
+                  recordInfo.recordPosition,recordInfo.userWordOne,recordInfo.userWordTwo);
    }  else {
      printf(" write::record : empty record will not be written.....");
    }
@@ -121,10 +121,7 @@ void writer::writeIndexTable(){
     indexBank.putLong("userWordOne",i,recordInfo.userWordOne);
     indexBank.putLong("userWordTwo",i,recordInfo.userWordTwo);
   }
-
-  int eventSize = 32*nEntries + 1024;
-
-  hipo::event indexEvent(eventSize);
+  hipo::event indexEvent;
   indexEvent.addStructure(indexBank);
   recordBuilder.reset();
   recordBuilder.addEvent(indexEvent);

@@ -135,8 +135,8 @@ void  reader::readIndex(){
             readerEventIndex.addPosition(position);
           } else {
             bool accept = false;
-            for(int jr = 0; jr < tagsToRead.size(); jr++){
-              if(tagsToRead[jr]==uid1) accept = true;
+            for(long jr : tagsToRead){
+              if(jr==uid1) accept = true;
             }
             if(accept==true){
               readerEventIndex.addSize(entries);
@@ -205,7 +205,7 @@ bool  reader::next(){
 }
   //dglazier
   bool  reader::loadRecord(int irec){
-
+    
     long position = readerEventIndex.getPosition(irec);
     inputRecord.readRecord(inputStream,position,0);
     return readerEventIndex.loadRecord(irec);
@@ -216,7 +216,7 @@ bool  reader::next(){
     readerEventIndex.advance();
     return true;
   }
-
+  
 void reader::printWarning(){
     #ifndef __LZ4__
       std::cout << "******************************************************" << std::endl;
@@ -278,7 +278,7 @@ namespace hipo {
     }
     if(irec+1>(int)recordEvents.size())
       return false;
-
+    
     currentEvent = recordEvents[irec]-1;
     currentRecord=irec;
     currentRecordEvent = -1;

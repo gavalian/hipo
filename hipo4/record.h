@@ -17,9 +17,9 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 #include <fstream>
 
 #include "event.h"
@@ -47,12 +47,12 @@ namespace hipo {
       private:
         const char  *data_ptr;
         int          data_size;
-        int          data_endianness;
-        int          data_offset;
+        int          data_endianness{};
+        int          data_offset{};
 
       public:
-        data(){ data_ptr = NULL; data_size = 0;}
-        ~data(){ }
+        data(){ data_ptr = nullptr; data_size = 0;}
+        ~data()= default;
 
         void setDataPtr(const char *__ptr){ data_ptr = __ptr;}
         void setDataSize(int __size){ data_size = __size;}
@@ -74,7 +74,7 @@ namespace hipo {
 
         //std::vector< std::vector<char> > eventBuffer;
         std::vector<char>  recordHeaderBuffer;
-        recordHeader_t     recordHeader;
+        recordHeader_t     recordHeader{};
 
         std::vector<char>  recordBuffer;
         std::vector<char>  recordCompressedBuffer;
