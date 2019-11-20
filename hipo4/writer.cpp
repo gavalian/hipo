@@ -121,7 +121,10 @@ void writer::writeIndexTable(){
     indexBank.putLong("userWordOne",i,recordInfo.userWordOne);
     indexBank.putLong("userWordTwo",i,recordInfo.userWordTwo);
   }
-  hipo::event indexEvent;
+
+  int eventSize = 32*nEntries + 1024;
+
+  hipo::event indexEvent(eventSize);
   indexEvent.addStructure(indexBank);
   recordBuilder.reset();
   recordBuilder.addEvent(indexEvent);

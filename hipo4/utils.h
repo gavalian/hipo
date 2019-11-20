@@ -70,6 +70,7 @@ namespace hipo {
        void    resume();
        void    pause();
        long    getTime();
+       double   getTimeSec();
        int     getCounter();
   };
 }

@@ -20,6 +20,11 @@ extern "C" {
     free(buffer);
   }
 
+  void hipo_file_open(const char *filename){
+    hipo_FORT_Reader.open(filename);
+    hipo_FORT_Reader.readDictionary(hipo_FORT_Dictionary);
+  }
+  
   int hipo_file_next_(int* fstatus){
     bool status = hipo_FORT_Reader.next();
     if(status==false){

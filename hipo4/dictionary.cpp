@@ -71,15 +71,6 @@ namespace hipo {
     }
   }
 
-  // int   schema::getOffset(int item, int order, int rows){
-  //   // std::cout<<"My "<< rows*schemaEntries[item].offset + order*schemaEntries[item].typeSize<<std::endl;
-  //   //std::cout<<rows*_offsets[item]+order*_typeSize[item]<<std::endl;
-  //   return rows*_offsets[item]+order*_typeSize[item];
-  //   //return rows*schemaEntries[item].offset + order*schemaEntries[item].typeSize;
-  //     //      return offset;
-  //     //int offset = rows*schemaEntries[item].offset + order*schemaEntries[item].typeSize;
-  //   //    return offset;
-  // }
   int   schema::getOffset(const char *name, int order, int rows){
       int item = schemaEntriesMap[name];
       return getOffset(item,order,rows);
@@ -93,12 +84,6 @@ namespace hipo {
     int offset   = getOffset(nentries-1,rows-1,rows) + schemaEntries[nentries-1].typeSize;
     return offset;
   }
-
-  // int   schema::getRowLength(){
-  //   int nentries = schemaEntries.size();
-  //   int size     = schemaEntries[nentries-1].offset + schemaEntries[nentries-1].typeSize;
-  //   return size;
-  // }
 
   std::string  schema::getSchemaString(){
     char parts[256];
@@ -115,14 +100,14 @@ namespace hipo {
   }
 
   std::string  schema::getSchemaStringJson(){
-    char parts[256];
+     char parts[256];
     std::string result;
-    sprintf(parts,R"({ "name": "%s", "group": %d, "item": %d, "info": " ",)",
+    sprintf(parts,"{ \"name\": \"%s\", \"group\": %d, \"item\": %d, \"info\": \" \",",
                schemaName.c_str(),groupid,itemid);
     result.append(parts);
     result.append("\"entries\": [ ");
     for(int loop = 0; loop < schemaEntries.size(); loop++){
-      sprintf(parts,R"({"name":"%s", "type":"%s", "info":" "})",
+      sprintf(parts,"{\"name\":\"%s\", \"type\":\"%s\", \"info\":\" \"}",
        schemaEntries[loop].name.c_str(), schemaEntries[loop].type.c_str());
       if(loop!=0) result.append(",");
       result.append(parts);

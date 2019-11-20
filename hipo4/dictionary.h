@@ -70,8 +70,7 @@ class schema {
     int   getGroup(){ return groupid;}
     int   getItem(){ return itemid;}
     int   getSizeForRows(int rows);
-    // int   getRowLength();
-    
+     
     int  getRowLength()  const noexcept{
       const int nentries = schemaEntries.size()-1;
       const auto &sch=schemaEntries[nentries];
@@ -79,7 +78,7 @@ class schema {
     }
 
     int   getEntryOrder(const char *name);
-    // int   getOffset(int item, int order, int rows);
+ 
     int   getOffset(int item, int order, int rows) const noexcept {
       const auto &sch=schemaEntries[item];
       return  rows*sch.offset + order*sch.typeSize;

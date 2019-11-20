@@ -15,7 +15,7 @@ namespace hipo {
         #endif
         // default allocation size for the event is 20 Kb
         //
-        dataBuffer.resize(20*1024);
+        dataBuffer.resize(128*1024);
         reset();
         //printf("creating event class.....\n");
         //hipo::node<int> *type = new hipo::node<int>();
@@ -45,11 +45,17 @@ namespace hipo {
        }
     }
 
-    void    event::addStructure(hipo::structure &str){
+  void    event::addStructure(hipo::structure &str){
         int str_size = str.getStructureBufferSize();
         int evt_size = getSize();
-        memcpy(&dataBuffer[evt_size], &str.getStructureBuffer()[0],str_size);
-        *(reinterpret_cast<uint32_t*>(&dataBuffer[4])) = (evt_size + str_size);
+	int evt_capacity = dataBuffer.size();
+	if((evt_size + str_size)<evt_capacity){
+	  memcpy(&dataBuffer[evt_size], &str.getStructureBuffer()[0],str_size);
+	  *(reinterpret_cast<uint32_t*>(&dataBuffer[4])) = (evt_size + str_size);
+	} else {
+	  printf("event::add : error adding structure with size = %5d (capacity = %5d, size = %5d)\n",
+		 str_size,evt_capacity, evt_size);
+	}
     }
 
     void event::init(std::vector<char> &buffer){
@@ -57,7 +63,7 @@ namespace hipo {
         std::memcpy(&dataBuffer[0],&buffer[0],buffer.size());
     }
 
-    std::pair<int,int>  event::getStructurePosition(int group, int item) {
+    std::pair<int,int>  event::getStructurePosition(int group, int item){
       int position = 16;
       int eventSize = *(reinterpret_cast<uint32_t*>(&dataBuffer[4]));
       while(position+8<eventSize){
