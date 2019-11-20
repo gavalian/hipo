@@ -14,12 +14,10 @@
 namespace hipo {
 
 
-    record::record(){
-
-    }
+    record::record()= default;
 
 
-    record::~record(){ }
+    record::~record()= default;
 
     /**
      */
@@ -117,7 +115,7 @@ namespace hipo {
 
         int eventPosition = 0;
         for(int i = 0; i < recordHeader.numberOfEvents; i++){
-            int *ptr = reinterpret_cast<int*>(&recordBuffer[i*4]);
+            auto *ptr = reinterpret_cast<int*>(&recordBuffer[i*4]);
             int size = *ptr;
             if(recordHeader.dataEndianness==1) size = __builtin_bswap32(size);
             eventPosition += size;
@@ -227,7 +225,7 @@ namespace hipo {
       indexBenchmark.resume();
       int eventPosition = 0;
       for(int i = 0; i < recordHeader.numberOfEvents; i++){
-          int *ptr = reinterpret_cast<int*>(&recordBuffer[i*4]);
+          auto *ptr = reinterpret_cast<int*>(&recordBuffer[i*4]);
           int size = *ptr;
           if(recordHeader.dataEndianness==1) size = __builtin_bswap32(size);
           eventPosition += size;
@@ -340,7 +338,7 @@ namespace hipo {
        //printf(" deompression ..... ok \n");
       int eventPosition = dataposition;
       for(int i = 0; i < recordHeader.numberOfEvents; i++){
-          int *ptr = reinterpret_cast<int*>(&recordBuffer[i*4]);
+          auto *ptr = reinterpret_cast<int*>(&recordBuffer[i*4]);
           int size = *ptr;
           if(recordHeader.dataEndianness==1) size = __builtin_bswap32(size);
           eventPosition += size;
@@ -442,7 +440,7 @@ namespace hipo {
           printf("\n   >>>>> LZ4 compression is not supported.");
           printf("\n   >>>>> check if libz4 is installed on your system.");
           printf("\n   >>>>> recompile the library with liblz4 installed.\n");
-          return NULL;
+          return nullptr;
         #endif
 
     }

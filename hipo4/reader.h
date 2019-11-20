@@ -79,10 +79,11 @@
 #endif
 
 #include <iostream>
+#include <utility>
 #include <vector>
 #include <fstream>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <memory>
 #include <climits>
 #include "record.h"
@@ -126,15 +127,13 @@ class readerIndex {
      std::vector<int>  recordEvents;
      std::vector<long> recordPosition;
 
-     int              currentRecord;
-     int              currentEvent;
-     int              currentRecordEvent;
+     int              currentRecord{};
+     int              currentEvent{};
+     int              currentRecordEvent{};
 
    public:
-      readerIndex(){
-
-      };
-      ~readerIndex(){};
+      readerIndex()= default;;
+      ~readerIndex()= default;;
 
       bool canAdvance();
       bool advance();
@@ -174,10 +173,10 @@ class readerIndex {
 
     private:
 
-        fileHeader_t      header;
+        fileHeader_t      header{};
         hipo::utils       hipoutils;
         std::ifstream     inputStream;
-        long              inputStreamSize;
+        long              inputStreamSize{};
 
         hipo::record       inputRecord;
         hipo::readerIndex  readerEventIndex;
@@ -194,7 +193,7 @@ class readerIndex {
         void  open(const char *filename);
         void setTags(int tag){ tagsToRead.push_back(tag);}
 	//dglazier
-	void setTags(std::vector<long> tags){ tagsToRead=tags;}
+	void setTags(std::vector<long> tags){ tagsToRead=std::move(tags);}
 
 	bool  hasNext();
         bool  next();
@@ -205,6 +204,7 @@ class readerIndex {
  	int getNRecords() const {return readerEventIndex.getNRecords()-1;}
 	bool  nextInRecord();
 	bool loadRecord(int irec);
+	int  getEntries(){return readerEventIndex.getMaxEvents();} 
       };
 }
 #endif /* HIPOFILE_H */

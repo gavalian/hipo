@@ -17,9 +17,9 @@
 #include <iostream>
 #include <vector>
 #include <cstring>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 #include <map>
 #include "bank.h"
 
@@ -55,7 +55,7 @@ namespace hipo {
         void                getStructure(hipo::bank &b);
         void                addStructure(hipo::structure &str);
 
-        std::pair<int,int>  getStructurePosition(int group, int item);
+        std::pair<int,int>  getStructurePosition(int group, int item) ;
         std::vector<char>  &getEventBuffer();
         int                 getSize();
         void                reset();

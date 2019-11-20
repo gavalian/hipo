@@ -135,8 +135,8 @@ void  reader::readIndex(){
             readerEventIndex.addPosition(position);
           } else {
             bool accept = false;
-            for(int jr = 0; jr < tagsToRead.size(); jr++){
-              if(tagsToRead[jr]==uid1) accept = true;
+            for(long jr : tagsToRead){
+              if(jr==uid1) accept = true;
             }
             if(accept==true){
               readerEventIndex.addSize(entries);

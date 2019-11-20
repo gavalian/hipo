@@ -21,7 +21,6 @@
 #include <string>
 #include <vector>
 
-
 //#include "reader.h"
 
 namespace hipo {
@@ -29,9 +28,9 @@ namespace hipo {
   typedef struct {
     std::string  name;
     std::string  type;
-    int          typeId;
-    int          typeSize;
-    int          offset;
+    int          typeId{};
+    int          typeSize{};
+    int          offset{};
   } schemaEntry_t;
 
 class schema {
@@ -42,13 +41,14 @@ class schema {
 
     int         groupid;
     int         itemid;
-    int         rowLength;
+    int         rowLength{};
     std::string schemaName;
 
 
     int  getTypeSize(int id);
     int  getTypeByString(std::string &typeName);
 
+    
   public:
 
     schema(){ groupid = 0; itemid = 0; rowLength = 0;}
@@ -61,22 +61,36 @@ class schema {
       schemaEntriesMap = s.schemaEntriesMap;
       groupid       = s.groupid;
       itemid        = s.itemid;
-    }
+      }
 
-    virtual ~schema(){}
+    virtual ~schema()= default;
 
-    void  parse(std::string schString);
+    void  parse(const std::string& schString);
     std::string   getName(){ return schemaName;}
     int   getGroup(){ return groupid;}
     int   getItem(){ return itemid;}
     int   getSizeForRows(int rows);
-    int   getRowLength();
+    // int   getRowLength();
+    
+    int  getRowLength()  const noexcept{
+      const int nentries = schemaEntries.size()-1;
+      const auto &sch=schemaEntries[nentries];
+      return sch.offset + sch.typeSize;
+    }
+
     int   getEntryOrder(const char *name);
-    int   getOffset(int item, int order, int rows);
+    // int   getOffset(int item, int order, int rows);
+    int   getOffset(int item, int order, int rows) const noexcept {
+      const auto &sch=schemaEntries[item];
+      return  rows*sch.offset + order*sch.typeSize;
+    }
+
     int   getOffset(const char *name, int order, int rows);
-    int   getEntryType(int item){ return schemaEntries[item].typeId;}
-    std::string getEntryName(int item) { return schemaEntries[item].name;}
-    int   getEntries(){ return schemaEntries.size();}
+    int   getEntryType(int item) const noexcept {
+      return schemaEntries[item].typeId;
+    }
+    std::string getEntryName(int item)  const noexcept { return schemaEntries[item].name;}
+    int   getEntries() const noexcept { return schemaEntries.size();}
     void  show();
 
     std::string  getSchemaString();
@@ -95,8 +109,8 @@ class schema {
   private:
     std::map<std::string,schema> factory;
   public:
-    dictionary(){};
-    virtual ~dictionary(){};
+    dictionary()= default;;
+    virtual ~dictionary()= default;;
 
     std::vector<std::string> getSchemaList();
     void    addSchema(schema sc){ factory[sc.getName()] = sc;}

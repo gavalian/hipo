@@ -27,9 +27,7 @@ namespace hipo {
         reset();
     }
 
-    event::~event(){
-
-    }
+    event::~event()= default;
 
     void   event::getStructure(hipo::bank &b){
         getStructure(b,b.getSchema().getGroup(),b.getSchema().getItem());
@@ -59,7 +57,7 @@ namespace hipo {
         std::memcpy(&dataBuffer[0],&buffer[0],buffer.size());
     }
 
-    std::pair<int,int>  event::getStructurePosition(int group, int item){
+    std::pair<int,int>  event::getStructurePosition(int group, int item) {
       int position = 16;
       int eventSize = *(reinterpret_cast<uint32_t*>(&dataBuffer[4]));
       while(position+8<eventSize){
