@@ -114,63 +114,6 @@ void bank::notify(){
   //    getSize(),size, bankRows);
 }
 
-// int    bank::getInt(int item, int index){
-//   int type = bankSchema.getEntryType(item);
-//   int offset = bankSchema.getOffset(item, index, bankRows);
-//   switch(type){
-//     case 1: return (int) getByteAt(offset);
-//     case 2: return (int) getShortAt(offset);
-//     case 3: return getIntAt(offset);
-//     default: printf("---> error : requested INT for [%s] type = %d\n",
-//              bankSchema.getEntryName(item).c_str(),type); break;
-//   }
-//   return 0;
-// }
-// int    bank::getShort(int item, int index){
-//   int type = bankSchema.getEntryType(item);
-//   int offset = bankSchema.getOffset(item, index, bankRows);
-//   switch(type){
-//     case 1: return (int) getByteAt(offset);
-//     case 2: return (int) getShortAt(offset);
-//     default: printf("---> error : requested SHORT for [%s] type = %d\n",
-//              bankSchema.getEntryName(item).c_str(),type); break;
-//   }
-//   return 0;
-// }
-
-// int    bank::getByte(int item, int index){
-//   int type = bankSchema.getEntryType(item);
-//   int offset = bankSchema.getOffset(item, index, bankRows);
-//   switch(type){
-//     case 1: return (int) getByteAt(offset);
-//     default: printf("---> error : requested BYTE for [%s] type = %d\n",
-//              bankSchema.getEntryName(item).c_str(),type); break;
-//   }
-//   return 0;
-// }
-// // float  bank::getFloat(int item, int index){
-// //   //if(bankSchema.getEntryType(item)==4){
-// //     int offset = bankSchema.getOffset(item, index, bankRows);
-// //     // if(item==1&&index==5)std::cout<<item<<" "<<index<<" "<<bankRows<<" "<<offset<<std::endl;
-// //     return getFloatAt(offset);
-// //     //}
-// //     //return 0.0;
-// // }
-// double  bank::getDouble(int item, int index){
-//   if(bankSchema.getEntryType(item)==5){
-//     int offset = bankSchema.getOffset(item, index, bankRows);
-//     return getDoubleAt(offset);
-//   }
-//   return 0.0;
-// }
-
-// long bank::getLong(int item, int index){
-//   if(bankSchema.getEntryType(item)==8){
-//     int offset = bankSchema.getOffset(item, index, bankRows);
-//     return getLongAt(offset);
-//   }
-//   return 0;
-// }
 
 int    bank::getInt(const char *name, int index){
   int item = bankSchema.getEntryOrder(name);
