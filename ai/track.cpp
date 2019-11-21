@@ -92,8 +92,21 @@ bool track::isValid(){
 
 void track::getFeatures(double* buffer, int offset){
   for(int i = 0; i < 6; i++){
-    buffer[offset + i] = clusters[i]->getCenterX()/112.0;
+    buffer[offset + i] = clusters[i]->getCenterX();
   }
+}
+
+std::vector<int> track::getTrackIndexArray(){
+  std::vector<int> vec;
+  for(int i = 0; i < 6; i++){
+    for(int l = 0; l < 6; l++){
+      for(int w = 0; w < 112; w++){
+         int value = clusters[i]->getWire(l,w);
+         if(value>0) vec.push_back(value);
+      }
+    }
+  }
+  return vec;
 }
 
 void track::print(){

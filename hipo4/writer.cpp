@@ -67,6 +67,13 @@ namespace hipo {
     printf("writing dictionary:: position = %ld\n",position);
  }
 
+void writer::addDictionary(hipo::dictionary &dict){
+    std::vector<std::string> schemaList = dict.getSchemaList();
+    for(int i = 0; i < schemaList.size(); i++){
+        writerDictionary.addSchema(dict.getSchema(schemaList[i].c_str()));
+      }
+}
+
  void writer::addEvent(hipo::event &hevent){
    bool status = recordBuilder.addEvent(hevent);
    if(status==false){

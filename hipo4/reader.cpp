@@ -203,6 +203,20 @@ bool  reader::next(){
     }
     return true;
 }
+
+bool reader::gotoEvent(int eventNumber){
+  int recordNumber = readerEventIndex.getRecordNumber();
+  readerEventIndex.gotoEvent(eventNumber);
+  int recordToBeRead = readerEventIndex.getRecordNumber();
+  if(recordToBeRead!=recordNumber){
+    long position = readerEventIndex.getPosition(recordToBeRead);
+    inputRecord.readRecord(inputStream,position,0);
+    /*printf(" record changed from %d to %d at event %d total event # %d\n",
+      recordNumber, recordToBeRead,readerEventIndex.getEventNumber(),
+      readerEventIndex.getMaxEvents());*/
+  }
+  return true;
+}
   //dglazier
   bool  reader::loadRecord(int irec){
 
@@ -261,6 +275,27 @@ namespace hipo {
     currentEvent++;
     currentRecord++;
     currentRecordEvent = 0;
+    return true;
+  }
+
+  bool readerIndex::gotoEvent(int eventNumber){
+
+    std::vector<int>::iterator l_bound = std::lower_bound(recordEvents.begin(), recordEvents.end(), eventNumber);
+    std::vector<int>::iterator u_bound = std::lower_bound(recordEvents.begin(), recordEvents.end(), eventNumber);
+    long  position = (l_bound - recordEvents.begin()) - 1;
+
+    currentRecord       = position;
+    currentRecordEvent  = eventNumber - recordEvents[currentRecord];
+    currentEvent        = eventNumber;
+    /*printf("**** event # = %8d, record # = %8d, record offset = %8d\n",
+            currentEvent,currentRecord, currentRecordEvent);
+    int size = recordEvents.size();
+    for(int i = 0; i < size; i++){
+      printf(" record : %4d value = %8d\n",i,recordEvents[i]);
+    }
+    printf("record events size = %8d, event # = %8d, lower bound = %8d, upper bound = %8d, position = %8lu\n",
+        size,eventNumber,*l_bound,*u_bound, position);
+        */
     return true;
   }
 

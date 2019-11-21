@@ -47,6 +47,8 @@ int main(int argc, char** argv) {
 
    int counter = 0;
 
+   reader.gotoEvent(561);
+
    while(reader.next()==true){
       reader.read(event);
 
