@@ -1,4 +1,3 @@
-
 SOURCES := $(wildcard *.cpp)
 OBJECTS := $(SOURCES:.cpp=.o)
 

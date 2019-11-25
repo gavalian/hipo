@@ -16,9 +16,9 @@
 #include <iostream>
 #include <vector>
 #include <cstring>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 #include <map>
 #include "dictionary.h"
 
@@ -29,7 +29,7 @@ namespace hipo {
     private:
 
       std::vector<char> structureBuffer;
-      char *structureAddress;
+      char *structureAddress{};
       void setAddress(const char *address);
 
     protected:
@@ -38,13 +38,15 @@ namespace hipo {
       int                 getStructureBufferSize(){ return 8+getSize();}
     public:
 
-      structure(){ structureAddress = NULL;}
+      structure(){ structureAddress = nullptr;}
       structure(int size){ allocate(size);}
       structure(int __group, int __item, std::string &str);
 
-      virtual     ~structure(){}
+      virtual     ~structure()= default;
       bool         allocate(int size);
-      int          getSize();
+      int          getSize() const noexcept{
+	return *reinterpret_cast<uint32_t *>(structureAddress+4);
+      }
       int          getType();
       int          getGroup();
       int          getItem();
@@ -54,22 +56,22 @@ namespace hipo {
       void         setSize(int size);
 
 
-      int          getIntAt   ( int index) {
+      int          getIntAt   ( int index) const noexcept {
         return *reinterpret_cast<int32_t*>(&structureAddress[index+8]);
       }
-      int16_t      getShortAt ( int index){
+      int16_t      getShortAt ( int index) const noexcept {
         return *reinterpret_cast<int16_t*>(&structureAddress[index+8]);
       }
-      int8_t       getByteAt  ( int index){
+      int8_t       getByteAt  ( int index) const noexcept {
         return *reinterpret_cast<int8_t*>(&structureAddress[index+8]);
       }
-      inline float        getFloatAt ( int index){
+      float        getFloatAt ( int index) const noexcept {
         return *reinterpret_cast<float*>(&structureAddress[index+8]);
       }
-      double       getDoubleAt( int index){
+      double       getDoubleAt( int index) const noexcept {
         return *reinterpret_cast<double*>(&structureAddress[index+8]);
       }
-      long         getLongAt  ( int index){
+      long         getLongAt  ( int index) const noexcept {
         return *reinterpret_cast<int64_t*>(&structureAddress[index+8]);
       }
 
@@ -112,7 +114,7 @@ namespace hipo {
     private:
 
       hipo::schema  bankSchema;
-      int           bankRows;
+      int           bankRows{-1};
 
     protected:
         void setBankRows(int rows){ bankRows = rows;}
@@ -123,40 +125,32 @@ namespace hipo {
         // constructor initializes the nodes in the bank
         // and they will be filled automatically by reader.next()
         // method.
-        bank(hipo::schema __schema){
+        bank(const hipo::schema& __schema){
           bankSchema = __schema;
           bankRows   = -1;
         }
 
-        bank(hipo::schema __schema, int __rows){
+        bank(const hipo::schema& __schema, int __rows){
           bankSchema = __schema;
           bankRows   = __rows;
           int size   = bankSchema.getSizeForRows(__rows);
           initStructureBySize(bankSchema.getGroup(),bankSchema.getItem(), 11, size);
         }
 
-        ~bank();
+        ~bank() override;
         // display the content of the bank
         //void show();
 
         hipo::schema  &getSchema() { return bankSchema;}
 
-        int    getRows(){ return bankRows;}
+        int    getRows() const noexcept{ return bankRows;}
         void   setRows(int rows);
-        int    getInt(int item, int index);
-        int    getShort(int item, int index);
-        int    getByte(int item, int index);
-
-        inline float  getFloat(int item, int index){
-          if(bankSchema.getEntryType(item)==4){
-            int offset = bankSchema.getOffset(item, index, bankRows);
-            return getFloatAt(offset);
-          }
-          return 0.0;
-        }
-
-        double getDouble(int item, int index);
-        long   getLong(int item, int index);
+        int    getInt(int item, int index) const noexcept;
+        int    getShort(int item, int index) const noexcept;
+        int    getByte(int item, int index) const noexcept;
+        float  getFloat(int item, int index) const noexcept;
+        double getDouble(int item, int index) const noexcept;
+        long   getLong(int item, int index) const noexcept;
 
         int    getInt(const char *name, int index);
         int    getShort(const char *name, int index);
@@ -172,12 +166,71 @@ namespace hipo {
         void    putDouble(const char *name, int index, double value);
         void    putLong(const char *name, int index, int64_t value);
 
-        void    show();
+        void    show() override;
         void    reset();
         //virtual  void notify(){ };
 
-        virtual void notify();
+        void notify() override;
+
+
+	
   };
+   inline float  bank::getFloat(int item, int index) const noexcept{
+     if(bankSchema.getEntryType(item)==4){
+       int offset = bankSchema.getOffset(item, index, bankRows);
+        return getFloatAt(offset);
+     }
+     return 0.0;
+   }
+
+   inline double  bank::getDouble(int item, int index) const noexcept{
+     if(bankSchema.getEntryType(item)==5){
+       int offset = bankSchema.getOffset(item, index, bankRows);
+       return getDoubleAt(offset);
+     }
+     return 0.0;
+   }
+   inline long bank::getLong(int item, int index) const noexcept{
+     if(bankSchema.getEntryType(item)==8){
+     int offset = bankSchema.getOffset(item, index, bankRows);
+     return getLongAt(offset);
+     }
+     return 0;
+   }
+   inline int    bank::getInt(int item, int index) const noexcept{
+     int type = bankSchema.getEntryType(item);
+     int offset = bankSchema.getOffset(item, index, bankRows);
+     switch(type){
+     case 1: return (int) getByteAt(offset);
+     case 2: return (int) getShortAt(offset);
+     case 3: return getIntAt(offset);
+     default: printf("---> error : requested INT for [%s] type = %d\n",
+     		     bankSchema.getEntryName(item).c_str(),type); break;
+     }
+      return 0; 
+   }
+   inline int    bank::getShort(int item, int index) const noexcept{
+     int type = bankSchema.getEntryType(item);
+     int offset = bankSchema.getOffset(item, index, bankRows);
+     switch(type){
+     case 1: return (int) getByteAt(offset);
+     case 2: return (int) getShortAt(offset);
+     default: printf("---> error : requested SHORT for [%s] type = %d\n",
+		     bankSchema.getEntryName(item).c_str(),type); break;
+     }
+     return 0;
+   }
+   
+   inline int    bank::getByte(int item, int index) const noexcept{
+     int type = bankSchema.getEntryType(item);
+     int offset = bankSchema.getOffset(item, index, bankRows);
+     switch(type){
+     case 1: return (int) getByteAt(offset);
+     default: printf("---> error : requested BYTE for [%s] type = %d\n",
+		     bankSchema.getEntryName(item).c_str(),type); break;
+     }
+     return 0;
+   }
 
 }
 #endif /* EVENT_H */

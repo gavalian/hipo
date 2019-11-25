@@ -6,11 +6,11 @@
 
 #include "dictionary.h"
 #include "utils.h"
-#include <stdlib.h>
+#include <cstdlib>
 
 namespace hipo {
 
-  void  schema::parse(std::string schString){
+  void  schema::parse(const std::string& schString){
     std::vector<std::string>  entries;
     std::vector<std::string>  entry;
     hipo::utils::tokenize(schString, entries, ",");
@@ -27,7 +27,7 @@ namespace hipo {
       offset += e.typeSize;
       schemaEntries.push_back(e);
       schemaEntriesMap[e.name] = i;
-    }
+   }
   }
 
   int   schema::getTypeByString(std::string &typeName){
@@ -63,23 +63,18 @@ namespace hipo {
   void  schema::show(){
     printf("schema : %14s , group = %6d, item = %3d\n",
        schemaName.c_str(),groupid,itemid);
-    for(int i = 0; i < schemaEntries.size(); i++){
+    for(auto & schemaEntrie : schemaEntries){
       printf("%16s : (%3s) %5d %5d , offset = %3d\n",
-         schemaEntries[i].name.c_str(),schemaEntries[i].type.c_str(),
-         schemaEntries[i].typeId,schemaEntries[i].typeSize, schemaEntries[i].offset
+         schemaEntrie.name.c_str(),schemaEntrie.type.c_str(),
+         schemaEntrie.typeId,schemaEntrie.typeSize, schemaEntrie.offset
          );
     }
   }
-/*
-  int   schema::getOffset(int item, int order, int rows){
-      int offset = rows*schemaEntries[item].offset + order*schemaEntries[item].typeSize;
-      return offset;
-  }*/
-  /*
+
   int   schema::getOffset(const char *name, int order, int rows){
       int item = schemaEntriesMap[name];
       return getOffset(item,order,rows);
-  }*/
+  }
 
   int   schema::getEntryOrder(const char *name){
     return schemaEntriesMap[name];
@@ -88,12 +83,6 @@ namespace hipo {
     int nentries = schemaEntries.size();
     int offset   = getOffset(nentries-1,rows-1,rows) + schemaEntries[nentries-1].typeSize;
     return offset;
-  }
-
-  int   schema::getRowLength(){
-    int nentries = schemaEntries.size();
-    int size     = schemaEntries[nentries-1].offset + schemaEntries[nentries-1].typeSize;
-    return size;
   }
 
   std::string  schema::getSchemaString(){
@@ -111,7 +100,7 @@ namespace hipo {
   }
 
   std::string  schema::getSchemaStringJson(){
-    char parts[256];
+     char parts[256];
     std::string result;
     sprintf(parts,"{ \"name\": \"%s\", \"group\": %d, \"item\": %d, \"info\": \" \",",
                schemaName.c_str(),groupid,itemid);
@@ -155,8 +144,8 @@ namespace hipo {
 
   void    dictionary::show(){
     std::vector<std::string> list = getSchemaList();
-    for(int i = 0; i < list.size(); i++){
-      schema sc = getSchema(list[i].c_str());
+    for(auto & i : list){
+      schema sc = getSchema(i.c_str());
       printf("%24s : %5d %5d %5d\n", sc.getName().c_str(),
         sc.getGroup(), sc.getItem(),sc.getEntries());
     }

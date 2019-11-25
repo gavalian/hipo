@@ -34,30 +34,23 @@ namespace hipo {
       *reinterpret_cast<uint8_t *>(&structureAddress[3]) = (uint8_t) __type;
       *reinterpret_cast<uint32_t *>(&structureAddress[4]) = __size;
     }
-    /**
-    * returns the size of the structure
-    */
-    int structure::getSize(){
-      int size = *reinterpret_cast<uint32_t *>(structureAddress+4);
-      return size;
-    }
-
+ 
     void structure::setSize(int size){
       *reinterpret_cast<uint32_t *>(structureAddress+4) = size;
     }
     // return the type of the structure
     int structure::getType(){
-      int type = (int) (*reinterpret_cast<uint8_t *>(structureAddress+3));
+      auto type = (int) (*reinterpret_cast<uint8_t *>(structureAddress+3));
       return type;
     }
     // returns the group number of the object
     int structure::getGroup(){
-      int group = (int) (*reinterpret_cast<uint16_t *>(structureAddress));
+      auto group = (int) (*reinterpret_cast<uint16_t *>(structureAddress));
       return group;
     }
     // returns the item number of the structure
     int structure::getItem(){
-      int item = (int) (*reinterpret_cast<uint8_t *>(structureAddress+2));
+      auto item = (int) (*reinterpret_cast<uint8_t *>(structureAddress+2));
       return item;
     }
     void structure::init(const char *buffer, int size){
@@ -73,7 +66,7 @@ namespace hipo {
 
     std::string  structure::getStringAt(int index){
         int length = getSize();
-        char *string_ch = (char *) malloc(length+1);
+        auto *string_ch = (char *) malloc(length+1);
         std::memcpy(string_ch, &structureBuffer[8],length);
         string_ch[length] = '\0';
         std::string result = string_ch;
@@ -92,13 +85,9 @@ namespace hipo {
     //====================================================================
     // END of structure class
     //====================================================================
-bank::bank(){
+bank::bank()= default;
 
-}
-
-bank::~bank(){
-
-}
+bank::~bank()= default;
 
 void    bank::setRows(int rows){
    bankRows = rows;
@@ -118,63 +107,6 @@ void bank::notify(){
   //    getSize(),size, bankRows);
 }
 
-int    bank::getInt(int item, int index){
-  int type = bankSchema.getEntryType(item);
-  int offset = bankSchema.getOffset(item, index, bankRows);
-  switch(type){
-    case 1: return (int) getByteAt(offset);
-    case 2: return (int) getShortAt(offset);
-    case 3: return getIntAt(offset);
-    default: printf("---> error : requested INT for [%s] type = %d\n",
-             bankSchema.getEntryName(item).c_str(),type); break;
-  }
-  return 0;
-}
-int    bank::getShort(int item, int index){
-  int type = bankSchema.getEntryType(item);
-  int offset = bankSchema.getOffset(item, index, bankRows);
-  switch(type){
-    case 1: return (int) getByteAt(offset);
-    case 2: return (int) getShortAt(offset);
-    default: printf("---> error : requested SHORT for [%s] type = %d\n",
-             bankSchema.getEntryName(item).c_str(),type); break;
-  }
-  return 0;
-}
-
-int    bank::getByte(int item, int index){
-  int type = bankSchema.getEntryType(item);
-  int offset = bankSchema.getOffset(item, index, bankRows);
-  switch(type){
-    case 1: return (int) getByteAt(offset);
-    default: printf("---> error : requested BYTE for [%s] type = %d\n",
-             bankSchema.getEntryName(item).c_str(),type); break;
-  }
-  return 0;
-}
-/*
-float  bank::getFloat(int item, int index){
-  if(bankSchema.getEntryType(item)==4){
-    int offset = bankSchema.getOffset(item, index, bankRows);
-    return getFloatAt(offset);
-  }
-  return 0.0;
-}*/
-double  bank::getDouble(int item, int index){
-  if(bankSchema.getEntryType(item)==5){
-    int offset = bankSchema.getOffset(item, index, bankRows);
-    return getDoubleAt(offset);
-  }
-  return 0.0;
-}
-
-long bank::getLong(int item, int index){
-  if(bankSchema.getEntryType(item)==8){
-    int offset = bankSchema.getOffset(item, index, bankRows);
-    return getLongAt(offset);
-  }
-  return 0;
-}
 
 int    bank::getInt(const char *name, int index){
   int item = bankSchema.getEntryOrder(name);

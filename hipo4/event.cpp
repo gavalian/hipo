@@ -27,9 +27,7 @@ namespace hipo {
         reset();
     }
 
-    event::~event(){
-
-    }
+    event::~event()= default;
 
     void   event::getStructure(hipo::bank &b){
         getStructure(b,b.getSchema().getGroup(),b.getSchema().getItem());
@@ -47,7 +45,7 @@ namespace hipo {
        }
     }
 
-    void    event::addStructure(hipo::structure &str){
+  void    event::addStructure(hipo::structure &str){
         int str_size = str.getStructureBufferSize();
         int evt_size = getSize();
 	int evt_capacity = dataBuffer.size();
@@ -91,7 +89,6 @@ namespace hipo {
     int event::getSize(){
       return *(reinterpret_cast<uint32_t*>(&dataBuffer[4]));
     }
-
     void event::reset(){
         dataBuffer[0] = 'E'; dataBuffer[1] = 'V';
         dataBuffer[2] = 'N'; dataBuffer[3] = 'T';

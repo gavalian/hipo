@@ -208,7 +208,7 @@ namespace hipo {
   long  benchmark::getTime(){
     return running_time;
   }
-
+  
   double  benchmark::getTimeSec(){
     return running_time*1e-9;
   }

@@ -24,7 +24,7 @@ extern "C" {
     hipo_FORT_Reader.open(filename);
     hipo_FORT_Reader.readDictionary(hipo_FORT_Dictionary);
   }
-
+  
   int hipo_file_next_(int* fstatus){
     bool status = hipo_FORT_Reader.next();
     if(status==false){
@@ -179,7 +179,7 @@ extern "C" {
            free(buffer_item);
            return;
         }
-
+        
         hipo::bank *bank = eventStore[buffer_group];
         int  nrows = bank->getRows();
         if(nrows>(*maxRows)) nrows = *(maxRows);
