@@ -141,6 +141,7 @@ class readerIndex {
       //dglazier
       bool canAdvanceInRecord();
       bool loadRecord(int irec);
+      bool gotoEvent(int eventNumber);
 
       int  getEventNumber() { return currentEvent;}
       int  getRecordNumber() { return currentRecord;}
@@ -192,11 +193,12 @@ class readerIndex {
         void  readDictionary(hipo::dictionary &dict);
         void  open(const char *filename);
         void setTags(int tag){ tagsToRead.push_back(tag);}
-	//dglazier
-	void setTags(std::vector<long> tags){ tagsToRead=std::move(tags);}
+	      void setTags(std::vector<long> tags){ tagsToRead=std::move(tags);}
 
-	bool  hasNext();
+
+	      bool  hasNext();
         bool  next();
+        bool  gotoEvent(int eventNumber);
         bool  next(hipo::event &dataevent);
         void  read(hipo::event &dataevent);
         void  printWarning();

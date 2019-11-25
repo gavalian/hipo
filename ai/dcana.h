@@ -46,6 +46,9 @@ public:
       int   getNtracks();
       void  getFeatures(double* features);
       void  showFeatures();
+      std::vector<int> getTrackIndex(int track){
+        return dcTracks[track]->getTrackIndexArray();
+      }
   };
 }
 

@@ -51,6 +51,7 @@ class track {
 
    void  setCluster(int superLayer, cluster &cluster);
    void  getFeatures(double* buffer, int offset);
+   std::vector<int> getTrackIndexArray();
    void  print();
    bool  isValid();
 };

@@ -131,6 +131,7 @@ class writer {
      void open(const char *filename);
      void close();
      void showSummary();
+     void addDictionary(hipo::dictionary &dict);
      hipo::dictionary &getDictionary(){ return writerDictionary;}
 };
 
