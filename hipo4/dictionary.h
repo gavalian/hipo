@@ -77,7 +77,9 @@ class schema {
       return sch.offset + sch.typeSize;
     }
 
-    int   getEntryOrder(const char *name) const noexcept ;
+    int   getEntryOrder(const char *name) const noexcept {
+    return schemaEntriesMap.at(name);//at needed for const function
+    }
  
     int   getOffset(int item, int order, int rows) const noexcept {
       const auto &sch=schemaEntries[item];
