@@ -71,10 +71,6 @@ namespace hipo {
     }
   }
 
-  int   schema::getOffset(const char *name, int order, int rows){
-      int item = schemaEntriesMap[name];
-      return getOffset(item,order,rows);
-  }
 
   int   schema::getSizeForRows(int rows){
     int nentries = schemaEntries.size();
