@@ -76,10 +76,12 @@ int main(int argc, char** argv) {
       int pid;
       int16_t status;
       int8_t  charge;
+      int pid_index = 0;
       //printf("---------- PARTICLE BANK CONTENT -------\n");
       for(int row = 0; row < nrows; row++){
 
-  pid = particles.getInt(0,row);
+	pid = particles.getInt(pid_index,row);
+  //	int a = particles.getInt((int) 0,row);
 
   px = particles.getFloat(1,row);
 	py = particles.getFloat(2,row);
@@ -93,10 +95,15 @@ int main(int argc, char** argv) {
   beta = particles.getFloat(9,row);
   chi2pid = particles.getFloat(10,row);
   status  = particles.getShort(11,row);
+  //status  = particles.getInt(11,row);
 
 
-	h1mag->Fill(sqrt(px*px+py*py+pz*pz) * sqrt(vx*vx+vy*vy+vz*vz)
- + vt + pid*beta*chi2pid+status - charge);
+  double value = sqrt(px*px+py*py+pz*pz) * sqrt(vx*vx+vy*vy+vz*vz)
+            + vt + pid*beta*chi2pid+status - charge;
+
+	h1mag->Fill(value);
+  //sqrt(px*px+py*py+pz*pz) * sqrt(vx*vx+vy*vy+vz*vz)
+ //+ vt + pid*beta*chi2pid+status - charge);
 	/*int charge = particles.getByte(8,row);
 	  if(vec.Mag()>5.0){
           if(charge>0){

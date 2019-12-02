@@ -14,24 +14,28 @@
 namespace clas12 {
 
 class cluster {
-    int wires[6][112];
+    //int wires[6][112];
+    std::vector<int> wires;
     int region;
     int sector;
+    int trackid;
 
 public:
-    cluster(){}
+    cluster();
     cluster(const cluster &c);
-
     virtual ~cluster(){}
 
     void reset();
-    void setWire(int layer, int wire, int value){wires[layer][wire] = value;}
-    int  getWire(int layer, int wire) const {return wires[layer][wire];}
+    void setWire(int layer, int wire, int value){ wires[layer*112+wire] = value;}
+    int  getWire(int layer, int wire) const { return wires[layer*112+wire];}
 
     int    getRegion(){ return region;}
     int    getSector(){ return sector;}
+    int    getTrackId(){ return trackid;}
     void   setRegion(int r) { region = r;}
     void   setSector(int s) { sector = s;}
+    void   setTrackId(int id){ trackid = id;}
+
 
     double getLayerCenterX(int layer);
     double getCenterX();

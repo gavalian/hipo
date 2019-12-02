@@ -8,6 +8,17 @@ int main(int argc, char** argv){
   printf("----->>> start testing program \n");
   char inputFile[256];
 
+  std::vector<clas12::cluster> clusters;
+  clas12::cluster a;
+
+  for(int i = 0; i < 5; i++){
+    a.setSector(i);
+    a.setRegion(i*4+1);
+    clusters.push_back(a);
+  }
+
+  for(int i = 0; i < clusters.size(); i++) clusters[i].print();
+  return 1;
    if(argc>1) {
       sprintf(inputFile,"%s",argv[1]);
       //sprintf(outputFile,"%s",argv[2]);

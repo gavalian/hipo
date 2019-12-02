@@ -3,11 +3,17 @@
 
 namespace clas12 {
 
+cluster::cluster(){
+  wires.resize(112*6,0);
+  sector  = -1;
+  region  = -1;
+  trackid = -1;
+}
+
 cluster::cluster(const cluster &c){
-    for(int l = 0; l < 6; l++)
-    for(int w = 0; w < 112; w++){
-      wires[l][w] = c.getWire(l,w);
-    }
+    wires  = c.wires;
+    region = c.region;
+    sector = c.sector;
 }
 
 double cluster::getLayerCenterX(int layer){
@@ -15,7 +21,7 @@ double cluster::getLayerCenterX(int layer){
     int    count  = 0;
     int    summ   = 0;
     for(int w = 0; w < 112; w++){
-      if(wires[layer][w]>0) {
+      if(wires[layer*112+w]>0) {
         summ += w;
         count++;
       }
@@ -42,11 +48,11 @@ double cluster::getCenterX(){
   }
 
   void   cluster::print(){
-    printf("********* CLUSTER : region = %5d, sector = %5d, center X = %8.2f\n"
-            ,region, sector, getCenterX());
+    printf("********* CLUSTER : region = %5d, sector = %5d, trackid = %5d, center X = %8.2f\n"
+            ,region, sector, trackid, getCenterX());
     for(int l = 0; l < 6; l++){
       for(int w = 0; w < 112 ; w++){
-        if(wires[l][w]>0){
+        if(wires[l*112+w]>0){
             printf("X");
         } else {
            printf("-");
@@ -58,8 +64,9 @@ double cluster::getCenterX(){
   }
 
   void   cluster::reset(){
-    for(int l = 0; l < 6; l++)
-    for(int w = 0; w < 112; w++) wires[l][w] = 0;
+    wires.resize(112*6,0);
+    //for(int l = 0; l < 6; l++)
+    //for(int w = 0; w < 112; w++) wires[l*112+w] = 0;
   }
 
   void   cluster::copy(cluster &c){
