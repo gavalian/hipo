@@ -8,6 +8,12 @@ int main(int argc, char** argv){
   printf("----->>> start testing program \n");
   char inputFile[256];
 
+
+
+  clas12::sector sector;
+  sector.show();
+
+/*
   std::vector<clas12::cluster> clusters;
   clas12::cluster a;
 
@@ -16,9 +22,9 @@ int main(int argc, char** argv){
     a.setRegion(i*4+1);
     clusters.push_back(a);
   }
-
-  for(int i = 0; i < clusters.size(); i++) clusters[i].print();
-  return 1;
+*/
+  //for(int i = 0; i < clusters.size(); i++) clusters[i].print();
+  //return 1;
    if(argc>1) {
       sprintf(inputFile,"%s",argv[1]);
       //sprintf(outputFile,"%s",argv[2]);
@@ -47,9 +53,13 @@ int main(int argc, char** argv){
      event.getStructure(dchits);
      //dchits.show();
      printf("########### EVENT %6d #############\n",counter);
-     analyzer.readClusters(dchits,1);
-     analyzer.makeTracks();
-     analyzer.showFeatures();
+     sector.reset();
+     sector.read(dchits,1);
+     sector.makeTracks();
+     sector.show();
+//     analyzer.readClusters(dchits,1);
+//     analyzer.makeTracks();
+//     analyzer.showFeatures();
      //analyzer.showTracks();
    }
 

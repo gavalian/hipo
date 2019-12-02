@@ -2,7 +2,7 @@
 
 namespace clas12 {
 
-
+/*
   void dcsector::add(cluster *cl){
     int region = cl->getRegion();
     regionclusters[region].push_back(cl);
@@ -26,14 +26,7 @@ void dcana::readClusters(hipo::bank &hits, int sector){
     int id_layer  = hits.getSchema().getEntryOrder("layer");
     int id_wire   = hits.getSchema().getEntryOrder("wire");
     for(int i = 0; i < nrows; i++){
-      /*
-        int hitsec = hits.getInt("sector",i);
-        int hitid  = hits.getInt("id",i);
-        int   cid  = hits.getInt("clusterID",i);
-        int region = hits.getInt("superlayer",i);
-        int layer  = hits.getInt("layer",i);
-        int wire   = hits.getInt("wire",i);
-      */
+
         int hitsec = hits.getInt(id_sector,i);
         int hitid  = hits.getInt(id_hitid,i);
         int   cid  = hits.getInt(id_cid,i);
@@ -63,11 +56,7 @@ void dcana::readClusters(hipo::bank &hits, int sector){
       dcSectors[sec-1].add(it->second);
       it++;
     }
-    /*
-    for(int i = 0; i < 6; i++){
-      printf("SECTOR %5d\n",i);
-      dcSectors[i].print();
-    }*/
+
 }
 
 void dcana::makeTracks(){
@@ -145,5 +134,5 @@ void dcana::showTracks(){
     for(int i = 0; i < dcTracks.size(); i++){
       dcTracks[i]->print();
     }
-}
+}*/
 }

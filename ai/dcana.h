@@ -22,9 +22,9 @@ class dcsector {
   public:
     dcsector(){ regionclusters.resize(6);}
     ~dcsector(){};
-    std::vector<cluster*> &getRegion(int region){ return regionclusters[region];};
+  /*  std::vector<cluster*> &getRegion(int region){ return regionclusters[region];};
     void add(cluster *cl);
-    void print();
+    void print();*/
 };
 
 class dcana {
@@ -36,7 +36,7 @@ public:
 
       dcana(){};
       virtual ~dcana(){};
-
+/*
       void readClusters(hipo::bank &hits, int sector);
       void makeTracks();
       void makeTracks(int sector);
@@ -48,8 +48,8 @@ public:
       void  showFeatures();
       std::vector<int> getTrackIndex(int track){
         return dcTracks[track]->getTrackIndexArray();
-      }
-  };
+      }*/
+};
 }
 
 #endif
