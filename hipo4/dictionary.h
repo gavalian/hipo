@@ -39,9 +39,11 @@ class schema {
     std::map<std::string, int>    schemaEntriesMap;
     std::vector<schemaEntry_t>    schemaEntries;
 
-    int         groupid;
-    int         itemid;
+    int         groupid{};
+    int         itemid{};
     int         rowLength{};
+    mutable int         warningCount{10};
+    
     std::string schemaName;
 
 
@@ -72,19 +74,28 @@ class schema {
     int   getSizeForRows(int rows);
      
     int  getRowLength()  const noexcept{
-      const int nentries = schemaEntries.size()-1;
+      const auto nentries = schemaEntries.size()-1;
       const auto &sch=schemaEntries[nentries];
       return sch.offset + sch.typeSize;
     }
 
-    int   getEntryOrder(const char *name);
- 
-    int   getOffset(int item, int order, int rows) const noexcept {
+    int   getEntryOrder(const char *name) const;
+
+    bool  exists(const char *name) const{
+      if(schemaEntriesMap.count(name)) return true;
+      return false;
+    }
+    
+    int   getOffset(int item, int order, int rows) const  {
       const auto &sch=schemaEntries[item];
       return  rows*sch.offset + order*sch.typeSize;
     }
 
-    int   getOffset(const char *name, int order, int rows);
+    int   getOffset(const char *name, int order, int rows) const  {
+      int item = schemaEntriesMap.at(name);
+      return getOffset(item,order,rows);  
+    }
+    
     int   getEntryType(int item) const noexcept {
       return schemaEntries[item].typeId;
     }
@@ -103,8 +114,18 @@ class schema {
          schemaEntriesMap = D.schemaEntriesMap;
     }
 };
-
-  class dictionary {
+ 
+ inline int  schema::getEntryOrder(const char *name) const  {
+   if(exists(name))
+     return schemaEntriesMap.at(name);//at needed for const function
+   
+   if(warningCount>0 ) { warningCount--; std::cout<<"Warning , hipo::schema getEntryOrder(const char *name) item :" <<name<<" not found, for bank "<<schemaName<<" data for this item is not valid "<<std::endl;
+   }
+   return 0;
+ }
+ 
+ 
+ class dictionary {
   private:
     std::map<std::string,schema> factory;
   public:

@@ -152,12 +152,12 @@ namespace hipo {
         double getDouble(int item, int index) const noexcept;
         long   getLong(int item, int index) const noexcept;
 
-        int    getInt(const char *name, int index);
-        int    getShort(const char *name, int index);
-        int    getByte(const char *name, int index);
-        float  getFloat(const char *name, int index);
-        double getDouble(const char *name, int index);
-        long   getLong(const char *name, int index);
+        int    getInt(const char *name, int index) const noexcept;
+        int    getShort(const char *name, int index) const noexcept;
+        int    getByte(const char *name, int index) const noexcept;
+        float  getFloat(const char *name, int index) const noexcept;
+        double getDouble(const char *name, int index) const noexcept;
+        long   getLong(const char *name, int index) const noexcept;
 
         void    putInt(const char *name, int index, int32_t value);
         void    putShort(const char *name, int index, int16_t value);
@@ -175,62 +175,128 @@ namespace hipo {
 
 	
   };
-   inline float  bank::getFloat(int item, int index) const noexcept{
-     if(bankSchema.getEntryType(item)==4){
-       int offset = bankSchema.getOffset(item, index, bankRows);
+    /////////////////////////////////////
+    //inlined getters
+    
+    inline float  bank::getFloat(int item, int index) const noexcept{
+      if(bankSchema.getEntryType(item)==4){
+	int offset = bankSchema.getOffset(item, index, bankRows);
         return getFloatAt(offset);
-     }
-     return 0.0;
-   }
+      }
+      return 0.0;
+    }
 
-   inline double  bank::getDouble(int item, int index) const noexcept{
-     if(bankSchema.getEntryType(item)==5){
-       int offset = bankSchema.getOffset(item, index, bankRows);
-       return getDoubleAt(offset);
-     }
-     return 0.0;
-   }
-   inline long bank::getLong(int item, int index) const noexcept{
-     if(bankSchema.getEntryType(item)==8){
-     int offset = bankSchema.getOffset(item, index, bankRows);
-     return getLongAt(offset);
-     }
-     return 0;
-   }
-   inline int    bank::getInt(int item, int index) const noexcept{
-     int type = bankSchema.getEntryType(item);
-     int offset = bankSchema.getOffset(item, index, bankRows);
-     switch(type){
-     case 1: return (int) getByteAt(offset);
-     case 2: return (int) getShortAt(offset);
-     case 3: return getIntAt(offset);
-     default: printf("---> error : requested INT for [%s] type = %d\n",
-     		     bankSchema.getEntryName(item).c_str(),type); break;
-     }
+    inline double  bank::getDouble(int item, int index) const noexcept{
+      if(bankSchema.getEntryType(item)==5){
+	int offset = bankSchema.getOffset(item, index, bankRows);
+	return getDoubleAt(offset);
+      }
+      return 0.0;
+    }
+    inline long bank::getLong(int item, int index) const noexcept{
+      if(bankSchema.getEntryType(item)==8){
+	int offset = bankSchema.getOffset(item, index, bankRows);
+	return getLongAt(offset);
+      }
+      return 0;
+    }
+    inline int    bank::getInt(int item, int index) const noexcept{
+      int type = bankSchema.getEntryType(item);
+      int offset = bankSchema.getOffset(item, index, bankRows);
+      switch(type){
+      case 1: return (int) getByteAt(offset);
+      case 2: return (int) getShortAt(offset);
+      case 3: return getIntAt(offset);
+      default: printf("---> error : requested INT for [%s] type = %d\n",
+		      bankSchema.getEntryName(item).c_str(),type); break;
+      }
       return 0; 
-   }
-   inline int    bank::getShort(int item, int index) const noexcept{
-     int type = bankSchema.getEntryType(item);
-     int offset = bankSchema.getOffset(item, index, bankRows);
-     switch(type){
-     case 1: return (int) getByteAt(offset);
-     case 2: return (int) getShortAt(offset);
-     default: printf("---> error : requested SHORT for [%s] type = %d\n",
-		     bankSchema.getEntryName(item).c_str(),type); break;
-     }
-     return 0;
-   }
+    }
+    inline int    bank::getShort(int item, int index) const noexcept{
+      int type = bankSchema.getEntryType(item);
+      int offset = bankSchema.getOffset(item, index, bankRows);
+      switch(type){
+      case 1: return (int) getByteAt(offset);
+      case 2: return (int) getShortAt(offset);
+      default: printf("---> error : requested SHORT for [%s] type = %d\n",
+		      bankSchema.getEntryName(item).c_str(),type); break;
+      }
+      return 0;
+    }
    
-   inline int    bank::getByte(int item, int index) const noexcept{
-     int type = bankSchema.getEntryType(item);
-     int offset = bankSchema.getOffset(item, index, bankRows);
-     switch(type){
-     case 1: return (int) getByteAt(offset);
-     default: printf("---> error : requested BYTE for [%s] type = %d\n",
-		     bankSchema.getEntryName(item).c_str(),type); break;
-     }
-     return 0;
-   }
+    inline int    bank::getByte(int item, int index) const noexcept{
+      int type = bankSchema.getEntryType(item);
+      int offset = bankSchema.getOffset(item, index, bankRows);
+      switch(type){
+      case 1: return (int) getByteAt(offset);
+      default: printf("---> error : requested BYTE for [%s] type = %d\n",
+		      bankSchema.getEntryName(item).c_str(),type); break;
+      }
+      return 0;
+    }
+    inline int    bank::getInt(const char *name, int index) const noexcept{
+      int item = bankSchema.getEntryOrder(name);
+      int type = bankSchema.getEntryType(item);
+      int offset = bankSchema.getOffset(item, index, bankRows);
+      switch(type){
+      case 1: return (int) getByteAt(offset);
+      case 2: return (int) getShortAt(offset);
+      case 3: return getIntAt(offset);
+      default: printf("---> error : requested INT for [%s] type = %d\n",name,type); break;
+      }
+      return 0;
+    }
+
+    inline int    bank::getShort(const char *name, int index) const noexcept{
+      int item = bankSchema.getEntryOrder(name);
+      int type = bankSchema.getEntryType(item);
+      int offset = bankSchema.getOffset(item, index, bankRows);
+      switch(type){
+      case 1: return (int) getByteAt(offset);
+      case 2: return (int) getShortAt(offset);
+      default: printf("---> error : requested SHORT for [%s] type = %d\n",
+		      bankSchema.getEntryName(item).c_str(),type); break;
+      }
+      return 0;
+    }
+    inline int    bank::getByte(const char *name, int index) const noexcept{
+      int item = bankSchema.getEntryOrder(name);
+      int type = bankSchema.getEntryType(item);
+      int offset = bankSchema.getOffset(item, index, bankRows);
+      switch(type){
+      case 1: return (int) getByteAt(offset);
+      default: printf("---> error : requested BYTE for [%s] type = %d\n",
+		      bankSchema.getEntryName(item).c_str(),type); break;
+      }
+      return 0;
+    }
+
+    inline float  bank::getFloat(const char *name, int index) const noexcept{
+      int item = bankSchema.getEntryOrder(name);
+      if(bankSchema.getEntryType(item)==4){
+	int offset = bankSchema.getOffset(item, index, bankRows);
+	return getFloatAt(offset);
+      }
+      return 0.0;
+    }
+
+    inline double  bank::getDouble(const char *name, int index) const noexcept{
+      int item = bankSchema.getEntryOrder(name);
+      if(bankSchema.getEntryType(item)==5){
+	int offset = bankSchema.getOffset(item, index, bankRows);
+	return getDoubleAt(offset);
+      }
+      return 0.0;
+    }
+
+    inline long bank::getLong(const char *name, int index) const noexcept{
+      int item = bankSchema.getEntryOrder(name);
+      if(bankSchema.getEntryType(item)==8){
+	int offset = bankSchema.getOffset(item, index, bankRows);
+	return getLongAt(offset);
+      }
+      return 0;
+    }
 
 }
 #endif /* EVENT_H */
