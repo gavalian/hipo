@@ -14,6 +14,13 @@ cluster::cluster(const cluster &c){
     wires  = c.wires;
     region = c.region;
     sector = c.sector;
+    trackid = c.trackid;
+}
+
+void   cluster::getWireHits(std::vector<int> &hitsVector){
+  for(int i = 0; i < wires.size(); i++){
+    if(wires[i]>0) hitsVector.push_back(wires[i]);
+  }
 }
 
 double cluster::getLayerCenterX(int layer){
@@ -87,6 +94,13 @@ track::track(){
   }*/
 }
 
+track::track(const track &trk){
+  weight = trk.weight;
+  status = trk.status;
+  clusters = trk.clusters;
+  means    = trk.means;
+}
+
 track::~track(){
   clusters.clear();
 }
@@ -104,6 +118,13 @@ bool track::isValid(){
   if(fabs(clusters[2]->getCenterX()-clusters[3]->getCenterX())>15.0) return false;
   if(fabs(clusters[4]->getCenterX()-clusters[5]->getCenterX())>15.0) return false;*/
   return true;
+}
+
+bool  track::isNegative(){
+    double a1 = (means[0]+means[1])*0.5;
+    double a2 = (means[2]+means[3])*0.5;
+    double a3 = (means[4]+means[5])*0.5;
+    return ((a1-a2)>0 &&(a2-a3)>0);
 }
 /*
 void track::getFeatures(double* buffer, int offset){
@@ -130,6 +151,13 @@ void  track::setCluster(int superlayer, int cid){
 void  track::setCluster(int superlayer, int cid, double mean){
   clusters[superlayer] = cid;
   means[superlayer] = mean;
+}
+
+bool  track::contains(track &trk){
+  for(int i = 0; i < 6; i++){
+    if(trk.getId(i)==getId(i)) return true;
+  }
+  return false;
 }
 
 void track::print(){
@@ -160,6 +188,7 @@ void sector::read(hipo::bank &hits, int sector){
   int id_region = hits.getSchema().getEntryOrder("superlayer");
   int id_layer  = hits.getSchema().getEntryOrder("layer");
   int id_wire   = hits.getSchema().getEntryOrder("wire");
+  int id_trk   = hits.getSchema().getEntryOrder("trkID");
   for(int i = 0; i < nrows; i++){
      int hitsec = hits.getInt(id_sector,i);
      if(hitsec==sector){
@@ -168,13 +197,14 @@ void sector::read(hipo::bank &hits, int sector){
        int region = hits.getInt(id_region,i);
        int layer  = hits.getInt(id_layer,i);
        int wire   = hits.getInt(id_wire,i);
-
+       int trkID  = hits.getInt(id_trk,i);
        if(clusterMap.count(cid)==0){
          clusterMap[cid] = new cluster();
        }
        clusterMap[cid]->setWire(layer-1,wire-1,hitid);
        clusterMap[cid]->setRegion(region-1);
        clusterMap[cid]->setSector(hitsec);
+       clusterMap[cid]->setTrackId(trkID);
      }
   }
 
@@ -188,8 +218,18 @@ void sector::read(hipo::bank &hits, int sector){
   clusterMap.clear();
 }
 
+int  sector::getTrackId(int track){
+  int trkid = sectorClusters[0][sectorTracks[track].getId(0)].getTrackId();
+  //printf("trakid = %d\n",trkid);
+  for(int i = 1; i < 6; i++){
+      if(sectorClusters[i][sectorTracks[track].getId(i)].getTrackId()!=trkid) return 0;
+  }
+  if(trkid<0) trkid = 0;
+  return trkid;
+}
 void sector::makeTracks(){
   sectorTracks.clear();
+
   int n1 = sectorClusters[0].size();
   int n2 = sectorClusters[1].size();
   int n3 = sectorClusters[2].size();
@@ -210,8 +250,8 @@ void sector::makeTracks(){
                track.setCluster(3,r4, sectorClusters[3][r4].getCenterX());
                track.setCluster(4,r5, sectorClusters[4][r5].getCenterX());
                track.setCluster(5,r6, sectorClusters[5][r6].getCenterX());
-               if(track.isValid()==true)
-                sectorTracks.push_back(track);
+               if(track.isValid()==true&&track.isNegative()==true)
+                  sectorTracks.push_back(track);
             }
           }
         }
@@ -232,9 +272,34 @@ void sector::show(){
     printf("SL : %2d => %5lu , ",s,sectorClusters[s].size());
   }
   printf("\n");
-  for(int i = 0; i < sectorTracks.size();i++)
-    sectorTracks[i].print();
+  for(int i = 0; i < sectorTracks.size();i++){
+    printf("%4d : ",getTrackId(i)); sectorTracks[i].print();
+  }
 }
+
+void sector::showTrackInfo(){
+  for(int i = 0; i < trackInfo.size(); i++){
+    printf("track info %5d : id = %3d, charge = %3d , chi2 = %8.2f, sector = %4d\n",i,
+       trackInfo[i].getId(), trackInfo[i].getCharge(), trackInfo[i].getChi2(),trackInfo[i].getSector());
+  }
+}
+
+void sector::showBest(){
+  int ns = sectorClusters.size();
+  printf(" n tracks= %lu\n", sectorTracks.size());
+  for(int s = 0; s < ns; s++){
+    printf("SL : %2d => %5lu , ",s,sectorClusters[s].size());
+  }
+
+  printf("\n");
+  for(int i = 0; i < sectorTracks.size();i++){
+    int track_id = getTrackId(i);
+    if(sectorTracks[i].getWeight()>0.5||track_id>0){
+     printf("%4d : ",track_id);sectorTracks[i].print();
+   }
+  }
+}
+
 void sector::reset(){
   for(int i = 0; i < 6; i++)
     sectorClusters[i].clear();
@@ -255,4 +320,90 @@ void sector::setWeights(double *wgt){
         sectorTracks[i].setWeight(wgt[i]);
     }
 }
+
+int  sector::getTrackCount(){
+return sectorTracks.size();
+}
+
+int  sector::getBestTrackCount(){
+  int count = 0;
+  for(int i = 0; i < sectorTracks.size(); i++){
+    if(sectorTracks[i].getStatus()>0) count++;
+  }
+return count;
+}
+
+int  sector::getBestTrack(){
+  int     best_index = -1;
+  double   best_prob = 0.5;
+  for(int i = 0; i < sectorTracks.size(); i++){
+    if(sectorTracks[i].getStatus()==0&&sectorTracks[i].getWeight()>best_prob){
+       best_prob  = sectorTracks[i].getWeight();
+       best_index = i;
+    }
+  }
+  return best_index;
+}
+
+void sector::analyze(){
+
+  int best_index = getBestTrack();
+  if(best_index<0){
+    for(int i = 0; i < sectorTracks.size(); i++) sectorTracks[i].setStatus(-1);
+    return;
+  }
+
+  while(best_index>=0){
+    sectorTracks[best_index].setStatus(2);
+    for(int i = 0; i < sectorTracks.size(); i++){
+      if(sectorTracks[i].getStatus()==0){
+        if(sectorTracks[best_index].contains(sectorTracks[i])==true)
+           sectorTracks[i].setStatus(-1);
+      }
+    }
+    best_index = getBestTrack();
+  }
+}
+
+
+void sector::createWireHits(){
+  sectorWireHits.clear();
+
+  std::vector<track> tracks;
+
+  for(int i = 0; i < sectorTracks.size(); i++){
+    if(sectorTracks[i].getStatus()>0) tracks.push_back(sectorTracks[i]);
+  }
+  int tracksSize = tracks.size();
+  printf("-------->>>>>> identified tracks array size = %d\n",tracksSize);
+  sectorWireHits.resize(tracksSize);
+
+  for(int i = 0; i < tracksSize; i++){
+      for(int s = 0; s < 6; s++){
+        int index = tracks[i].getId(s);
+        sectorClusters[s][index].getWireHits(sectorWireHits[i]);
+      }
+  }
+
+
+  for(int i = 0; i < tracksSize; i++){
+    printf("******** %5d : wires = %lu\n",i,sectorWireHits[i].size());
+  }
+}
+
+void sector::readTrackInfo(hipo::bank &trkBank){
+   trackInfo.clear();
+   int nrows = trkBank.getRows();
+   for(int i = 0; i < nrows; i++){
+     int id = trkBank.getInt("id",i);
+     int q  = trkBank.getInt("q",i);
+     int sector = trkBank.getInt("sector",i);
+     double chi2 = trkBank.getFloat("chi2",i);
+     trackinfo info;
+     info.setTrack(id,q,chi2);
+     info.setSector(sector);
+     trackInfo.push_back(info);
+   }
+}
+
 }

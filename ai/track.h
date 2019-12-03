@@ -39,7 +39,7 @@ public:
     void   setSector(int s) { sector = s;}
     void   setTrackId(int id){ trackid = id;}
 
-
+    void   getWireHits(std::vector<int> &hitsVector);
     double getLayerCenterX(int layer);
     double getCenterX();
     double getCenterY();
@@ -58,6 +58,7 @@ class track {
  public:
 
    track();
+   track(const track &trk);
    virtual ~track();
    void    setWeight(double w) { weight = w;}
    double  getWeight(){ return weight;}
@@ -74,6 +75,34 @@ class track {
    std::vector<int> getTrackIndexArray();*/
    void  print();
    bool  isValid();
+   bool  isNegative();
+   bool  contains(track &trk);
+};
+
+class trackinfo {
+
+   int     trackid;
+   int     charge;
+   int     sector;
+   double  chi2;
+ public:
+   trackinfo(){}
+   trackinfo(const trackinfo &t){
+     trackid = t.trackid;
+     charge  = t.charge;
+     sector  = t.sector;
+     chi2    = t.chi2;
+   }
+   ~trackinfo(){};
+
+   void setTrack(int id, int c, double c2){
+     trackid = id; charge = c; chi2 = c2;
+   }
+   void setSector(int s){ sector = s;}
+   int getId(){ return trackid;};
+   int getCharge(){ return charge;}
+   int getSector(){ return sector;}
+   double getChi2(){ return chi2;}
 };
 
 class sector {
@@ -81,18 +110,34 @@ class sector {
     std::vector<std::vector<cluster>>  sectorClusters;
     std::vector<track>    sectorTracks;
 
+    std::vector< std::vector<int> > sectorWireHits;
+    std::vector<trackinfo>          trackInfo;
+
+    int  getBestTrack();
+
 public:
 
     sector();
     virtual ~sector(){}
 
+    int  getTrackId(int track);
+
     void read(hipo::bank &hits, int sector);
+    void readTrackInfo(hipo::bank &trkBank);
+
     void makeTracks();
     void addCluster(cluster &cluster);
     void show();
+    void showBest();
+    void showTrackInfo();
     void reset();
     std::vector<double>  getFeatures();
     void setWeights(double *wgt);
+    int  getTrackCount();
+    int  getBestTrackCount();
+    void analyze();
+    void createWireHits();
+
 };
 
 }
