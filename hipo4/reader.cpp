@@ -172,6 +172,13 @@ void  reader::read(hipo::event &dataevent){
   inputRecord.readHipoEvent(dataevent,eventNumberInRecord);
 }
 
+  void  reader::getStructure(hipo::structure &structure,int group, int item){
+    hipo::data data;
+    int eventNumberInRecord = readerEventIndex.getRecordEventNumber();
+    inputRecord.getData(data,eventNumberInRecord);
+    event::getStructure(data.getDataPtr(),structure,group,item);
+  }
+
 void  reader::readDictionary(hipo::dictionary &dict){
   long position = header.headerLength*4;
   hipo::record  dictRecord;
@@ -219,7 +226,7 @@ bool reader::gotoEvent(int eventNumber){
 }
   //dglazier
   bool  reader::loadRecord(int irec){
-    
+
     long position = readerEventIndex.getPosition(irec);
     inputRecord.readRecord(inputStream,position,0);
     return readerEventIndex.loadRecord(irec);
@@ -230,7 +237,7 @@ bool reader::gotoEvent(int eventNumber){
     readerEventIndex.advance();
     return true;
   }
-  
+
 void reader::printWarning(){
     #ifndef __LZ4__
       std::cout << "******************************************************" << std::endl;
@@ -313,7 +320,7 @@ namespace hipo {
     }
     if(irec+1>(int)recordEvents.size())
       return false;
-    
+
     currentEvent = recordEvents[irec]-1;
     currentRecord=irec;
     currentRecordEvent = -1;

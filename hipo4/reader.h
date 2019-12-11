@@ -88,6 +88,7 @@
 #include <climits>
 #include "record.h"
 #include "utils.h"
+#include "bank.h"
 
 namespace hipo {
 
@@ -191,9 +192,11 @@ class readerIndex {
         ~reader();
 
         void  readDictionary(hipo::dictionary &dict);
+        void  getStructure(hipo::structure &structure,int group, int item);
+
         void  open(const char *filename);
-        void setTags(int tag){ tagsToRead.push_back(tag);}
-	      void setTags(std::vector<long> tags){ tagsToRead=std::move(tags);}
+        void  setTags(int tag){ tagsToRead.push_back(tag);}
+	      void  setTags(std::vector<long> tags){ tagsToRead=std::move(tags);}
 
 
 	      bool  hasNext();
@@ -206,7 +209,7 @@ class readerIndex {
  	int getNRecords() const {return readerEventIndex.getNRecords()-1;}
 	bool  nextInRecord();
 	bool loadRecord(int irec);
-	int  getEntries(){return readerEventIndex.getMaxEvents();} 
+	int  getEntries(){return readerEventIndex.getMaxEvents();}
       };
 }
 #endif /* HIPOFILE_H */

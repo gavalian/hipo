@@ -360,6 +360,7 @@ namespace hipo {
     void  record::readEvent( std::vector<char> &vec, int index){
 
     }
+
     /**
      * returns a data object that points to the event inside of the
      * record. For given index the data object will be filled with the

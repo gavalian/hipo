@@ -45,7 +45,18 @@ namespace hipo {
        }
     }
 
-  void    event::addStructure(hipo::structure &str){
+    void     event::getStructure(const char *buffer, hipo::structure &str, int group, int item){
+       std::pair<int,int> index = getStructurePosition(buffer,group,item);
+       if(index.first>0){
+         str.init(&buffer[index.first], index.second + 8);
+         str.notify();
+       } else {
+         str.initStructureBySize(group,item,1,0);
+         str.notify();
+         //printf("*** error *** : structure (%5d,%5d) does not exist\n", group,item);
+       }
+    }
+    void    event::addStructure(hipo::structure &str){
         int str_size = str.getStructureBufferSize();
         int evt_size = getSize();
 	int evt_capacity = dataBuffer.size();
@@ -61,6 +72,21 @@ namespace hipo {
     void event::init(std::vector<char> &buffer){
         dataBuffer.resize(buffer.size());
         std::memcpy(&dataBuffer[0],&buffer[0],buffer.size());
+    }
+
+    std::pair<int,int>  event::getStructurePosition(const char *buffer, int group, int item){
+      int position = 16;
+      int eventSize = *(reinterpret_cast<const uint32_t*>(&buffer[4]));
+      while(position+8<eventSize){
+          uint16_t   gid = *(reinterpret_cast<const uint16_t*> (&buffer[position  ]));
+          uint8_t    iid = *(reinterpret_cast<const uint8_t*>  (&buffer[position+2]));
+          uint8_t   type = *(reinterpret_cast<const uint8_t*>  (&buffer[position+3]));
+          int     length = *(reinterpret_cast<const int*>      (&buffer[position+4]));
+          //printf("group = %4d , item = %4d\n",(unsigned int) gid, (unsigned int) iid);
+          if(gid==group&&iid==item) return std::make_pair(position,length);
+          position += (length + 8);
+      }
+      return std::make_pair(-1,0);
     }
 
     std::pair<int,int>  event::getStructurePosition(int group, int item){
