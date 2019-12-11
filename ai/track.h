@@ -40,6 +40,7 @@ public:
     void   setTrackId(int id){ trackid = id;}
 
     void   getWireHits(std::vector<int> &hitsVector);
+    void   getWireHits(std::vector<int> &hitsVector, std::vector<int> &hitsID, int id);
     double getLayerCenterX(int layer);
     double getCenterX();
     double getCenterY();
@@ -84,6 +85,7 @@ class trackinfo {
    int     trackid;
    int     charge;
    int     sector;
+   double  p;
    double  chi2;
  public:
    trackinfo(){}
@@ -92,12 +94,15 @@ class trackinfo {
      charge  = t.charge;
      sector  = t.sector;
      chi2    = t.chi2;
+     p       = t.p;
    }
    ~trackinfo(){};
 
    void setTrack(int id, int c, double c2){
      trackid = id; charge = c; chi2 = c2;
    }
+   void setP(double __p){p=__p;}
+   double getP(){return p;}
    void setSector(int s){ sector = s;}
    int getId(){ return trackid;};
    int getCharge(){ return charge;}
@@ -134,9 +139,14 @@ public:
     std::vector<double>  getFeatures();
     void setWeights(double *wgt);
     int  getTrackCount();
+
+    int  getTrackInfoIndex(int charge, int sector);
+    int  getTrackInfoCount(int charge, int sector);
+    std::string getTrackInfoString(int charge, int sector);
+
     int  getBestTrackCount();
     void analyze();
-    void createWireHits();
+    void createWireHits(hipo::bank &bank);
 
 };
 

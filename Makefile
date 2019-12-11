@@ -21,6 +21,8 @@ all:
 clean:
 	@cd Lz4; make clean
 	@cd hipo4; make clean
+	@cd examples; make clean
+	@cd examples/root ; make clean
 	@echo "Cleaning lib directory"
 	@rm -rf lib/* slib lib
 

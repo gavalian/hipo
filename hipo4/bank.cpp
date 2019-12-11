@@ -92,7 +92,8 @@ bank::~bank()= default;
 void    bank::setRows(int rows){
    bankRows = rows;
    int size = bankSchema.getSizeForRows(bankRows);
-   allocate(size+12);
+   initStructureBySize(bankSchema.getGroup(),bankSchema.getItem(), 11, size);
+   //allocate(size+12);
 }
 
 void bank::reset(){
@@ -153,7 +154,7 @@ void bank::show(){
     printf("%14d : ", i);
     for(int k = 0; k < bankRows; k++){
       if(bankSchema.getEntryType(i) < 4){
-          printf("%8d ",getInt(i,k));
+	  printf("%8d ",getInt(i,k));
         } else if(bankSchema.getEntryType(i)==4) {
           printf("%8.5f ",getFloat(i,k));
         }

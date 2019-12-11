@@ -23,6 +23,15 @@ void   cluster::getWireHits(std::vector<int> &hitsVector){
   }
 }
 
+void   cluster::getWireHits(std::vector<int> &hitsVector, std::vector<int> &hitsID, int id){
+  for(int i = 0; i < wires.size(); i++){
+    if(wires[i]>0){
+      hitsVector.push_back(wires[i]);
+      hitsID.push_back(id);
+    }
+  }
+}
+
 double cluster::getLayerCenterX(int layer){
     double center = -1;
     int    count  = 0;
@@ -279,8 +288,9 @@ void sector::show(){
 
 void sector::showTrackInfo(){
   for(int i = 0; i < trackInfo.size(); i++){
-    printf("track info %5d : id = %3d, charge = %3d , chi2 = %8.2f, sector = %4d\n",i,
-       trackInfo[i].getId(), trackInfo[i].getCharge(), trackInfo[i].getChi2(),trackInfo[i].getSector());
+    printf("track info %5d : id = %3d, charge = %3d , chi2 = %8.2f, sector = %4d, p = %8.3f\n",i,
+       trackInfo[i].getId(), trackInfo[i].getCharge(), trackInfo[i].getChi2(),
+       trackInfo[i].getSector(),trackInfo[i].getP());
   }
 }
 
@@ -366,7 +376,8 @@ void sector::analyze(){
 }
 
 
-void sector::createWireHits(){
+void sector::createWireHits(hipo::bank &bank){
+
   sectorWireHits.clear();
 
   std::vector<track> tracks;
@@ -385,6 +396,24 @@ void sector::createWireHits(){
       }
   }
 
+  std::vector<int> hitsList;
+  std::vector<int>   idList;
+
+  for(int i = 0; i < tracksSize; i++){
+      for(int s = 0; s < 6; s++){
+        int index = tracks[i].getId(s);
+        sectorClusters[s][index].getWireHits(hitsList,idList,i+1);
+      }
+  }
+
+  int bankRows = hitsList.size();
+  bank.setRows(bankRows);
+  //bank.show();
+  for(int i = 0; i < bankRows; i++){
+    bank.putByte("id",i, (int8_t) idList[i]);
+    bank.putShort("index",i,(int16_t) hitsList[i]);
+  }
+
 
   for(int i = 0; i < tracksSize; i++){
     printf("******** %5d : wires = %lu\n",i,sectorWireHits[i].size());
@@ -399,11 +428,51 @@ void sector::readTrackInfo(hipo::bank &trkBank){
      int q  = trkBank.getInt("q",i);
      int sector = trkBank.getInt("sector",i);
      double chi2 = trkBank.getFloat("chi2",i);
+     double px = trkBank.getFloat("p0_x",i);
+     double py = trkBank.getFloat("p0_y",i);
+     double pz = trkBank.getFloat("p0_z",i);
+     //printf("MOM = %f %f %f \n",px,py,pz);
      trackinfo info;
      info.setTrack(id,q,chi2);
      info.setSector(sector);
+     info.setP(sqrt(px*px+py*py+pz*pz));
      trackInfo.push_back(info);
    }
 }
+
+int  sector::getTrackInfoIndex(int charge, int sector){
+  int count = -1;
+  for(int i = 0; i < trackInfo.size(); i++){
+    if(trackInfo[i].getCharge()==charge&&trackInfo[i].getSector()==sector){
+      return i;
+    }
+  }
+  return count;
+}
+
+int  sector::getTrackInfoCount(int charge, int sector){
+  int count = 0;
+  for(int i = 0; i < trackInfo.size(); i++){
+    if(trackInfo[i].getCharge()==charge&&trackInfo[i].getSector()==sector){
+      count++;
+    }
+  }
+  return count;
+}
+
+std::string sector::getTrackInfoString(int charge, int sector){
+  double chi2 = -1.0;
+  double p    = -1.0;
+  int index = getTrackInfoIndex(charge,sector);
+  if(index>=0){
+    chi2 = trackInfo[index].getChi2();
+    p    = trackInfo[index].getP();
+  }
+  char line[128];
+  sprintf(line," %12.3f %8.3f ",chi2,p);
+  return std::string(line);
+}
+
+
 
 }
