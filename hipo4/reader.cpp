@@ -178,7 +178,12 @@ void  reader::read(hipo::event &dataevent){
     inputRecord.getData(data,eventNumberInRecord);
     event::getStructure(data.getDataPtr(),structure,group,item);
   }
-
+  void  reader::getStructureNoCopy(hipo::structure &structure,int group, int item){
+    hipo::data data;
+    int eventNumberInRecord = readerEventIndex.getRecordEventNumber();
+    inputRecord.getData(data,eventNumberInRecord);
+    event::getStructureNoCopy(data.getDataPtr(),structure,group,item);
+  }
 void  reader::readDictionary(hipo::dictionary &dict){
   long position = header.headerLength*4;
   hipo::record  dictRecord;

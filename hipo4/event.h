@@ -53,6 +53,7 @@ namespace hipo {
         void init(const char *buffer, int size);
         void                getStructure(hipo::structure &str, int group, int item);
 
+
         void                getStructure(hipo::bank &b);
         void                addStructure(hipo::structure &str);
 
@@ -65,6 +66,7 @@ namespace hipo {
 
         static std::pair<int,int>  getStructurePosition(const char *buffer, int group, int item);
         static void                getStructure(const char *buffer, hipo::structure &str, int group, int item);
+        static void                getStructureNoCopy(const char *buffer, hipo::structure &str, int group, int item);
     };
     /*
     template<class T>   node<T> event::getNode(){

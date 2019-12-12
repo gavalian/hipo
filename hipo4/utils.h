@@ -57,21 +57,29 @@ namespace hipo {
 
        std::chrono::high_resolution_clock clock;
        std::chrono::time_point<std::chrono::high_resolution_clock> first, second;
+       std::string  benchmarkName;
 
        long running_time;
        int  counter;
        int  printoutFrequency;
 
      public:
+
+        benchmark(const char *name){
+           benchmarkName = name;
+           running_time = 0;counter = 0; printoutFrequency = -1;
+         }
         benchmark(){ running_time = 0;counter = 0; printoutFrequency = -1;}
         benchmark(int freq){ running_time = 0;counter = 0; printoutFrequency = freq;}
        ~benchmark(){}
 
-       void    resume();
-       void    pause();
-       long    getTime();
+       void     setName(const char *name){ benchmarkName = name;}
+       void     resume();
+       void     pause();
+       long     getTime();
        double   getTimeSec();
-       int     getCounter();
+       int      getCounter();
+       void     show();
   };
 }
 
