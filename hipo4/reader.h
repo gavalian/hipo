@@ -189,10 +189,13 @@ class readerIndex {
     public:
 
         reader();
+        reader(const reader &r){}
+
         ~reader();
 
         void  readDictionary(hipo::dictionary &dict);
         void  getStructure(hipo::structure &structure,int group, int item);
+        void  getStructureNoCopy(hipo::structure &structure,int group, int item);
 
         void  open(const char *filename);
         void  setTags(int tag){ tagsToRead.push_back(tag);}
