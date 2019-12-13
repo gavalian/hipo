@@ -93,27 +93,27 @@
 namespace hipo {
 
   typedef struct {
-    int  uniqueid;
-    int  filenumber;
-    int  headerLength; // in words (usually 14)
-    int  recordCount;
-    int  indexArrayLength; // in bytes
-    int  bitInfo;
-    int  version;
-    int  userHeaderLength;
-    int  magicNumber;
-    long userRegister;
-    long trailerPosition;
-    long firstRecordPosition;
+    int  uniqueid{};
+    int  filenumber{};
+    int  headerLength{}; // in words (usually 14)
+    int  recordCount{};
+    int  indexArrayLength{}; // in bytes
+    int  bitInfo{};
+    int  version{};
+    int  userHeaderLength{};
+    int  magicNumber{};
+    long userRegister{};
+    long trailerPosition{};
+    long firstRecordPosition{};
   } fileHeader_t;
 
 
   typedef struct {
-      long recordPosition;
-      int  recordLength;
-      int  recordEntries;
-      long userWordOne;
-      long userWordTwo;
+      long recordPosition{};
+      int  recordLength{};
+      int  recordEntries{};
+      long userWordOne{};
+      long userWordTwo{};
   } recordInfo_t;
   /**
 * READER index class is used to construct entire events
