@@ -51,6 +51,8 @@ namespace hipo {
       int          getGroup();
       int          getItem();
       void         init(const char *buffer, int size);
+      void         initNoCopy(const char *buffer, int size);
+
       const char  *getAddress();
       virtual void  show();
       void         setSize(int size);
@@ -173,11 +175,11 @@ namespace hipo {
         void notify() override;
 
 
-	
+
   };
     /////////////////////////////////////
     //inlined getters
-    
+
     inline float  bank::getFloat(int item, int index) const noexcept{
       if(bankSchema.getEntryType(item)==4){
 	int offset = bankSchema.getOffset(item, index, bankRows);
@@ -210,7 +212,7 @@ namespace hipo {
       default: printf("---> error : requested INT for [%s] type = %d\n",
 		      bankSchema.getEntryName(item).c_str(),type); break;
       }
-      return 0; 
+      return 0;
     }
     inline int    bank::getShort(int item, int index) const noexcept{
       int type = bankSchema.getEntryType(item);
@@ -223,7 +225,7 @@ namespace hipo {
       }
       return 0;
     }
-   
+
     inline int    bank::getByte(int item, int index) const noexcept{
       int type = bankSchema.getEntryType(item);
       int offset = bankSchema.getOffset(item, index, bankRows);

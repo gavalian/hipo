@@ -53,6 +53,10 @@ namespace hipo {
       auto item = (int) (*reinterpret_cast<uint8_t *>(structureAddress+2));
       return item;
     }
+    void         structure::initNoCopy(const char *buffer, int size){
+        structureAddress = const_cast<char*>(buffer);
+    }
+
     void structure::init(const char *buffer, int size){
       allocate(size);
       memcpy(&structureBuffer[0],buffer,size);

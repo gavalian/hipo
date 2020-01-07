@@ -33,6 +33,8 @@ namespace hipo {
         getStructure(b,b.getSchema().getGroup(),b.getSchema().getItem());
     }
 
+
+
     void event::getStructure(hipo::structure &str, int group, int item){
        std::pair<int,int> index = getStructurePosition(group,item);
        if(index.first>0){
@@ -44,7 +46,17 @@ namespace hipo {
          //printf("*** error *** : structure (%5d,%5d) does not exist\n", group,item);
        }
     }
-
+    void     event::getStructureNoCopy(const char *buffer, hipo::structure &str, int group, int item){
+       std::pair<int,int> index = getStructurePosition(buffer,group,item);
+       if(index.first>0){
+         str.initNoCopy(&buffer[index.first], index.second + 8);
+         str.notify();
+       } else {
+         str.initStructureBySize(group,item,1,0);
+         str.notify();
+         //printf("*** error *** : structure (%5d,%5d) does not exist\n", group,item);
+       }
+    }
     void     event::getStructure(const char *buffer, hipo::structure &str, int group, int item){
        std::pair<int,int> index = getStructurePosition(buffer,group,item);
        if(index.first>0){
