@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
 
    TH1F *h1mag = new TH1F("H1MAG","",120,0.0,10.0);
 
-   for(int ev = 0 ; ev < 6492832; ev++){
+   for(int ev = 0 ; ev < 19478498; ev++){
      readers[0].next();
      readers[1].next();
      readers[2].next();
@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
        float pz = pzNode.getFloatAt(i*4);
        double p = sqrt(px*px+py*py+pz+pz);
        //histoBenchmark.resume();
-       h1mag->Fill(p);
+       //h1mag->Fill(p);
        //histoBenchmark.pause();
       //printf(" %8.4f ",px);
     }

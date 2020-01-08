@@ -19,7 +19,7 @@ LD        := g++
 LDFLAGS   := $(ROOTLDFLAGS)
 
 
-all: converter benchmark_root benchmark_hipo benchmark_hipo_cwise
+all: converter benchmark_root benchmark_hipo benchmark_hipo_cwise benchmark_hipo_ana
 
 converter: converter.o
 	$(CXX) -o converter $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
@@ -32,6 +32,9 @@ benchmark_hipo: benchmark_hipo.o
 
 benchmark_hipo_cwise: benchmark_hipo_cwise.o
 	$(CXX) -o benchmark_hipo_cwise.exe $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
+
+benchmark_hipo_ana: benchmark_hipo_ana.o
+	$(CXX) -o benchmark_hipo_ana.exe $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
 
 clean:
 	@echo 'Removing all build files'
