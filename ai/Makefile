@@ -20,6 +20,9 @@ slibtrack: checkdirs $(OBJECTS)
 exe: main.o
 	$(CXX) -o main.exe main.o -L../lib -llz4 -lhipo4 -ltrack
 
+ana: analyze.o
+	$(CXX) -o analyze.exe analyze.o -L../lib -llz4 -lhipo4 -ltrack
+
 show:
 	@echo $(OBJECTS)
 
@@ -32,7 +35,7 @@ $(SLIBDIR):
 	@mkdir -p $(SLIBDIR)
 clean:
 	@echo 'Removing the build files....'
-	@rm -rf *~ *.o
+	@rm -rf *~ *.o *.exe
 
 %.o: %.cpp
 	$(CXX) -fPIC -c $< -O2 -D__LZ4__ $(CXXFLAGS) $(LZ4INCLUDES)

@@ -60,13 +60,17 @@ std::vector<point*> match::range_query(std::vector<point*>* points, point* s, in
 void match::find_clusters(std::vector<point*>& __points, int eps, size_t minPts){
     int C = -1;
     std::vector<point*> all_points[6];
+    //printf("---- start procedure");
     for (size_t i = 0; i< __points.size(); i++)
     {
         all_points[__points[i]->y].push_back(__points[i]);
     }
     int i = 5;
+
+
     while (i >= 0)
     {
+      //printf("--- iteration %d\n",i);
         for (size_t j = 0; j< all_points[i].size(); j++)
         {
             point* p = all_points[i][j];
@@ -92,14 +96,17 @@ void match::find_clusters(std::vector<point*>& __points, int eps, size_t minPts)
                 q->label = C;
             }
         }
-
-        for (size_t j = 0; j< all_points[i].size(); j++)
-        {
-            point* p = all_points[i][j];
-            if (p->label == -1)
-            {
-                for (size_t k = 0; k< all_points[i].size(); k++)
-                {
+        //printf("--- insight %d\n",i);
+        int aps = all_points[i].size();
+      /*  try {
+          for (size_t j = 0; j< all_points[i].size(); j++)
+          {
+            printf("---- erasing %d : %d %d\n",i,(int) j,aps);
+              point* p = all_points[i][j];
+              if (p->label == -1)
+              {
+                  for (size_t k = 0; k< all_points[i].size(); k++)
+                  {
                     point* q = all_points[i][k];
                     if ( (point::distance(p,q) == 1) && q->label != -1)
                     {
@@ -113,10 +120,14 @@ void match::find_clusters(std::vector<point*>& __points, int eps, size_t minPts)
                         {
                             all_points[i].erase(all_points[i].begin()+j);
                         }
-                    }
-                }
-            }
-        }
+                      }
+                  }
+              }
+          }
+       } catch(...){
+         printf("well..... exception happened...\n");
+       }*/
+
         i -= 1;
     }
 }

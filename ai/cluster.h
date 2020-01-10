@@ -58,17 +58,23 @@ class match{
 
   public:
     match(){}
+    match(const match &m){
+      points = m.points;
+    }
     virtual ~match(){}
 
     void addPoint(int x, int y, int index){
       points.push_back(new point(x,y,index));
     }
 
+    std::vector<point*>  &getData(){ return points;}
     void reset(){points.clear();}
     std::vector<point*> range_query(std::vector<point*>* points, point* s, int eps);
     void find_clusters(std::vector<point*>& points, int eps, size_t minPts);
     void find(int eps, size_t minPts);
+    void sort(){ std::sort(points.begin(), points.end(), point::compare);}
     void show();
+
 };
 }
 

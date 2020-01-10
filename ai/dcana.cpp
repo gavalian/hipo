@@ -2,6 +2,10 @@
 
 namespace clas12 {
 
+
+void dcana::show(){
+  printf("\n------ dcana : nothing to show... come back later\n");
+}
 /*
   void dcsector::add(cluster *cl){
     int region = cl->getRegion();

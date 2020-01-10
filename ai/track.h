@@ -11,6 +11,7 @@
 #include <iostream>
 #include <vector>
 #include "bank.h"
+#include "cluster.h"
 
 namespace clas12 {
 
@@ -46,6 +47,7 @@ public:
     double getCenterY();
     void   print();
     void   copy(cluster &c);
+    static std::vector<cluster> create(clas12::match &m);
 };
 
 class track {
@@ -128,6 +130,7 @@ public:
     int  getTrackId(int track);
 
     void read(hipo::bank &hits, int sector);
+    void readRaw(hipo::bank &hits, int sector);
     void readTrackInfo(hipo::bank &trkBank);
 
     void makeTracks();
