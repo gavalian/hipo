@@ -1,8 +1,39 @@
+//******************************************************************************
+//*       ██╗  ██╗██╗██████╗  ██████╗     ██╗  ██╗    ██████╗                  *
+//*       ██║  ██║██║██╔══██╗██╔═══██╗    ██║  ██║   ██╔═████╗                 *
+//*       ███████║██║██████╔╝██║   ██║    ███████║   ██║██╔██║                 *
+//*       ██╔══██║██║██╔═══╝ ██║   ██║    ╚════██║   ████╔╝██║                 *
+//*       ██║  ██║██║██║     ╚██████╔╝         ██║██╗╚██████╔╝                 *
+//*       ╚═╝  ╚═╝╚═╝╚═╝      ╚═════╝          ╚═╝╚═╝ ╚═════╝                  *
+//************************ Jefferson National Lab (2017) ***********************
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ *   Copyright (c) 2017.  Jefferson Lab (JLab). All rights reserved. Permission
+ *   to use, copy, modify, and distribute  this software and its documentation
+ *   for educational, research, and not-for-profit purposes, without fee and
+ *   without a signed licensing agreement.
+ *
+ *   IN NO EVENT SHALL JLAB BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL
+ *   INCIDENTAL, OR CONSEQUENTIAL DAMAGES, INCLUDING LOST PROFITS, ARISING
+ *   OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF JLAB HAS
+ *   BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ *   JLAB SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ *   THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ *   PURPOSE. THE HIPO DATA FORMAT SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF
+ *   ANY, PROVIDED HEREUNDER IS PROVIDED "AS IS". JLAB HAS NO OBLIGATION TO
+ *   PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+ *
+ *   This software was developed under the United States Government license.
+ *   For more information contact author at gavalian@jlab.org
+ *   Department of Experimental Nuclear Physics, Jefferson Lab.
  */
+
+ /*
+  * File:   record.cpp
+  * Author: gavalian
+  *
+  * Created on April 11, 2017, 4:47 PM
+  */
 
 #include "record.h"
 //#include "hipoexceptions.h"
@@ -20,6 +51,7 @@ namespace hipo {
     record::~record()= default;
 
     /**
+     * Read
      */
     void record::readRecord(std::ifstream &stream, long position, int dataOffset){
 
@@ -27,10 +59,10 @@ namespace hipo {
         stream.seekg(position,std::ios::beg);
 
         stream.read( (char *) &recordHeaderBuffer[0],80);
-        recordHeader.recordLength    = *(reinterpret_cast<int *>(&recordHeaderBuffer[0]));
-        recordHeader.headerLength    = *(reinterpret_cast<int *>(&recordHeaderBuffer[8]));
-        recordHeader.numberOfEvents  = *(reinterpret_cast<int *>(&recordHeaderBuffer[12]));
-        recordHeader.bitInfo         = *(reinterpret_cast<int *>(&recordHeaderBuffer[20]));
+        recordHeader.recordLength     = *(reinterpret_cast<int *>(&recordHeaderBuffer[ 0]));
+        recordHeader.headerLength     = *(reinterpret_cast<int *>(&recordHeaderBuffer[ 8]));
+        recordHeader.numberOfEvents   = *(reinterpret_cast<int *>(&recordHeaderBuffer[12]));
+        recordHeader.bitInfo          = *(reinterpret_cast<int *>(&recordHeaderBuffer[20]));
         recordHeader.signatureString  = *(reinterpret_cast<int *>(&recordHeaderBuffer[28]));
         recordHeader.recordDataLength = *(reinterpret_cast<int *>(&recordHeaderBuffer[32]));
         recordHeader.userHeaderLength = *(reinterpret_cast<int *>(&recordHeaderBuffer[24]));
@@ -40,9 +72,9 @@ namespace hipo {
         if(recordHeader.signatureString==0x0001dac0) recordHeader.dataEndianness = 1;
 
         if(recordHeader.signatureString==0x0001dac0){
-          recordHeader.recordLength = __builtin_bswap32(recordHeader.recordLength);
-          recordHeader.headerLength = __builtin_bswap32(recordHeader.headerLength);
-          recordHeader.numberOfEvents = __builtin_bswap32(recordHeader.numberOfEvents);
+          recordHeader.recordLength     = __builtin_bswap32(recordHeader.recordLength);
+          recordHeader.headerLength     = __builtin_bswap32(recordHeader.headerLength);
+          recordHeader.numberOfEvents   = __builtin_bswap32(recordHeader.numberOfEvents);
           recordHeader.recordDataLength = __builtin_bswap32(recordHeader.recordDataLength);
           recordHeader.userHeaderLength = __builtin_bswap32(recordHeader.userHeaderLength);
           recordHeader.bitInfo          = __builtin_bswap32(recordHeader.bitInfo);
@@ -53,7 +85,7 @@ namespace hipo {
         int headerLengthBytes     = recordHeader.headerLength*4;
         int dataBufferLengthBytes = recordHeader.recordLength * 4 - headerLengthBytes;
 
-        recordHeader.userHeaderLengthPadding = (recordHeader.bitInfo>>20)&0x00000003;
+        recordHeader.userHeaderLengthPadding    = (recordHeader.bitInfo>>20)&0x00000003;
         recordHeader.recordDataLengthCompressed = compressedWord&0x0FFFFFFF;
         recordHeader.compressionType            = (compressedWord>>28)&0x0000000F;
         recordHeader.indexDataLength            = 4*recordHeader.numberOfEvents;
@@ -133,10 +165,10 @@ namespace hipo {
       stream.seekg(position,std::ios::beg);
 
       stream.read( (char *) &recordHeaderBuffer[0],80);
-      recordHeader.recordLength    = *(reinterpret_cast<int *>(&recordHeaderBuffer[0]));
-      recordHeader.headerLength    = *(reinterpret_cast<int *>(&recordHeaderBuffer[8]));
-      recordHeader.numberOfEvents  = *(reinterpret_cast<int *>(&recordHeaderBuffer[12]));
-      recordHeader.bitInfo         = *(reinterpret_cast<int *>(&recordHeaderBuffer[20]));
+      recordHeader.recordLength     = *(reinterpret_cast<int *>(&recordHeaderBuffer[0]));
+      recordHeader.headerLength     = *(reinterpret_cast<int *>(&recordHeaderBuffer[8]));
+      recordHeader.numberOfEvents   = *(reinterpret_cast<int *>(&recordHeaderBuffer[12]));
+      recordHeader.bitInfo          = *(reinterpret_cast<int *>(&recordHeaderBuffer[20]));
       recordHeader.signatureString  = *(reinterpret_cast<int *>(&recordHeaderBuffer[28]));
       recordHeader.recordDataLength = *(reinterpret_cast<int *>(&recordHeaderBuffer[32]));
       recordHeader.userHeaderLength = *(reinterpret_cast<int *>(&recordHeaderBuffer[24]));
@@ -156,10 +188,10 @@ namespace hipo {
       }
 
       int compressedDataLengthPadding = (recordHeader.bitInfo>>24)&0x00000003;
-      int headerLengthBytes     = recordHeader.headerLength*4;
-      int dataBufferLengthBytes = recordHeader.recordLength * 4 - headerLengthBytes;
+      int headerLengthBytes           = recordHeader.headerLength*4;
+      int dataBufferLengthBytes       = recordHeader.recordLength * 4 - headerLengthBytes;
 
-      recordHeader.userHeaderLengthPadding = (recordHeader.bitInfo>>20)&0x00000003;
+      recordHeader.userHeaderLengthPadding    = (recordHeader.bitInfo>>20)&0x00000003;
       recordHeader.recordDataLengthCompressed = compressedWord&0x0FFFFFFF;
       recordHeader.compressionType            = (compressedWord>>28)&0x0000000F;
       recordHeader.indexDataLength            = 4*recordHeader.numberOfEvents;
@@ -172,31 +204,35 @@ namespace hipo {
       //char *compressedBuffer    = (char*) malloc(dataBufferLengthBytes);
 
       if(dataBufferLengthBytes>recordCompressedBuffer.size()){
-        int newSize = dataBufferLengthBytes + 5*1024;
-        printf("---> resizing internal compressed buffer size to from %ld to %d\n",
-           recordCompressedBuffer.size(), newSize);
+        //-- resize the buffer extending it by 500kB. hopefully
+        //-- will be enough not to resize too many times.
+        int newSize = dataBufferLengthBytes + 500*1024;
+        // printout commented out --- by G.G.
+        /* printf("---> resizing internal compressed buffer size to from %ld to %d\n",
+           recordCompressedBuffer.size(), newSize); */
         recordCompressedBuffer.resize(newSize);
       }
-      //dataBufferLengthBytes    -= compressedDataLengthPadding;
+
       long  dataposition = position + headerLengthBytes;
-      //printf("position = %ld data position = %ld\n",position, dataposition);
       stream.seekg(dataposition,std::ios::beg);
-      //stream.read( compressedBuffer, dataBufferLengthBytes);
+
       if(position+dataBufferLengthBytes+recordHeader.headerLength>inputSize){
         printf("**** warning : record at position %ld is incomplete.",position);
          return false;
-       }
+      }
+
       stream.read( (&recordCompressedBuffer[0]), dataBufferLengthBytes);
-      //showBuffer(compressedBuffer, 10, 200);
-      //printf("position = %ld data position = %ld \n",position, dataposition);
+
       int decompressedLength = recordHeader.indexDataLength +
                                recordHeader.userHeaderLength +
                                recordHeader.userHeaderLengthPadding +
                                recordHeader.recordDataLength;
 
       if(recordBuffer.size()<decompressedLength){
-        printf(" resizing internal buffer from %lu to %d\n", recordBuffer.size(), recordHeader.recordDataLength);
-        recordBuffer.resize(decompressedLength+1024);
+        // Buffer resizes by 20% --- modified by me
+        int resize_fraction = (int) (decompressedLength*0.2);
+        //printf(" resizing internal buffer from %lu to %d\n", recordBuffer.size(), recordHeader.recordDataLength);
+        recordBuffer.resize(decompressedLength + resize_fraction);
       }
       //for(int i = 0; i < recordBuffer.size(); i++) recordBuffer[i] = 0;
       //printf("****************** BEFORE padding = %d\n", compressedDataLengthPadding);
@@ -238,6 +274,7 @@ namespace hipo {
     int   record::getRecordSizeCompressed(){
       return recordHeader.recordLength;
     }
+
     void  record::readRecord__(std::ifstream &stream, long position, long recordLength){
 
       stream.seekg(position,std::ios::beg);
@@ -384,7 +421,6 @@ namespace hipo {
     void  record::readHipoEvent(hipo::event &event, int index){
           hipo::data event_data;
           getData(event_data,index);
-          //printf("reading event %d ptr=%X size=%d\n",index,(unsigned long) event_data.getDataPtr(),event_data.getDataSize());
           event.init(event_data.getDataPtr(), event_data.getDataSize());
     }
     /**

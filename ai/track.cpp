@@ -32,6 +32,31 @@ void   cluster::getWireHits(std::vector<int> &hitsVector, std::vector<int> &hits
   }
 }
 
+std::vector<cluster> cluster::create(clas12::match &m){
+  std::vector<cluster> c;
+  std::vector<point*> &mt = m.getData();
+  int size = mt.size();
+  if(size==0) return c;
+
+  int     cid = -1;//mt[0]->label;
+  int counter = -1;
+
+  for(int i = 0; i < size; i++){
+    int l = mt[i]->label;
+    if(l<0) break;
+
+    if(l!=cid){
+      cid = l;
+      cluster ct;
+      c.push_back(ct);
+      counter++;
+    }
+    //printf("%d %d %d %d %d\n",counter,mt[i]->x,mt[i]->y,mt[i]->index,mt[i]->label);
+    c[counter].setWire(mt[i]->y,mt[i]->x,mt[i]->index);
+  }
+  return c;
+}
+
 double cluster::getLayerCenterX(int layer){
     double center = -1;
     int    count  = 0;
@@ -375,6 +400,60 @@ void sector::analyze(){
   }
 }
 
+
+void sector::readRaw(hipo::bank &hits, int sector){
+
+  
+  int rows = hits.getRows();
+
+  std::vector<clas12::match> m;
+  m.resize(6);
+  for(int i = 0; i < rows; i++){
+    int sec   = hits.getInt("sector",i);
+    int layer = hits.getInt("layer",i);
+    int comp  = hits.getInt("component",i);
+
+    if(sec==sector){
+      int   region = (int) (layer-1)/6;
+      int sublayer = layer - region*6 -1;
+      m[region].addPoint(comp-1,sublayer,i);
+      //printf("add region = %d, sublayer = %d, layer = %d, component = %d\n",region,sublayer,layer,comp);
+      /*if(layer>30&&layer<=36){
+        int nl = layer-31;
+        m.addPoint(comp-1,nl,i);
+      }*/
+    }
+  }
+
+  for(int i = 0; i < 6; i++) {
+    m[i].find(2,4);
+    m[i].sort();
+    m[i].show();
+   }
+
+  for(int i = 0; i < 6; i++){
+    std::vector<cluster>  clusters = cluster::create(m[i]);
+    for(int r = 0; r < clusters.size(); r++){
+      clusters[r].setRegion(i);
+      addCluster(clusters[r]);
+    }
+    printf(">>>>>> region %d : clusters %d\n",i+1,(int) clusters.size());
+    m[i].reset();
+  }
+  /*
+  int msize = m.getData().size();
+  printf(" data size for ML is %d\n",msize);
+  m.find(2,4);
+  m.show();
+
+  std::vector<cluster>  clusters = cluster::create(m);
+  printf("--> clusters size = %d\n",(int) clusters.size());
+  for(int i = 0; i < clusters.size(); i++){
+    clusters[i].print();
+  }
+
+  m.reset();*/
+}
 
 void sector::createWireHits(hipo::bank &bank){
 

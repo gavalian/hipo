@@ -36,6 +36,8 @@ public:
 
       dcana(){};
       virtual ~dcana(){};
+
+      void show();
 /*
       void readClusters(hipo::bank &hits, int sector);
       void makeTracks();

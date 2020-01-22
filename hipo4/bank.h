@@ -1,10 +1,33 @@
+//******************************************************************************
+//*       ██╗  ██╗██╗██████╗  ██████╗     ██╗  ██╗    ██████╗                  *
+//*       ██║  ██║██║██╔══██╗██╔═══██╗    ██║  ██║   ██╔═████╗                 *
+//*       ███████║██║██████╔╝██║   ██║    ███████║   ██║██╔██║                 *
+//*       ██╔══██║██║██╔═══╝ ██║   ██║    ╚════██║   ████╔╝██║                 *
+//*       ██║  ██║██║██║     ╚██████╔╝         ██║██╗╚██████╔╝                 *
+//*       ╚═╝  ╚═╝╚═╝╚═╝      ╚═════╝          ╚═╝╚═╝ ╚═════╝                  *
+//************************ Jefferson National Lab (2017) ***********************
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ *   Copyright (c) 2017.  Jefferson Lab (JLab). All rights reserved. Permission
+ *   to use, copy, modify, and distribute  this software and its documentation
+ *   for educational, research, and not-for-profit purposes, without fee and
+ *   without a signed licensing agreement.
+ *
+ *   IN NO EVENT SHALL JLAB BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL
+ *   INCIDENTAL, OR CONSEQUENTIAL DAMAGES, INCLUDING LOST PROFITS, ARISING
+ *   OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF JLAB HAS
+ *   BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ *   JLAB SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ *   THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ *   PURPOSE. THE HIPO DATA FORMAT SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF
+ *   ANY, PROVIDED HEREUNDER IS PROVIDED "AS IS". JLAB HAS NO OBLIGATION TO
+ *   PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+ *
+ *   This software was developed under the United States Government license.
+ *   For more information contact author at gavalian@jlab.org
+ *   Department of Experimental Nuclear Physics, Jefferson Lab.
  */
-
-/*
+/*******************************************************************************
  * File:   bank.h
  * Author: gavalian
  *
@@ -45,7 +68,7 @@ namespace hipo {
       virtual     ~structure()= default;
       bool         allocate(int size);
       int          getSize() const noexcept{
-	return *reinterpret_cast<uint32_t *>(structureAddress+4);
+	         return *reinterpret_cast<uint32_t *>(structureAddress+4);
       }
       int          getType();
       int          getGroup();
@@ -145,28 +168,28 @@ namespace hipo {
 
         hipo::schema  &getSchema() { return bankSchema;}
 
-        int    getRows() const noexcept{ return bankRows;}
-        void   setRows(int rows);
-        int    getInt(int item, int index) const noexcept;
-        int    getShort(int item, int index) const noexcept;
-        int    getByte(int item, int index) const noexcept;
-        float  getFloat(int item, int index) const noexcept;
-        double getDouble(int item, int index) const noexcept;
-        long   getLong(int item, int index) const noexcept;
+        int    getRows()  const noexcept{ return bankRows;}
+        void   setRows(   int rows);
+        int    getInt(    int item, int index) const noexcept;
+        int    getShort(  int item, int index) const noexcept;
+        int    getByte(   int item, int index) const noexcept;
+        float  getFloat(  int item, int index) const noexcept;
+        double getDouble( int item, int index) const noexcept;
+        long   getLong(   int item, int index) const noexcept;
 
-        int    getInt(const char *name, int index) const noexcept;
-        int    getShort(const char *name, int index) const noexcept;
-        int    getByte(const char *name, int index) const noexcept;
-        float  getFloat(const char *name, int index) const noexcept;
-        double getDouble(const char *name, int index) const noexcept;
-        long   getLong(const char *name, int index) const noexcept;
+        int    getInt(    const char *name, int index) const noexcept;
+        int    getShort(  const char *name, int index) const noexcept;
+        int    getByte(   const char *name, int index) const noexcept;
+        float  getFloat(  const char *name, int index) const noexcept;
+        double getDouble( const char *name, int index) const noexcept;
+        long   getLong(   const char *name, int index) const noexcept;
 
-        void    putInt(const char *name, int index, int32_t value);
-        void    putShort(const char *name, int index, int16_t value);
-        void    putByte(const char *name, int index, int8_t value);
-        void    putFloat(const char *name, int index, float value);
-        void    putDouble(const char *name, int index, double value);
-        void    putLong(const char *name, int index, int64_t value);
+        void    putInt(    const char *name, int index, int32_t value);
+        void    putShort(  const char *name, int index, int16_t value);
+        void    putByte(   const char *name, int index, int8_t value);
+        void    putFloat(  const char *name, int index, float value);
+        void    putDouble( const char *name, int index, double value);
+        void    putLong(   const char *name, int index, int64_t value);
 
         void    show() override;
         void    reset();
@@ -182,26 +205,28 @@ namespace hipo {
 
     inline float  bank::getFloat(int item, int index) const noexcept{
       if(bankSchema.getEntryType(item)==4){
-	int offset = bankSchema.getOffset(item, index, bankRows);
-        return getFloatAt(offset);
+	       int offset = bankSchema.getOffset(item, index, bankRows);
+         return getFloatAt(offset);
       }
       return 0.0;
     }
 
     inline double  bank::getDouble(int item, int index) const noexcept{
-      if(bankSchema.getEntryType(item)==5){
-	int offset = bankSchema.getOffset(item, index, bankRows);
-	return getDoubleAt(offset);
+        if(bankSchema.getEntryType(item)==5){
+	         int offset = bankSchema.getOffset(item, index, bankRows);
+	         return getDoubleAt(offset);
       }
       return 0.0;
     }
+
     inline long bank::getLong(int item, int index) const noexcept{
       if(bankSchema.getEntryType(item)==8){
-	int offset = bankSchema.getOffset(item, index, bankRows);
-	return getLongAt(offset);
+	       int offset = bankSchema.getOffset(item, index, bankRows);
+	        return getLongAt(offset);
       }
       return 0;
     }
+
     inline int    bank::getInt(int item, int index) const noexcept{
       int type = bankSchema.getEntryType(item);
       int offset = bankSchema.getOffset(item, index, bankRows);
@@ -214,6 +239,7 @@ namespace hipo {
       }
       return 0;
     }
+
     inline int    bank::getShort(int item, int index) const noexcept{
       int type = bankSchema.getEntryType(item);
       int offset = bankSchema.getOffset(item, index, bankRows);
@@ -301,4 +327,4 @@ namespace hipo {
     }
 
 }
-#endif /* EVENT_H */
+#endif /* BANK_H */
