@@ -236,10 +236,10 @@ namespace hipo {
         void  read(hipo::event &dataevent);
         void  printWarning();
 	//dglazier
- 	      int getNRecords() const {return readerEventIndex.getNRecords()-1;}
-	      bool  nextInRecord();
-	      bool loadRecord(int irec);
-	      int  getEntries(){return readerEventIndex.getMaxEvents();}
-      };
+	int getNRecords() const {return readerEventIndex.getNRecords()-1;}
+	bool  nextInRecord();
+	bool loadRecord(int irec);
+	int  getEntries(){return readerEventIndex.getMaxEvents();}
+  };
 }
 #endif /* HIPOREADER_H */
