@@ -32,6 +32,16 @@ void   cluster::getWireHits(std::vector<int> &hitsVector, std::vector<int> &hits
   }
 }
 
+cluster    cluster::createMap(clas12::match &m){
+  cluster c;
+  std::vector<point*> &mt = m.getData();
+  int size = mt.size();
+  for(int i = 0; i < size; i++){
+    c.setWire(mt[i]->y,mt[i]->x,mt[i]->index);
+  }
+  return c;
+}
+
 std::vector<cluster> cluster::create(clas12::match &m){
   std::vector<cluster> c;
   std::vector<point*> &mt = m.getData();
@@ -284,8 +294,8 @@ void sector::makeTracks(){
                track.setCluster(3,r4, sectorClusters[3][r4].getCenterX());
                track.setCluster(4,r5, sectorClusters[4][r5].getCenterX());
                track.setCluster(5,r6, sectorClusters[5][r6].getCenterX());
-               if(track.isValid()==true&&track.isNegative()==true)
-                  sectorTracks.push_back(track);
+               //if(track.isValid()==true&&track.isNegative()==true)
+                sectorTracks.push_back(track);
             }
           }
         }
@@ -403,15 +413,20 @@ void sector::analyze(){
 
 void sector::readRaw(hipo::bank &hits, int sector){
 
-  
+
   int rows = hits.getRows();
 
   std::vector<clas12::match> m;
   m.resize(6);
   for(int i = 0; i < rows; i++){
-    int sec   = hits.getInt("sector",i);
+    /*int sec   = hits.getInt("sector",i);
     int layer = hits.getInt("layer",i);
     int comp  = hits.getInt("component",i);
+*/
+
+    int sec   = hits.getInt(0,i);
+    int layer = hits.getInt(1,i);
+    int comp  = hits.getInt(2,i);
 
     if(sec==sector){
       int   region = (int) (layer-1)/6;
@@ -428,7 +443,7 @@ void sector::readRaw(hipo::bank &hits, int sector){
   for(int i = 0; i < 6; i++) {
     m[i].find(2,4);
     m[i].sort();
-    m[i].show();
+    //m[i].show();
    }
 
   for(int i = 0; i < 6; i++){
@@ -437,7 +452,7 @@ void sector::readRaw(hipo::bank &hits, int sector){
       clusters[r].setRegion(i);
       addCluster(clusters[r]);
     }
-    printf(">>>>>> region %d : clusters %d\n",i+1,(int) clusters.size());
+    //printf(">>>>>> region %d : clusters %d\n",i+1,(int) clusters.size());
     m[i].reset();
   }
   /*
@@ -510,11 +525,16 @@ void sector::readTrackInfo(hipo::bank &trkBank){
      double px = trkBank.getFloat("p0_x",i);
      double py = trkBank.getFloat("p0_y",i);
      double pz = trkBank.getFloat("p0_z",i);
+     double vz = trkBank.getFloat("Vtx0_z",i);
+
      //printf("MOM = %f %f %f \n",px,py,pz);
      trackinfo info;
      info.setTrack(id,q,chi2);
      info.setSector(sector);
+     info.setVz(vz);
      info.setP(sqrt(px*px+py*py+pz*pz));
+     double theta = acos(pz/sqrt(px*px+py*py+pz*pz));
+     info.setTheta(theta);
      trackInfo.push_back(info);
    }
 }
@@ -542,13 +562,17 @@ int  sector::getTrackInfoCount(int charge, int sector){
 std::string sector::getTrackInfoString(int charge, int sector){
   double chi2 = -1.0;
   double p    = -1.0;
+  double vz   = -1000.0;
+  double theta = 0.0;
   int index = getTrackInfoIndex(charge,sector);
   if(index>=0){
     chi2 = trackInfo[index].getChi2();
     p    = trackInfo[index].getP();
+    vz   = trackInfo[index].getVz();
+    theta = trackInfo[index].getTheta()*57.29;
   }
   char line[128];
-  sprintf(line," %12.3f %8.3f ",chi2,p);
+  sprintf(line," %12.3f %8.3f %12.3f %8.3f ",chi2,p,vz,theta);
   return std::string(line);
 }
 

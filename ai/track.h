@@ -47,7 +47,9 @@ public:
     double getCenterY();
     void   print();
     void   copy(cluster &c);
+
     static std::vector<cluster> create(clas12::match &m);
+    static cluster              createMap(clas12::match &m);
 };
 
 class track {
@@ -89,6 +91,9 @@ class trackinfo {
    int     sector;
    double  p;
    double  chi2;
+   double  vz;
+   double theta;
+
  public:
    trackinfo(){}
    trackinfo(const trackinfo &t){
@@ -97,6 +102,8 @@ class trackinfo {
      sector  = t.sector;
      chi2    = t.chi2;
      p       = t.p;
+     vz      = t.vz;
+     theta   = t.theta;
    }
    ~trackinfo(){};
 
@@ -106,9 +113,13 @@ class trackinfo {
    void setP(double __p){p=__p;}
    double getP(){return p;}
    void setSector(int s){ sector = s;}
+   void setTheta(double __th){theta = __th;}
+   void setVz(double __vz){ vz = __vz;}
    int getId(){ return trackid;};
    int getCharge(){ return charge;}
    int getSector(){ return sector;}
+   double getTheta(){return theta;}
+   double getVz(){ return vz;}
    double getChi2(){ return chi2;}
 };
 

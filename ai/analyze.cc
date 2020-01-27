@@ -45,11 +45,16 @@ int main(int argc, char** argv){
   reader.readDictionary(factory);
 
   //hipo::bank  dchits(factory.getSchema("TimeBasedTrkg::TBHits"));
+  /*
   hipo::bank  dchits(factory.getSchema("HitBasedTrkg::HBHits"));
   hipo::bank  dctracks(factory.getSchema("HitBasedTrkg::HBTracks"));
   hipo::bank  dchits_c(factory.getSchema("HitBasedTrkg::HBHits"));
   hipo::bank  dctracks_c(factory.getSchema("HitBasedTrkg::HBTracks"));
-
+*/
+hipo::bank  dchits(factory.getSchema("TimeBasedTrkg::TBHits"));
+hipo::bank  dctracks(factory.getSchema("TimeBasedTrkg::TBTracks"));
+hipo::bank  dchits_c(factory.getSchema("TimeBasedTrkg::TBHits"));
+hipo::bank  dctracks_c(factory.getSchema("TimeBasedTrkg::TBTracks"));
   hipo::event      event;
   hipo::event      event_c;
 
