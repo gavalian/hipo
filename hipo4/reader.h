@@ -119,27 +119,27 @@
 namespace hipo {
 
   typedef struct {
-    int  uniqueid;
-    int  filenumber;
-    int  headerLength; // in words (usually 14)
-    int  recordCount;
-    int  indexArrayLength; // in bytes
-    int  bitInfo;
-    int  version;
-    int  userHeaderLength;
-    int  magicNumber;
-    long userRegister;
-    long trailerPosition;
-    long firstRecordPosition;
+    int  uniqueid{};
+    int  filenumber{};
+    int  headerLength{}; // in words (usually 14)
+    int  recordCount{};
+    int  indexArrayLength{}; // in bytes
+    int  bitInfo{};
+    int  version{};
+    int  userHeaderLength{};
+    int  magicNumber{};
+    long userRegister{};
+    long trailerPosition{};
+    long firstRecordPosition{};
   } fileHeader_t;
 
 
   typedef struct {
-      long recordPosition;
-      int  recordLength;
-      int  recordEntries;
-      long userWordOne;
-      long userWordTwo;
+      long recordPosition{};
+      int  recordLength{};
+      int  recordEntries{};
+      long userWordOne{};
+      long userWordTwo{};
   } recordInfo_t;
 
 
@@ -236,10 +236,10 @@ namespace hipo {
         void  read(hipo::event &dataevent);
         void  printWarning();
 	//dglazier
- 	      int getNRecords() const {return readerEventIndex.getNRecords()-1;}
-	      bool  nextInRecord();
-	      bool loadRecord(int irec);
-	      int  getEntries(){return readerEventIndex.getMaxEvents();}
-      };
+	int getNRecords() const {return readerEventIndex.getNRecords()-1;}
+	bool  nextInRecord();
+	bool loadRecord(int irec);
+	int  getEntries(){return readerEventIndex.getMaxEvents();}
+  };
 }
 #endif /* HIPOREADER_H */
