@@ -17,7 +17,7 @@ LDFLAGS   :=
 all:  map
 
 map: map_benchmark.o
-	$(CXX) -o map_benchmark $<  $(HIPOLIBS) $(LZ4LIBS)
+	$(CXX) -o map_benchmark.exe $<  $(HIPOLIBS) $(LZ4LIBS)
 
 #analysis: analysis.o
 #	$(CXX) -o analysis $<   $(HIPOLIBS) $(LZ4LIBS)
@@ -27,7 +27,7 @@ map: map_benchmark.o
 
 clean:
 	@echo 'Removing all build files'
-	@rm -rf *.o readEvents schema *~ builder writeEvents writeFile readFile
+	@rm -rf *.o *~ *.exe
 
 %.o: %.cc
 	$(CXX) -c $< -O2 $(CXXFLAGS) $(HIPOCFLAGS) $(LZ4INCLUDES)
