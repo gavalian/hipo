@@ -71,7 +71,7 @@ namespace hipo {
    */
   void reader::open(const char *filename){
 
-    if(inputStream.is_open()==true){
+    /*if(inputStream.is_open()==true){
       inputStream.close();
 
     }
@@ -80,13 +80,17 @@ namespace hipo {
     inputStream.seekg(0,std::ios_base::end);
     inputStreamSize = inputStream.tellg();
     inputStream.seekg(0,std::ios_base::beg);
+
     if(inputStream.is_open()==false){
       printf("[ERROR] something went wrong with openning file : %s\n",
             filename);
       return;
-    }
+    }*/
+    inputDataStream = new datastreamXrootd();
+    inputDataStream->open(filename);
+
     readHeader();
-    readIndex();
+    //readIndex();
 }
 
 /**
@@ -97,7 +101,10 @@ namespace hipo {
 
     std::vector<char>               headerBuffer;
     headerBuffer.resize(80);
-    inputStream.read(&headerBuffer[0],80);
+
+    //---> inputStream.read(&headerBuffer[0],80);
+    inputDataStream->position(0);
+    inputDataStream->read(&headerBuffer[0],80);
 
     header.uniqueid     = *(reinterpret_cast<int *>(&headerBuffer[0]));
     header.filenumber   = *(reinterpret_cast<int *>(&headerBuffer[4]));

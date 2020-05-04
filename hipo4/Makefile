@@ -6,8 +6,12 @@ SLIBDIR  = ../slib
 BINDIR   = ../bin
 
 #LZ4INCLUDES := -I../Lz4/lib/
+
 LZ4INCLUDES := -I../lz4/lib/
 LZ4INCLUDES := -I../lz4/lib/
+
+XROOTDINCLUDES := -I/usr/local/Cellar/xrootd/4.10.1/include/xrootd
+XROOTDLIBS     := -L/usr/local/lib -lXrdClient
 
 CXXFLAGS = -std=c++11
 
@@ -33,4 +37,4 @@ clean:
 	@rm -rf *~ *.o
 
 %.o: %.cpp
-	$(CXX) -fPIC -c $< -O2 -D__LZ4__ $(CXXFLAGS) $(LZ4INCLUDES)
+	$(CXX) -fPIC -c $< -O2 -D__LZ4__ -D__XROOTD__ $(XROOTDINCLUDES) $(CXXFLAGS) $(LZ4INCLUDES)

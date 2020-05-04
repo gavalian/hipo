@@ -63,8 +63,8 @@ namespace hipo {
 
   void  datastreamXrootd::open(const char *filename){
 #ifdef __XROOTD__
-      printf("[datastream::xrootd] >>> open : %s\n" + filename);
-      XrdClient *cli = new new XrdClient(filename);
+    printf("[datastream::xrootd] >>> open : %s\n", filename);
+      XrdClient *cli = new XrdClient(filename);
       cli->Open(open_mode,open_opts);
 #endif
   }
@@ -73,7 +73,7 @@ namespace hipo {
     #ifdef __XROOTD__
      XrdClientStatInfo stats;
      cli->Stat(&stats);
-     return stats.size();
+     return stats.size;
      #endif
      #ifndef __XROOTD__
       return 0;

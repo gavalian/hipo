@@ -115,6 +115,7 @@
 #include "record.h"
 #include "utils.h"
 #include "bank.h"
+#include "datastream.h"
 
 namespace hipo {
 
@@ -204,6 +205,7 @@ namespace hipo {
         fileHeader_t      header{};
         hipo::utils       hipoutils;
         std::ifstream     inputStream;
+        datastream        *inputDataStream;
         long              inputStreamSize{};
 
         hipo::record       inputRecord;
