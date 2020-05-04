@@ -31,7 +31,7 @@ readFileXrootd: readFileXrootd.o
 
 clean:
 	@echo 'Removing all build files'
-	@rm -rf *.o readEvents schema *~ builder writeEvents writeFile readFile
+	@rm -rf *.o *~ readFileXrootd
 
 %.o: %.cc
 	$(CXX) -c $< -O2 $(CXXFLAGS) $(HIPOCFLAGS) $(LZ4INCLUDES) $(XROOTDINCLUDES)

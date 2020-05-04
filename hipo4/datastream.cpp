@@ -64,8 +64,8 @@ namespace hipo {
   void  datastreamXrootd::open(const char *filename){
 #ifdef __XROOTD__
     printf("[datastream::xrootd] >>> open : %s\n", filename);
-      XrdClient *cli = new XrdClient(filename);
-      cli->Open(open_mode,open_opts);
+    cli = new XrdClient(filename);
+    cli->Open(open_mode,open_opts);
 #endif
   }
 

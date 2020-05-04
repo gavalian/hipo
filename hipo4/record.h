@@ -48,6 +48,8 @@
 
 #include "event.h"
 #include "utils.h"
+#include "datastream.h"
+
 
 namespace hipo {
 
@@ -117,6 +119,8 @@ namespace hipo {
         ~record();
 
         void  readRecord(std::ifstream &stream, long position, int dataOffset);
+        void  readRecord(datastream &stream, long position, int dataoffset);
+        
         void  readRecord__(std::ifstream &stream, long position, long recordLength);
         bool  readRecord(std::ifstream &stream, long position, int dataOffset, long inputSize);
         int   getEventCount();

@@ -87,10 +87,14 @@ namespace hipo {
       return;
     }*/
     inputDataStream = new datastreamXrootd();
+    printf("initialize class\n");
     inputDataStream->open(filename);
-
+    printf("opened strem\n");
+    printf("start reading header\n");
     readHeader();
-    //readIndex();
+    printf("header reading done\n");
+
+    readIndex();
 }
 
 /**
@@ -157,7 +161,7 @@ namespace hipo {
  */
 void  reader::readIndex(){
 
-    inputRecord.readRecord(inputStream,header.trailerPosition,0);
+    inputRecord.readRecord(*inputDataStream,header.trailerPosition,0);
     printf("*** reader:: trailer record event count : %d\n",inputRecord.getEventCount());
     hipo::event event;
     inputRecord.readHipoEvent(event,0);
@@ -211,7 +215,7 @@ bool  reader::next(hipo::event &dataevent){
     int recordToBeRead = readerEventIndex.getRecordNumber();
     if(recordToBeRead!=recordNumber){
       long position = readerEventIndex.getPosition(recordToBeRead);
-      inputRecord.readRecord(inputStream,position,0);
+      inputRecord.readRecord(*inputDataStream,position,0);
       /*printf(" record changed from %d to %d at event %d total event # %d\n",
         recordNumber, recordToBeRead,readerEventIndex.getEventNumber(),
         readerEventIndex.getMaxEvents());*/
@@ -266,7 +270,8 @@ void  reader::getStructureNoCopy(hipo::structure &structure,int group, int item)
 void  reader::readDictionary(hipo::dictionary &dict){
   long position = header.headerLength*4;
   hipo::record  dictRecord;
-  dictRecord.readRecord(inputStream,position,0);
+  //--->>> dictRecord.readRecord(inputStream,position,0);
+  dictRecord.readRecord(*inputDataStream,position,0);
   int nevents = dictRecord.getEventCount();
   /* printf(" reading record at position %8lu, number of entries = %5d\n",
       position,dictRecord.getEventCount()); */
@@ -292,7 +297,7 @@ bool  reader::next(){
     int recordToBeRead = readerEventIndex.getRecordNumber();
     if(recordToBeRead!=recordNumber){
       long position = readerEventIndex.getPosition(recordToBeRead);
-      inputRecord.readRecord(inputStream,position,0);
+      inputRecord.readRecord(*inputDataStream,position,0);
       /*printf(" record changed from %d to %d at event %d total event # %d\n",
         recordNumber, recordToBeRead,readerEventIndex.getEventNumber(),
         readerEventIndex.getMaxEvents());*/

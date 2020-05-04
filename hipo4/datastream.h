@@ -69,9 +69,9 @@ class datastream {
 
     public:
 
-        datastream();
+  datastream(){};
         //datastream(const char *address);
-        virtual ~datastream();
+  virtual ~datastream(){};
 
         virtual long   size(){ return 0;}
         virtual long   position(){ return 0;}
@@ -81,14 +81,14 @@ class datastream {
         virtual int   read(char *s, int size){return 0;}
   };
 
-class datastreamLocalFile {
+  class datastreamLocalFile : public datastream {
 
   private:
     std::ifstream     inputStream;
 
   public:
 
-      datastreamLocalFile();
+    datastreamLocalFile(){};
       ~datastreamLocalFile(){
         if(inputStream.is_open()==true){
           inputStream.close();
@@ -111,7 +111,7 @@ class datastreamLocalFile {
       int    read(char *s, int size){inputStream.read(s,size); return size;}
 };
 
-class datastreamXrootd {
+  class datastreamXrootd : public datastream {
 
 private:
   #ifdef __XROOTD__
@@ -122,8 +122,8 @@ private:
   long streamPosition = 0;
 
 public:
-  datastreamXrootd();
-  ~datastreamXrootd();
+    datastreamXrootd();
+    ~datastreamXrootd();
 
 
    long   size();
