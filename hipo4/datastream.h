@@ -64,7 +64,7 @@ class datastream {
 
        std::ifstream     inputStream;
        std::string       remoteAddress;
-       int               streamType = 1;
+  //int               streamType = 1;
 
 
     public:

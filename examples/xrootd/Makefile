@@ -17,12 +17,13 @@ LD        := g++
 LDFLAGS   :=
 
 
-all:  readFileXrootd
+all:  readFileXrootd getFileXrootd
 
 readFileXrootd: readFileXrootd.o
 	$(CXX) -o readFileXrootd $<   $(HIPOLIBS) $(LZ4LIBS) $(XROOTDLIBS)
 
-
+getFileXrootd: getFileXrootd.o
+	$(CXX) -o getFileXrootd $<   $(HIPOLIBS) $(LZ4LIBS) $(XROOTDLIBS)
 #analysis: analysis.o
 #	$(CXX) -o analysis $<   $(HIPOLIBS) $(LZ4LIBS)
 
@@ -31,7 +32,7 @@ readFileXrootd: readFileXrootd.o
 
 clean:
 	@echo 'Removing all build files'
-	@rm -rf *.o *~ readFileXrootd
+	@rm -rf *.o *~ readFileXrootd getFileXrootd
 
 %.o: %.cc
 	$(CXX) -c $< -O2 $(CXXFLAGS) $(HIPOCFLAGS) $(LZ4INCLUDES) $(XROOTDINCLUDES)

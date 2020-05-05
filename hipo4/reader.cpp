@@ -317,7 +317,7 @@ bool reader::gotoEvent(int eventNumber){
   int recordToBeRead = readerEventIndex.getRecordNumber();
   if(recordToBeRead!=recordNumber){
     long position = readerEventIndex.getPosition(recordToBeRead);
-    inputRecord.readRecord(inputStream,position,0);
+    inputRecord.readRecord(*inputDataStream,position,0);
     /*printf(" record changed from %d to %d at event %d total event # %d\n",
       recordNumber, recordToBeRead,readerEventIndex.getEventNumber(),
       readerEventIndex.getMaxEvents());*/

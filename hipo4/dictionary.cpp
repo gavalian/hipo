@@ -122,6 +122,13 @@ namespace hipo {
     return vec;
   }
 
+  void    dictionary::addDictionary(dictionary &dict){
+      std::vector<std::string> list = dict.getSchemaList();
+      for(int i = 0; i < list.size(); i++){
+        addSchema(dict.getSchema(list[i].c_str()));
+      }
+  }
+
   bool    dictionary::parse(const char *schemaString){
     std::vector<std::string> tokens;
     std::string schemahead = hipo::utils::substring(schemaString,"{","}",0);
