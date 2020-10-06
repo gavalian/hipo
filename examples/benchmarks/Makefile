@@ -19,6 +19,8 @@ all:  map
 map: map_benchmark.o
 	$(CXX) -o map_benchmark.exe $<  $(HIPOLIBS) $(LZ4LIBS)
 
+ana: ana_benchmark.o
+	$(CXX) -o ana_benchmark.exe $<  $(HIPOLIBS) $(LZ4LIBS)
 #analysis: analysis.o
 #	$(CXX) -o analysis $<   $(HIPOLIBS) $(LZ4LIBS)
 
@@ -30,4 +32,4 @@ clean:
 	@rm -rf *.o *~ *.exe
 
 %.o: %.cc
-	$(CXX) -c $< -O2 $(CXXFLAGS) $(HIPOCFLAGS) $(LZ4INCLUDES)
+	$(CXX) -O2 -c $< $(CXXFLAGS) $(HIPOCFLAGS) $(LZ4INCLUDES)

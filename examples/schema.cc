@@ -21,7 +21,7 @@
 int main(int argc, char** argv) {
 
     hipo::schema  sch("rec::event",30,1);
-    sch.parse("pid/S,px/F,py/F,pz/F,vx/F,vy/F,vz/F");
+    sch.parse(" pid/S,  px/F, py/F, pz/F, vx/F,vy/F,vz/F");
     sch.show();
     int item = 6;
     for(int i = 0 ;i < 6; i++){
