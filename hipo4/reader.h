@@ -219,6 +219,7 @@ namespace hipo {
 
         ~reader();
 
+        void  about();
         void  readDictionary(hipo::dictionary &dict);
         void  getStructure(hipo::structure &structure,int group, int item);
         void  getStructureNoCopy(hipo::structure &structure,int group, int item);
