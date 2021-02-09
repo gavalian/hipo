@@ -133,13 +133,17 @@ namespace hipo {
     header.version = word_8&0x000000FF;
     header.bitInfo = (word_8>>8)&0x00FFFFFF;
     header.firstRecordPosition = 4*header.headerLength + header.userHeaderLength;
-    printf("----------------------------------------\n");
-    printf("**** reader:: header version   : %d \n",header.version);
-    printf("**** reader:: header length    : %d \n",header.headerLength*4);
-    printf("**** reader:: first record pos : %lu\n",header.firstRecordPosition);
-    printf("**** reader:: trailer position : %lu\n",header.trailerPosition);
-    printf("**** reader:: file size        : %lu\n",inputStreamSize);
-    printf("----------------------------------------\n");
+
+    //printf("hipo::reader >> version %3d, data offset = %5lu, trailer at %lu\n",
+    //    header.version,header.firstRecordPosition,header.trailerPosition);
+
+    //printf("----------------------------------------\n");
+    //printf("**** reader:: header version   : %d \n",header.version);
+    //printf("**** reader:: header length    : %d \n",header.headerLength*4);
+    //printf("**** reader:: first record pos : %lu\n",header.firstRecordPosition);
+    //printf("**** reader:: trailer position : %lu\n",header.trailerPosition);
+    //printf("**** reader:: file size        : %lu\n",inputStreamSize);
+    //printf("----------------------------------------\n");
     //int *signature = reinterpret_cast<int *>(&headerBuffer[0]);
     //printf("signature = %X\n",(unsigned int) *signature);
     //std::cout << "signature = " << std::ios::hex << (*signature) << '\n';
@@ -155,7 +159,7 @@ namespace hipo {
 void  reader::readIndex(){
 
     inputRecord.readRecord(inputStream,header.trailerPosition,0);
-    printf("*** reader:: trailer record event count : %d\n",inputRecord.getEventCount());
+    //printf("*** reader:: trailer record event count : %d\n",inputRecord.getEventCount());
     hipo::event event;
     inputRecord.readHipoEvent(event,0);
     event.show();
@@ -188,7 +192,7 @@ void  reader::readIndex(){
     }
     readerEventIndex.rewind();
     //printf("**** reader:: header version   : %d \n",readerEventIndex.getMaxEvents());
-    printf("**** reader::  # of events     : %d \n",readerEventIndex.getMaxEvents());
+    //printf("**** reader::  # of events     : %d \n",readerEventIndex.getMaxEvents());
 }
 /**
  * Checks if there are more events in the file to advance to.
