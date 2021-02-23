@@ -14,13 +14,16 @@ LD        := g++
 LDFLAGS   :=
 
 
-all:  writeFile readFile readFileTags
+all:  writeFile readFile readFileTags showFile schema
 
 readEvents: readEvents.o
 	$(CXX) -o readEvents $<  $(HIPOLIBS) $(LZ4LIBS)
 
 writeEvents: writeEvents.o
 	$(CXX) -o writeEvents $<   $(HIPOLIBS) $(LZ4LIBS)
+
+showFile: showFile.o
+	$(CXX) -o showFile $<   $(HIPOLIBS) $(LZ4LIBS)
 
 readFile: readFile.o
 	$(CXX) -o readFile $<   $(HIPOLIBS) $(LZ4LIBS)

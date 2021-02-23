@@ -62,7 +62,7 @@ int main(int argc, char** argv){
 
     hipo::event outEvent;
 
-    for(int i = 0; i < 10000; i++){
+    for(int i = 0; i < 25000; i++){
 
         int  nparts = 2 + rand()%10;
         int   ndets = 5 + rand()%20;
