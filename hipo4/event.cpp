@@ -117,7 +117,7 @@ namespace hipo {
     }
 
     int  event::getTag(){
-      int eventTag = *(reinterpret_cast<const uint32_t*>(&dataBuffer[4]));
+      int eventTag = *(reinterpret_cast<const uint32_t*>(&dataBuffer[8]));
       return eventTag;
     }
 
