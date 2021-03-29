@@ -1,0 +1,11 @@
+#
+# Input for cmake to create the package configuration file: hipo4Config.cmake
+# for find_package()
+#
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+find_dependency(LZ4 CONFIG REQUIRED)
+
+include("${CMAKE_CURRENT_LIST_DIR}/hipo4Targets.cmake")
