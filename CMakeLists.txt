@@ -29,18 +29,27 @@ if(APPLE)
 
     # the RPATH to be used when installing, but only if it's not a system directory
     list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}" isSystemDir)
-    IF("${isSystemDir}" STREQUAL "-1")
+    if("${isSystemDir}" STREQUAL "-1")
         set(CMAKE_INSTALL_RPATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
-        message("CMAKE_INSTALL_RPATH set to ${CMAKE_INSTALL_RPATH} ")
-
-    ENDIF("${isSystemDir}" STREQUAL "-1")
+    endif("${isSystemDir}" STREQUAL "-1")
 endif(APPLE)
 #
 # Dependencies
 #
 # add path containing CMake macros for this project
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-find_package(LZ4)
+find_package(LZ4 QUIET CONFIG PATHS ${PROJECT_SOURCE_DIR}/cmake )
+
+if(NOT LZ4_FOUND)
+    message(STATUS "***********************************************************************")
+    message(STATUS "* We did not find a system LZ4 package -- We will build this locally. *")
+    message(STATUS "***********************************************************************")
+    add_custom_target(LZ4 ALL
+                      COMMAND make lz4
+                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/lz4)
+    set(LZ4_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/lz4/lib)
+    set(LZ4_LIBRARIES ${PROJECT_SOURCE_DIR}/lz4/lib/liblz4.a)
+endif()
 #
 # Set a default build type if none was specified
 #
@@ -52,6 +61,10 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
                  "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
+
+add_compile_definitions(__LZ4__)
+
+include_directories(${LZ4_INCLUDE_DIRS})
 
 set(HIPO_SOURCE_FILES
     hipo4/bank.cpp
@@ -77,18 +90,28 @@ set(HIPO_HEADERS
     hipo4/utils.h
     hipo4/writer.h)
 
-include(CMakePackageConfigHelpers)
-
-add_library(hipo4 SHARED ${HIPO_SOURCE_FILES} )
-add_library(hipo4_static STATIC ${HIPO_SOURCE_FILES} )
+add_library(hipo4_objs   OBJECT ${HIPO_SOURCE_FILES})
+add_library(hipo4        SHARED $<TARGET_OBJECTS:hipo4_objs>)
+add_library(hipo4_static STATIC $<TARGET_OBJECTS:hipo4_objs>)
 set_target_properties(hipo4_static PROPERTIES OUTPUT_NAME hipo4)   # So that the lib is not called libhipo4_static.a
-target_include_directories(hipo4
-                           PUBLIC
-                           $<INSTALL_INTERFACE:include>
+
+add_dependencies(hipo4 LZ4)
+
+# Include the macros for creating export package.
+include(CMakePackageConfigHelpers)
+# Write a package versioning file based on the project version (see top)
+write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/hipo4ConfigVersion.cmake"
+        VERSION ${PROJECT_VERSION} COMPATIBILITY AnyNewerVersion)
+
+target_include_directories(hipo4 PUBLIC
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/hipo4>
+                           $<INSTALL_INTERFACE:include>
+                           $<INSTALL_INTERFACE:include/hipo4>
                            )
 
-target_link_libraries(hipo4 PUBLIC )
+target_link_libraries(hipo4 PUBLIC  ${LZ4_LIBRARIES} )
+target_link_libraries(hipo4_static PUBLIC ${LZ4_LIBRARIES})
 
 install(TARGETS hipo4
         EXPORT hipo4-export
@@ -100,24 +123,28 @@ install(TARGETS hipo4_static
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
 
+install(FILES ${HIPO_HEADERS}
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/include/hipo4)
 
 install(EXPORT hipo4-export
         FILE hipo4Targets.cmake
         DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/cmake/hipo4)
 
-install(FILES ${HIPO_HEADERS}
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+install(FILES cmake/LZ4Config.cmake
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/cmake/hipo4)
 
 export(TARGETS hipo4
        FILE "${PROJECT_BINARY_DIR}/hipo4Targets.cmake")
-#
-#
-export(PACKAGE hipo4)
 
 configure_package_config_file( cmake/hipo4Config.cmake.in
                                ${CMAKE_CURRENT_BINARY_DIR}/hipo4Config.cmake
                                INSTALL_DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/cmake/hipo4
                                )
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hipo4Config.cmake
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hipo4Config.cmake ${CMAKE_CURRENT_BINARY_DIR}/hipo4ConfigVersion.cmake
         DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/cmake/hipo4)
+
+# Export the package for use from the *build-tree*. Probably not what you want!
+# (this registers the build-tree with a global CMake-registry)
+# export(PACKAGE hipo4)
+
