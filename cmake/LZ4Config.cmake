@@ -39,8 +39,4 @@ else()
     set(LZ4_INCLUDE_DIRS ${LZ4_INCLUDE_DIR})
     set(LZ4_LIBRARIES ${LZ4_LIBRARY})
     mark_as_advanced(LZ4_INCLUDE_DIRS LZ4_INCLUDE_DIR LZ4_LIBRARIES LZ4_LIBRARY)
-
-    include($ENV{HOME}/cmake/cmake_debug_properties.cmake)
-    print_target_properties(LZ4)
-    message("----- LZ4_INCLUDE_DIRS = ${LZ4_INCLUDE_DIRS} ")
 endif (NOT LZ4_FOUND)
