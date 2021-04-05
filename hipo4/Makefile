@@ -16,7 +16,7 @@ libhipo: checkdirs $(OBJECTS)
 #	$(CXX) -shared -fPIC  -o ../lib/libhipo.so $(OBJECTS) -llz4
 
 slibhipo: checkdirs $(OBJECTS)
-	$(CXX) -shared $(OBJECTS) -L ../lib -llz4 -o ../slib/libhipo4.so
+	$(CXX) -shared $(OBJECTS) -L ../slib -llz4 -o ../slib/libhipo4.so
 
 show:
 	@echo $(OBJECTS)
