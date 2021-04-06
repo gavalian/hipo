@@ -51,9 +51,7 @@ if(NOT LZ4_FOUND)
                       COMMAND make PREFIX=${CMAKE_INSTALL_PREFIX} install
                       )
 
- #   set(LZ4_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/lz4/lib)
     set(LZ4_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/include)
- #   set(LZ4_LIBRARIES ${PROJECT_SOURCE_DIR}/lz4/lib/liblz4.a)
     set(LZ4_LIBRARIES  ${CMAKE_INSTALL_PREFIX}/lib/liblz4.a)
 endif()
 #
