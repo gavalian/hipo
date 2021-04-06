@@ -41,14 +41,21 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 find_package(LZ4 QUIET CONFIG PATHS ${PROJECT_SOURCE_DIR}/cmake )
 
 if(NOT LZ4_FOUND)
-    message(STATUS "***********************************************************************")
+    message(STATUS "**LZ4******************************************************************")
     message(STATUS "* We did not find a system LZ4 package -- We will build this locally. *")
     message(STATUS "***********************************************************************")
+    message("PROJECT_SOURCE_DIR = ${PROJECT_SOURCE_DIR}")
+    file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/include/hipo4)
     add_custom_target(LZ4 ALL
-                      COMMAND make lz4
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/lz4)
-    set(LZ4_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/lz4/lib)
-    set(LZ4_LIBRARIES ${PROJECT_SOURCE_DIR}/lz4/lib/liblz4.a)
+                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/lz4
+                      INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
+                      COMMAND make PREFIX=${CMAKE_INSTALL_PREFIX} install
+                      )
+
+ #   set(LZ4_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/lz4/lib)
+    set(LZ4_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/include/hipo4)
+ #   set(LZ4_LIBRARIES ${PROJECT_SOURCE_DIR}/lz4/lib/liblz4.a)
+    set(LZ4_LIBRARIES  ${CMAKE_INSTALL_PREFIX}/lib/liblz4.a)
 endif()
 #
 # Set a default build type if none was specified
@@ -95,7 +102,7 @@ add_library(hipo4        SHARED $<TARGET_OBJECTS:hipo4_objs>)
 add_library(hipo4_static STATIC $<TARGET_OBJECTS:hipo4_objs>)
 set_target_properties(hipo4_static PROPERTIES OUTPUT_NAME hipo4)   # So that the lib is not called libhipo4_static.a
 
-add_dependencies(hipo4 LZ4)
+add_dependencies(hipo4_objs LZ4)
 
 # Include the macros for creating export package.
 include(CMakePackageConfigHelpers)
