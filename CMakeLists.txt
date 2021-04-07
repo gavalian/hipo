@@ -47,7 +47,7 @@ if(NOT LZ4_FOUND)
     message("PROJECT_SOURCE_DIR = ${PROJECT_SOURCE_DIR}")
     file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/include/hipo4)
     add_custom_target(LZ4 ALL
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/lz4
+                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/lz4/lib
                       COMMAND make PREFIX=${CMAKE_INSTALL_PREFIX} install
                       )
 
