@@ -48,7 +48,7 @@ if(NOT LZ4_FOUND)
     file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/include/hipo4)
     add_custom_target(LZ4 ALL
                       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/lz4/lib
-                      COMMAND make PREFIX=${CMAKE_INSTALL_PREFIX} CFLAGS=-FPIC install
+                      COMMAND make PREFIX=${CMAKE_INSTALL_PREFIX} CFLAGS="-fPIC" install
                       )
 
     set(LZ4_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/include)
