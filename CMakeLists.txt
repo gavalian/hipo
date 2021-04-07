@@ -99,6 +99,9 @@ add_library(hipo4        SHARED $<TARGET_OBJECTS:hipo4_objs>)
 add_library(hipo4_static STATIC $<TARGET_OBJECTS:hipo4_objs>)
 set_target_properties(hipo4_static PROPERTIES OUTPUT_NAME hipo4)   # So that the lib is not called libhipo4_static.a
 
+# Required on Unix OS family to be able to be linked into shared libraries.
+set_target_properties(hipo4_objs PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 add_dependencies(hipo4_objs LZ4)
 
 # Include the macros for creating export package.
