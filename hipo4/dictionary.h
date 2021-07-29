@@ -25,7 +25,7 @@
 
 namespace hipo {
 
-  typedef struct {
+  typedef struct schemaEntry_t {
     std::string  name;
     std::string  type;
     int          typeId{};
