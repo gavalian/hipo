@@ -2,7 +2,6 @@
 #  Find the LZ4 library and include files and configure target for it.
 #
 get_filename_component(_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
-message(STATUS "Component LZ4: _DIR = ${_DIR}")
 find_path(LZ4_INCLUDE_DIR NAMES lz4.h)
 find_library(LZ4_LIBRARY NAMES lz4)
 if (LZ4_LIBRARY)
@@ -29,7 +28,6 @@ if (NOT LZ4_FOUND)
     message(STATUS "No system version of LZ4 found.")
 else()
     if(NOT TARGET LZ4)
-        message("ADDING LIBRARY LZ4 target")
         add_library(LZ4 INTERFACE IMPORTED)
         set_target_properties(LZ4 PROPERTIES
                               INTERFACE_INCLUDE_DIRECTORIES "${LZ4_INCLUDE_DIR}"
