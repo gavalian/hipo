@@ -118,7 +118,8 @@
 
 namespace hipo {
 
-  typedef struct fileHeader_t {
+  //  typedef struct fileHeader_t {
+ struct fileHeader_t {
     int  uniqueid{};
     int  filenumber{};
     int  headerLength{}; // in words (usually 14)
@@ -131,16 +132,17 @@ namespace hipo {
     long userRegister{};
     long trailerPosition{};
     long firstRecordPosition{};
-  } fileHeader_t;
+ };// fileHeader_t;
 
 
-  typedef struct recordInfo_t {
+  //  typedef struct recordInfo_t {
+  struct recordInfo_t {
       long recordPosition{};
       int  recordLength{};
       int  recordEntries{};
       long userWordOne{};
       long userWordTwo{};
-  } recordInfo_t;
+  };// recordInfo_t;
 
 
   /**
