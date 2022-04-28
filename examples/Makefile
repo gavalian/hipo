@@ -14,7 +14,7 @@ LD        := g++
 LDFLAGS   :=
 
 
-all:  writeFile readFile readFileTags showFile schema
+all:  writeFile readFile readFileTags showFile schema writeUserHeader
 
 readEvents: readEvents.o
 	$(CXX) -o readEvents $<  $(HIPOLIBS) $(LZ4LIBS)

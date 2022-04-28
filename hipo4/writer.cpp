@@ -73,10 +73,11 @@ namespace hipo {
       printf("::: adding user configuration (key): %s\n",it->first.c_str());
 
       std::string wKey = std::string(it->first.c_str());
-      std::string wConfig = std::string(it->first.c_str());
+      std::string wConfig = std::string(it->second.c_str());
       
       structure configKey(32555,1,wKey);
       structure configString(32555,2,wConfig);
+      
       configEvent.reset();
       configEvent.addStructure(configKey);
       configEvent.addStructure(configString);
@@ -92,7 +93,8 @@ namespace hipo {
 
     hipoFileHeader_t header;
 
-    header.uniqueid         = 0x43455248;
+    //header.uniqueid         = 0x43455248;
+    header.uniqueid         = 0x4F504948;// 4849504F;
     header.filenumber       = 1;
     header.headerLength     = 14;
     header.recordCount      = 0;

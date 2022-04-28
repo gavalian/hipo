@@ -13,51 +13,44 @@
 
 int main(int argc, char** argv) {
 
-   std::cout << " writing file example program (HIPO) "  << __cplusplus << std::endl;
-
-   char inputFile[256];
-
-   if(argc>1) {
-      sprintf(inputFile,"%s",argv[1]);
-      //sprintf(outputFile,"%s",argv[2]);
-   } else {
-      std::cout << " *** please provide a file name..." << std::endl;
-     exit(0);
-   }
+   std::cout << " writing file example : write user headers ::: "  << __cplusplus << std::endl;
 
    char outputFile[256];
-   sprintf(outputFile,"%s","exampleOutput.hipo");
+   sprintf(outputFile,"%s","userHeaderFile.hipo");
 
-   hipo::reader  reader;
-   reader.open(inputFile);
-   hipo::dictionary  factory;
-   reader.readDictionary(factory);
-
-   /*hipo::schema  sch("rec::event",30,1);
+   // define one bank schema
+   hipo::schema  sch("rec::event",30,1);
    sch.parse("pid/S,px/F,py/F,pz/F,vx/F,vy/F,vz/F");
-   sch.show();*/
-
+   sch.show();
+   // add bank schema to the writer's schema factory
    hipo::writer  writer;
-   writer.getDictionary().addSchema(factory.getSchema("REC::Traj"));
+   writer.getDictionary().addSchema(sch);
+
+   writer.addUserConfig("gemc","{\"version\": \"4.4.2\", \"beam\": \"e-,10.6 GeV\"}");
+   writer.addUserConfig("clara","{\"version\": \"8.0.2\", \"service\": \"dctracking\"}");
+   
    writer.open(outputFile);
-
-
-   hipo::bank traj(factory.getSchema("REC::Traj"));
-
-   hipo::event      inEvent;
-   hipo::event      outEvent;
-
-   while(reader.next()==true){
-      reader.read(inEvent);
-      inEvent.getStructure(traj);
-      outEvent.reset();
-      if(traj.getRows()>0){
-        outEvent.addStructure(traj);
-        writer.addEvent(outEvent);
-      }
-    }
 
    writer.close();
    writer.showSummary();
+
+
+   // and now, let's read the file and see if we can recover the user
+   // heder strings
+
+   printf("\n\n NOW reading the file back : %s\n\n",outputFile);
+   hipo::reader reader;
+   reader.open(outputFile);
+
+   std::map<std::string,std::string> config;
+
+   reader.readUserConfig(config);
+
+   std::map<std::string,std::string>::iterator it;
+   for( it = config.begin(); it != config.end(); it++){
+     printf("\t%14s : %s\n",it->first.c_str(),it->second.c_str());
+   }
+
+   printf("\n\n***************************\n\n");
 }
 //### END OF GENERATED CODE
