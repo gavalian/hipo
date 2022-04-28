@@ -46,6 +46,13 @@ int main(int argc, char** argv) {
 
    reader.readUserConfig(config);
 
+   //-- one can get it if one knows the existing key
+   //-------------------------------------------------------
+   //if(config.count(std::string(("gemc"))!=0){
+   //  std::string json = config[std::string("gemc")];
+   //}
+   //-------------------------------------------------------
+
    std::map<std::string,std::string>::iterator it;
    for( it = config.begin(); it != config.end(); it++){
      printf("\t%14s : %s\n",it->first.c_str(),it->second.c_str());
