@@ -8,7 +8,9 @@ efficient read speeds.
 Package has a dependency on LZ4 compression library, which is a submodule.
 Use command:
 
+```
  git clone --recurse-submodules git@github.com:gavalian/hipo.git
+```
 
 to clone the distribution.
 
