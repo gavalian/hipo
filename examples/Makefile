@@ -22,6 +22,9 @@ readEvents: readEvents.o
 writeEvents: writeEvents.o
 	$(CXX) -o writeEvents $<   $(HIPOLIBS) $(LZ4LIBS)
 
+writeUserHeader: writeUserHeader.o
+	$(CXX) -o writeUserHeader $<   $(HIPOLIBS) $(LZ4LIBS)
+
 showFile: showFile.o
 	$(CXX) -o showFile $<   $(HIPOLIBS) $(LZ4LIBS)
 
