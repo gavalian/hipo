@@ -11,6 +11,8 @@
 #include <iostream>
 #include "writer.h"
 
+void createEvent(hipo::event ev);
+
 int main(int argc, char** argv) {
 
    std::cout << " writing file example : write user headers ::: "  << __cplusplus << std::endl;
@@ -22,6 +24,12 @@ int main(int argc, char** argv) {
    hipo::schema  sch("rec::event",30,1);
    sch.parse("pid/S,px/F,py/F,pz/F,vx/F,vy/F,vz/F");
    sch.show();
+
+   hipo::bank rec(sch,30);
+   hipo::event outEvent;
+
+   outEvent.addStructure(rec);
+
    // add bank schema to the writer's schema factory
    hipo::writer  writer;
    writer.getDictionary().addSchema(sch);
@@ -30,7 +38,7 @@ int main(int argc, char** argv) {
    writer.addUserConfig("clara","{\"version\": \"8.0.2\", \"service\": \"dctracking\"}");
    
    writer.open(outputFile);
-
+   writer.addEvent(outEvent);
    writer.close();
    writer.showSummary();
 
@@ -61,3 +69,7 @@ int main(int argc, char** argv) {
    printf("\n\n***************************\n\n");
 }
 //### END OF GENERATED CODE
+
+void createEvent(hipo::event ev){
+  hipo::schema  schemaPart("event::particle",100,1);
+}
