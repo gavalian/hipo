@@ -2,7 +2,10 @@
 
 High Performance Output (HIPO) is a data format for experimental Physics.
 It uses chunked data blocks to store data with LZ4 compression. Provides highly 
-efficient read speeds.
+efficient read speeds. Originally implemented in Java for physics reconstruction
+software using service oriented architecture (SOA), now has C++ implementaion 
+with wrappers to interface FORTRAN and PTYHON. The wrapper does not provide full 
+functionality that exists in C++ and Java libraries.
 
 ## Clone the package
 
