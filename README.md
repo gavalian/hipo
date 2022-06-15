@@ -25,7 +25,7 @@ in the banks for each event.
 
 ## Python Interface
 
-In modern evolving world of Artificial Intelligence there is a need to reading
+In modern evolving world of Artificial Intelligence there is a need for reading
 HIPO files from Python. There is a python interface included in the package
 (in directory python) implemented using ctypes that provides direct access to
 the hipo4 shared library. No external dependencies and no compilation required.
