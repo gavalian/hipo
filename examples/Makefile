@@ -31,6 +31,9 @@ showFile: showFile.o
 readFile: readFile.o
 	$(CXX) -o readFile $<   $(HIPOLIBS) $(LZ4LIBS)
 
+readFusion: readFusion.o
+	$(CXX) -o readFusion $<   $(HIPOLIBS) $(LZ4LIBS)
+
 readFileTags: readFileTags.o
 	$(CXX) -o readFileTags $<   $(HIPOLIBS) $(LZ4LIBS)
 

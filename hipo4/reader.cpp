@@ -31,6 +31,7 @@
   * File:   reader.cpp
   * Author: gavalian
   *
+  * Additions by: dglazier
   * Created on April 11, 2017, 2:07 PM
   */
 
