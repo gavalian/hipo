@@ -17,34 +17,34 @@ LDFLAGS   :=
 all:  writeFile readFile readFileTags showFile schema writeUserHeader
 
 readEvents: readEvents.o
-	$(CXX) -o readEvents $<  $(HIPOLIBS) $(LZ4LIBS)
+	$(CXX) -o readEvents.exe $<  $(HIPOLIBS) $(LZ4LIBS)
 
 writeEvents: writeEvents.o
-	$(CXX) -o writeEvents $<   $(HIPOLIBS) $(LZ4LIBS)
+	$(CXX) -o writeEvents.exe $<   $(HIPOLIBS) $(LZ4LIBS)
 
 writeUserHeader: writeUserHeader.o
-	$(CXX) -o writeUserHeader $<   $(HIPOLIBS) $(LZ4LIBS)
+	$(CXX) -o writeUserHeader.exe $<   $(HIPOLIBS) $(LZ4LIBS)
 
 showFile: showFile.o
-	$(CXX) -o showFile $<   $(HIPOLIBS) $(LZ4LIBS)
+	$(CXX) -o showFile.exe $<   $(HIPOLIBS) $(LZ4LIBS)
 
 readFile: readFile.o
-	$(CXX) -o readFile $<   $(HIPOLIBS) $(LZ4LIBS)
+	$(CXX) -o readFile.exe $<   $(HIPOLIBS) $(LZ4LIBS)
 
 readFusion: readFusion.o
-	$(CXX) -o readFusion $<   $(HIPOLIBS) $(LZ4LIBS)
+	$(CXX) -o readFusion.exe $<   $(HIPOLIBS) $(LZ4LIBS)
 
 readFileTags: readFileTags.o
-	$(CXX) -o readFileTags $<   $(HIPOLIBS) $(LZ4LIBS)
+	$(CXX) -o readFileTags.exe $<   $(HIPOLIBS) $(LZ4LIBS)
 
 writeFile: writeFile.o
-	$(CXX) -o writeFile $<   $(HIPOLIBS) $(LZ4LIBS)
+	$(CXX) -o writeFile.exe $<   $(HIPOLIBS) $(LZ4LIBS)
 
 schema: schema.o
-	$(CXX) -o schema $<   $(HIPOLIBS) $(LZ4LIBS)
+	$(CXX) -o schema.exe $<   $(HIPOLIBS) $(LZ4LIBS)
 
 builder: builder.o
-	$(CXX) -o builder $<   $(HIPOLIBS) $(LZ4LIBS)
+	$(CXX) -o builder.exe $<   $(HIPOLIBS) $(LZ4LIBS)
 
 #analysis: analysis.o
 #	$(CXX) -o analysis $<   $(HIPOLIBS) $(LZ4LIBS)
@@ -54,7 +54,7 @@ builder: builder.o
 
 clean:
 	@echo 'Removing all build files'
-	@rm -rf *.o readEvents schema *~ builder writeEvents writeFile readFile
+	@rm -rf *.o *~ *.exe example*hipo 
 
 %.o: %.cc
 	$(CXX) -c $< -O2 $(CXXFLAGS) $(HIPOCFLAGS) $(LZ4INCLUDES)
