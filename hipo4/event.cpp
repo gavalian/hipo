@@ -109,7 +109,7 @@ namespace hipo {
         //if(dataBuffer.size()<= () ){
         //  dataBuffer.resize(size+1024);
         //}
-        if(dataSize>0){
+        if(data_size>0){
 	        if((evt_size + str_size)<evt_capacity){
 	           memcpy(&dataBuffer[evt_size], &str.getStructureBuffer()[0],str_size);
 	            *(reinterpret_cast<uint32_t*>(&dataBuffer[4])) = (evt_size + str_size + 24);
