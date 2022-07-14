@@ -75,28 +75,30 @@ add_compile_definitions(__LZ4__)
 include_directories(${LZ4_INCLUDE_DIRS})
 
 set(HIPO_SOURCE_FILES
-    hipo4/bank.cpp
-    hipo4/datastream.cpp
-    hipo4/dictionary.cpp
-    hipo4/event.cpp
-    hipo4/reader.cpp
-    hipo4/record.cpp
-    hipo4/recordbuilder.cpp
-    hipo4/utils.cpp
-    hipo4/wrapper.cpp
-    hipo4/writer.cpp)
+        hipo4/bank.cpp
+        hipo4/datastream.cpp
+        hipo4/dictionary.cpp
+        hipo4/event.cpp
+        hipo4/fusion.cpp
+        hipo4/reader.cpp
+        hipo4/record.cpp
+        hipo4/recordbuilder.cpp
+        hipo4/utils.cpp
+        hipo4/wrapper.cpp
+        hipo4/writer.cpp)
 
 set(HIPO_HEADERS
-    hipo4/bank.h
-    hipo4/datastream.h
-    hipo4/dictionary.h
-    hipo4/event.h
-    hipo4/hipoexceptions.h
-    hipo4/reader.h
-    hipo4/record.h
-    hipo4/recordbuilder.h
-    hipo4/utils.h
-    hipo4/writer.h)
+        hipo4/bank.h
+        hipo4/datastream.h
+        hipo4/dictionary.h
+        hipo4/event.h
+        hipo4/fusion.h
+        hipo4/hipoexceptions.h
+        hipo4/reader.h
+        hipo4/record.h
+        hipo4/recordbuilder.h
+        hipo4/utils.h
+        hipo4/writer.h)
 
 add_library(hipo4_objs   OBJECT ${HIPO_SOURCE_FILES})
 add_library(hipo4        SHARED $<TARGET_OBJECTS:hipo4_objs>)
