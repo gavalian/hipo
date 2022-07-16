@@ -211,6 +211,7 @@ bool  reader::hasNext(){ return readerEventIndex.canAdvance();}
  * @return true if the event was successfully read, and false otherwise
  */
 bool  reader::next(hipo::event &dataevent){
+    if(readerEventIndex.canAdvance()==false) return false;
     int recordNumber = readerEventIndex.getRecordNumber();
     readerEventIndex.advance();
     int recordToBeRead = readerEventIndex.getRecordNumber();
