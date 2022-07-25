@@ -28,6 +28,9 @@ writeUserHeader: writeUserHeader.o
 showFile: showFile.o
 	$(CXX) -o showFile.exe $<   $(HIPOLIBS) $(LZ4LIBS)
 
+readFileDebug: readFileDebug.o
+	$(CXX) -o readFileDebug.exe $<   $(HIPOLIBS) $(LZ4LIBS)
+
 readFile: readFile.o
 	$(CXX) -o readFile.exe $<   $(HIPOLIBS) $(LZ4LIBS)
 
