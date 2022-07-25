@@ -187,7 +187,7 @@ namespace hipo {
 
       //dglazier
       int getNRecords() const {return recordEvents.size();}
-
+    void show();
       void rewind(){
         currentRecord = -1; currentEvent  = -1; currentRecordEvent = -1;
       }

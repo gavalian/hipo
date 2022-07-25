@@ -40,9 +40,9 @@ void debug1(const char *file){
   int particle_counter = 0;
   int current_event = 2520;
 
-  //reader.gotoEvent(current_event);
+  reader.gotoEvent(current_event);
   
-  while( reader.next() ){  //
+  while( reader.gotoEvent(current_event)==true){  //
     reader.read(event);
     current_event++;
     counter++;

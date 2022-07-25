@@ -353,9 +353,11 @@ bool reader::gotoEvent(int eventNumber){
 	   eventNumber, readerEventIndex.getMaxEvents());
     return false;
   }
-  
+
   int recordToBeRead = readerEventIndex.getRecordNumber();
+  
   if(recordToBeRead!=recordNumber){
+    //readerEventIndex.show(); - commented out by gg, this was for debugging
     long position = readerEventIndex.getPosition(recordToBeRead);
     inputRecord.readRecord(inputStream,position,0);
     /*printf(" record changed from %d to %d at event %d total event # %d\n",
@@ -464,16 +466,31 @@ bool readerIndex::gotoEvent(int eventNumber){
   //check if event exists
   if(eventNumber>=getMaxEvents()) return false;
   // The proper record number is found by binary search through records array
+  //------ 
+  // G.Gavalian (July 25/2022)
+  // Changed the eventNumber -> eventNumber+1 in binary search. Now it changes the
+  // record number properly and starts with record event number from 0
+  // I think this was a bug.
+  
     std::vector<int>::iterator l_bound =
-      std::lower_bound(recordEvents.begin(), recordEvents.end(), eventNumber);
+      std::lower_bound(recordEvents.begin(), recordEvents.end(), eventNumber+1);
     std::vector<int>::iterator u_bound =
-      std::lower_bound(recordEvents.begin(), recordEvents.end(), eventNumber);
+      std::lower_bound(recordEvents.begin(), recordEvents.end(), eventNumber+1);
+
+  
     long  position = (l_bound - recordEvents.begin()) - 1;
+    //printf("event # %d , lbound = %ld\n",eventNumber,position);
     currentRecord       = position;
     currentRecordEvent  = eventNumber - recordEvents[currentRecord];
     currentEvent        = eventNumber;
     return true;
 }
+
+  void readerIndex::show(){
+    for(int i = 0; i < recordEvents.size(); i++){
+      printf("record = %8d, %8d\n",i,recordEvents[i]);
+    }
+  }
 /**
  * Returns maximum number of events available to read.
  * @return maximum number of events.
