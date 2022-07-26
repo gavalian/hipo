@@ -115,16 +115,17 @@ namespace hipo {
 
         record();
         ~record();
-
+        void   read(hipo::bank &b, int event);
         void  readRecord(std::ifstream &stream, long position, int dataOffset);
         void  readRecord__(std::ifstream &stream, long position, long recordLength);
         bool  readRecord(std::ifstream &stream, long position, int dataOffset, long inputSize);
         int   getEventCount();
         int   getRecordSizeCompressed();
-
+        
         void  readEvent( std::vector<char> &vec, int index);
         void  readHipoEvent(hipo::event &event, int index);
         void  getData(   hipo::data &data, int index);
+        void  getEventsMap(std::vector<std::pair<int,int>> &emap);
 
         hipo::benchmark  &getReadBenchmark(){ return readBenchmark;}
         hipo::benchmark  &getUnzipBenchmark(){ return unzipBenchmark;}

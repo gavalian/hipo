@@ -388,6 +388,12 @@ bool  reader::loadRecord(int irec){
     inputRecord.readRecord(inputStream,position,0);
     return readerEventIndex.loadRecord(irec);
 }
+
+  bool  reader::loadRecord(hipo::record &record, int irec){
+    long position = readerEventIndex.getPosition(irec);
+    record.readRecord(inputStream,position,0);
+    return true;
+}
 //dglazier
 bool  reader::nextInRecord(){
   if(readerEventIndex.canAdvanceInRecord()==false) return false;

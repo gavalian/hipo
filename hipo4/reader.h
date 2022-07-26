@@ -249,6 +249,7 @@ namespace hipo {
 	int getNRecords() const {return readerEventIndex.getNRecords()-1;}
 	bool  nextInRecord();
 	bool loadRecord(int irec);
+    bool loadRecord(hipo::record &record, int irec); 
 	int  getEntries(){return readerEventIndex.getMaxEvents();}
   };
 }

@@ -15,7 +15,9 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <vector>
 #include "reader.h"
+#include "record.h"
 
 
 void debug1(const char *file){
@@ -37,7 +39,7 @@ void debug1(const char *file){
   hipo::event event;
   
   int counter = 0;
-  int particle_counter = 0;
+  //int particle_counter = 0;
   int current_event = 2520;
 
   reader.gotoEvent(current_event);
@@ -50,6 +52,32 @@ void debug1(const char *file){
     printf("Evt: %6d  = run: %5d  event: %6d \n", current_event, runinfo.getInt("run", 0), runinfo.getInt("event", 0));
   }
   printf("processed events = %d\n",counter);
+}
+
+
+
+void debug2(const char *file){
+  hipo::reader  reader;
+  hipo::record  record;
+  reader.open(file);
+  hipo::dictionary  dict;
+  reader.readDictionary(dict);
+
+  hipo::bank  runinfo(dict.getSchema("RUN::config"));
+  int nrec = reader.getNRecords();
+  std::vector<std::pair<int,int>> events;
+
+  for(int i =0 ;i < nrec; i++){
+    reader.loadRecord(record,i);
+    printf("record # %8d events = %d\n",i,record.getEventCount());
+    record.getEventsMap(events);
+    for(int r = 0; r < events.size(); r++){
+      // printf("\t event # %8d, start -> %8d , end -> %8d (size = %8d)\n",
+       //r,events[r].first,events[r].second, events[r].second-events[r].first);
+       record.read(runinfo,r);
+       runinfo.show();
+    }
+  }
 }
 
 int main(int argc, char** argv) {
@@ -67,8 +95,8 @@ int main(int argc, char** argv) {
    }
 
 
-   debug1(inputFile);
-   
+//   debug1(inputFile);
+    debug2(inputFile);
 
 }
 //### END OF GENERATED CODE

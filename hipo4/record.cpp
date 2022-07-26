@@ -417,7 +417,34 @@ namespace hipo {
         data.setDataSize(last_position-first_position);
         data.setDataOffset(first_position + offset);
     }
+void   record::read(hipo::bank &b, int event){
+   hipo::data event_data;
+   getData(event_data,event);
+   hipo::event::getStructure(event_data.getDataPtr(),b,b.getSchema().getGroup(),b.getSchema().getItem());
+}
 
+void record::getEventsMap(std::vector<std::pair<int,int>> &emap){
+   emap.clear();
+   int offset        = recordHeader.indexDataLength
+                          + recordHeader.userHeaderLength
+                          + recordHeader.userHeaderLengthPadding;
+                          /*
+   printf(" offset for the record = %8d, %8d, %8d, %8d\n",offset,
+          recordHeader.indexDataLength
+        , recordHeader.userHeaderLength
+        , recordHeader.userHeaderLengthPadding
+        );*/
+
+   int nevents = recordHeader.numberOfEvents;
+   for(int index = 0; index < nevents; index++){
+      int first_position = 0;
+        if(index > 0){
+          first_position  = *(reinterpret_cast<uint32_t *>(&recordBuffer[(index -1)*4]));
+        }
+        int last_position = *(reinterpret_cast<uint32_t *>(&recordBuffer[index*4]));
+        emap.push_back(std::make_pair(first_position+offset,last_position+offset));
+   }
+}
     void  record::readHipoEvent(hipo::event &event, int index){
           hipo::data event_data;
           getData(event_data,index);
