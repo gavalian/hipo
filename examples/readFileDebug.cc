@@ -80,6 +80,48 @@ void debug2(const char *file){
   }
 }
 
+void debug3(const char *file){
+
+  hipo::reader  reader;
+  hipo::record  record;
+  reader.open(file);
+  hipo::dictionary  dict;
+  reader.readDictionary(dict);
+
+  hipo::bank  particle(dict.getSchema("REC::Particle"));
+
+  int nrec = reader.getNRecords();
+  std::vector<std::pair<int,int>> events;
+
+  hipo::data ptr;
+  hipo::data ptrpx;
+  
+  for(int i =0 ;i < nrec; i++){
+    reader.loadRecord(record,i);
+    //printf("record # %8d events = %d\n",i,record.getEventCount());
+    record.getEventsMap(events);
+    for(int r = 0; r < events.size(); r++){
+      // the particle column 0 - is PID
+      // the call will return the address and the length
+      // of the 0-th column from particle bank in the prt data class.
+      record.getColumn(ptr,0,particle,r);
+      record.getColumn(ptrpx,"px",particle,r);
+      int col_size = ptr.getDataSize();
+      for(int c = 0; c < col_size; c++){
+          printf("pid value %5d : = %8d, px = %f\n",c,
+          // the c*4 advance is because we know pid is int  and px is float
+          // to determine the offset check the column type using:
+          // type = ptr.getDataType();
+          *reinterpret_cast<const int32_t *> (&ptr.getDataPtr()[c*4]),
+          *reinterpret_cast<const float *> (&ptrpx.getDataPtr()[c*4])
+          );
+      }
+
+
+    }
+  }
+}
+
 int main(int argc, char** argv) {
 
    std::cout << " reading file example program (HIPO) "  << __cplusplus << std::endl;
@@ -96,7 +138,7 @@ int main(int argc, char** argv) {
 
 
 //   debug1(inputFile);
-    debug2(inputFile);
-
+//    debug2(inputFile);
+debug3(inputFile);
 }
 //### END OF GENERATED CODE

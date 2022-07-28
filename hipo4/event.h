@@ -90,6 +90,7 @@ namespace hipo {
         //*******************************************************************
         static std::pair<int,int>
               getStructurePosition(const char *buffer, int group, int item);
+        //static std::pair<int,int>  getStructurePosition(const char *buffer, int group, int item);
         static void
               getStructure(const char *buffer, hipo::structure &str, int group, int item);
         static void
