@@ -11,7 +11,7 @@
 //* Reads the file created by writeFile program
 //*--
 //* Author: G.Gavalian
-//*
+//*=================================================================
 
 #include <cstdlib>
 #include <iostream>
@@ -93,7 +93,7 @@ void debug3(const char *file){
   int nrec = reader.getNRecords();
   std::vector<std::pair<int,int>> events;
 
-  hipo::data ptr;
+  hipo::data ptrid;
   hipo::data ptrpx;
   
   for(int i =0 ;i < nrec; i++){
@@ -104,15 +104,16 @@ void debug3(const char *file){
       // the particle column 0 - is PID
       // the call will return the address and the length
       // of the 0-th column from particle bank in the prt data class.
-      record.getColumn(ptr,0,particle,r);
-      record.getColumn(ptrpx,"px",particle,r);
-      int col_size = ptr.getDataSize();
+      record.getColumn(ptrid,    0, particle, r);
+      record.getColumn(ptrpx, "px", particle, r);
+      int col_size = ptrid.getDataSize();
+      if(col_size>0) printf("record [%8d] event [%8d] , bank size = %5d\n",i,r,col_size);
       for(int c = 0; c < col_size; c++){
-          printf("pid value %5d : = %8d, px = %f\n",c,
+          printf("\t pid value %5d : = %8d, px = %f\n",c,
           // the c*4 advance is because we know pid is int  and px is float
           // to determine the offset check the column type using:
           // type = ptr.getDataType();
-          *reinterpret_cast<const int32_t *> (&ptr.getDataPtr()[c*4]),
+          *reinterpret_cast<const int32_t *> (&ptrid.getDataPtr()[c*4]),
           *reinterpret_cast<const float *> (&ptrpx.getDataPtr()[c*4])
           );
       }
