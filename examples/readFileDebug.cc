@@ -69,13 +69,13 @@ void debug2(const char *file){
 
   for(int i =0 ;i < nrec; i++){
     reader.loadRecord(record,i);
-    printf("record # %8d events = %d\n",i,record.getEventCount());
+    //printf("record # %8d events = %d\n",i,record.getEventCount());
     record.getEventsMap(events);
     for(int r = 0; r < events.size(); r++){
       // printf("\t event # %8d, start -> %8d , end -> %8d (size = %8d)\n",
        //r,events[r].first,events[r].second, events[r].second-events[r].first);
        record.read(runinfo,r);
-       runinfo.show();
+       //runinfo.show();
     }
   }
 }
