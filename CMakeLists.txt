@@ -6,12 +6,28 @@
 ##########################################################
 
 # minimum version of CMake, which is determined by Geant4's requirements
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.14)
 
 project(HIPO VERSION 1.3)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+#
+# Set a default build type if none was specified
+#
+set(default_build_type "RELEASE")
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    message(STATUS "Setting build type to '${default_build_type}' as none was specified.")
+    set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE STRING "Choose the type of build." FORCE)
+    # Set the possible values of build type for cmake-gui
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+            "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif()
+
+#if(NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+#    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/lib )
+#endif()
+
 
 if(APPLE)
     # use, i.e. don't skip the full RPATH for the build tree
@@ -32,7 +48,13 @@ if(APPLE)
     if("${isSystemDir}" STREQUAL "-1")
         set(CMAKE_INSTALL_RPATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
     endif("${isSystemDir}" STREQUAL "-1")
+
 endif(APPLE)
+
+message(STATUS "CMAKE_INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR}")
+message(STATUS "CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_RPATH}")
+message(STATUS "CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+message(STATUS "LIBRARY_OUTPUT_DIRECTORY ${LIBRARY_OUTPUT_DIRECTORY}")
 #
 # Dependencies
 #
@@ -58,21 +80,26 @@ if(NOT LZ4_FOUND)
     set(LZ4_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/include)
     set(LZ4_LIBRARIES  ${CMAKE_INSTALL_PREFIX}/lib/liblz4.a)
 endif()
-#
-# Set a default build type if none was specified
-#
-set(default_build_type "RELEASE")
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-    message(STATUS "Setting build type to '${default_build_type}' as none was specified.")
-    set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE STRING "Choose the type of build." FORCE)
-    # Set the possible values of build type for cmake-gui
-    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-                 "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
-endif()
 
 add_compile_definitions(__LZ4__)
-
 include_directories(${LZ4_INCLUDE_DIRS})
+
+find_package(ROOT COMPONENTS Core RootDataFrame ROOTVecOps)
+if(ROOT_FOUND)
+    message(STATUS "ROOT found at: ${ROOT_DIR}")
+    #---Define useful ROOT functions and macros (e.g. ROOT_GENERATE_DICTIONARY)
+    # include("${ROOT_DIR}/RootMacros.cmake")
+    include(${ROOT_USE_FILE})
+else()
+    message(STATUS "**ROOT*******************************************************************")
+    message(STATUS "* We did not find a compatible version of the ROOT libraries.           *")
+    message(STATUS "* These libraries are needed to compile the RDataFrame funcionality of  *")
+    message(STATUS "* HIPO, which allows you to do fast and efficient data analysis with    *")
+    message(STATUS "* ROOT.                                                                 *")
+    message(STATUS "* To enable this, please make sure you have initialized a ROOT version  *")
+    message(STATUS "* that was compiled with -DCMAKE_CXX_STANDARD=17                        *")
+    message(STATUS "*************************************************************************")
+endif()
 
 set(HIPO_SOURCE_FILES
         hipo4/bank.cpp
@@ -107,8 +134,39 @@ set_target_properties(hipo4_static PROPERTIES OUTPUT_NAME hipo4)   # So that the
 
 # Required on Unix OS family to be able to be linked into shared libraries.
 set_target_properties(hipo4_objs PROPERTIES POSITION_INDEPENDENT_CODE ON)
-
 add_dependencies(hipo4_objs LZ4)
+
+if(ROOT_FOUND)
+    set(DS_HEADERS
+            HipoDataFrame/RHipoDS.hxx)
+
+    set(DS_SOURCE_FILES
+            HipoDataFrame/RHipoDS.cxx)
+
+    set(DS_LINKDEF_FILES
+            HipoDataFrame/RHipoDS_LinkDef.h)
+
+    add_library(HipoDataFrame SHARED ${DS_SOURCE_FILES})
+    target_link_libraries(HipoDataFrame PUBLIC hipo4 ROOT::ROOTDataFrame ROOT::ROOTVecOps ) #  ${ROOT_LIBRARIES}
+
+    ROOT_GENERATE_DICTIONARY(HipoDataFrame_Dict ${DS_HEADERS}  LINKDEF ${DS_LINKDEF_FILES} MODULE HipoDataFrame)
+    # See this discussion why ROOT_GENERATE_DICTIONARY come *after* add_library() -- https://github.com/root-project/root/issues/8308
+
+    add_executable(test_hipo_ds HipoDataFrame/test_hipo_ds.cxx)
+    target_link_libraries(test_hipo_ds HipoDataFrame ROOT::Core ROOT::Hist)
+
+    install(TARGETS HipoDataFrame
+            EXPORT hipo4-export
+            LIBRARY DESTINATION lib
+            ARCHIVE DESTINATION lib)
+
+    install(FILES ${DS_HEADERS}
+                DESTINATION include/hipo4)
+
+    install(FILES ${PROJECT_BINARY_DIR}/libHipoDataFrame_rdict.pcm DESTINATION lib)
+    install(FILES ${PROJECT_BINARY_DIR}/libHipoDataFrame.rootmap DESTINATION lib)
+
+endif()
 
 # Include the macros for creating export package.
 include(CMakePackageConfigHelpers)
@@ -160,4 +218,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hipo4Config.cmake ${CMAKE_CURRENT_BINA
 # Export the package for use from the *build-tree*. Probably not what you want!
 # (this registers the build-tree with a global CMake-registry)
 # export(PACKAGE hipo4)
+
+include($ENV{HOME}/cmake/cmake_debug_properties.cmake)
+print_all_variables("RPATH")
 
