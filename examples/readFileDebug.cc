@@ -117,8 +117,6 @@ void debug3(const char *file){
           *reinterpret_cast<const float *> (&ptrpx.getDataPtr()[c*4])
           );
       }
-
-
     }
   }
 }

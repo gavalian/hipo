@@ -99,7 +99,7 @@ public:
    explicit RHipoDS(std::string_view fileName, int nevt_inspect=100, int debug=0);
    ~RHipoDS() override= default;
 
-   void Finalize() override;
+   void Finalize();
 
    unsigned long GetEntries();
    const std::vector<std::string> &GetColumnNames() const override;
