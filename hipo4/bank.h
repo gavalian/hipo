@@ -223,6 +223,10 @@ namespace hipo {
 	         int offset = bankSchema.getOffset(item, index, bankRows);
 	         return getDoubleAt(offset);
       }
+      if(bankSchema.getEntryType(item)==4){
+	         int offset = bankSchema.getOffset(item, index, bankRows);
+	         return getFloatAt(offset);
+      }
       return 0.0;
     }
 
@@ -318,8 +322,12 @@ namespace hipo {
     inline double  bank::getDouble(const char *name, int index) const noexcept{
       int item = bankSchema.getEntryOrder(name);
       if(bankSchema.getEntryType(item)==5){
-	int offset = bankSchema.getOffset(item, index, bankRows);
-	return getDoubleAt(offset);
+	      int offset = bankSchema.getOffset(item, index, bankRows);
+	      return getDoubleAt(offset);
+      }
+      if(bankSchema.getEntryType(item)==4){
+        int offset = bankSchema.getOffset(item, index, bankRows);
+        return (double) getFloatAt(offset);
       }
       return 0.0;
     }
