@@ -46,13 +46,12 @@ if(APPLE)
 
 endif(APPLE)
 
-find_package(hipo4 REQUIRED)
-if( ${hipo4_FOUND})
-    message(STATUS "Hipo4 found. ")
-else()
-    message(STATUS "You will never see this message, becaus if not found, find_package should have aborted.")
+if(NOT DATAFRAME_IN_MAIN)
+    find_package(hipo4 REQUIRED)
+    if( ${hipo4_FOUND})
+        message(STATUS "Hipo4 found. ")
+    endif()
 endif()
-
 
 find_package(ROOT COMPONENTS Core RootDataFrame ROOTVecOps)
 if(NOT ROOT_FOUND)
