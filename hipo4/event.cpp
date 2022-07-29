@@ -159,7 +159,22 @@ namespace hipo {
       }
       return std::make_pair(-1,0);
     }
-
+/*
+    std::pair<int,int>  event::getStructurePosition(const char *buffer, int group, int item){
+      int position = 16;
+      int eventSize = *(reinterpret_cast<uint32_t*>(&buffer[4]));
+      while(position+8<eventSize){
+          uint16_t   gid = *(reinterpret_cast<uint16_t*>(&buffer[position]));
+          uint8_t    iid = *(reinterpret_cast<uint8_t*>(&buffer[position+2]));
+          uint8_t   type = *(reinterpret_cast<uint8_t*>(&buffer[position+3]));
+          int     length = *(reinterpret_cast<int*>(&buffer[position+4]));
+          //printf("group = %4d , item = %4d\n",(unsigned int) gid, (unsigned int) iid);
+          if(gid==group&&iid==item) return std::make_pair(position,length);
+          position += (length + 8);
+      }
+      return std::make_pair(-1,0);
+    }
+*/
     void event::init(const char *buffer, int size){
        if(dataBuffer.size()<=size){
          dataBuffer.resize(size+1024);
