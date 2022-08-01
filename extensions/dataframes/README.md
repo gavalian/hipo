@@ -27,6 +27,11 @@ cd build
 cmake -DCMAKE_INSTALL_PREFIX=/path/to/install/location ..
 make -j8 install
 ```
+NOTE: On a system where the default compiler is NOT c++17 compatible, i.e. Linux at JLab,
+you want to specify the compiler to cmake. You can do so with the following lines:
+```bash
+
+```
 
 This will install the hipo4 library (both .a and .so) in 
 `/path/to/install/location/lib`

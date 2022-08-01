@@ -63,6 +63,7 @@ int main(int argc, char **argv) {
    };
 
    auto h_p = df2.Define("p",v_abs,{"px","py","pz"}).Histo1D({"h_p","P (Momentum)", 1000, 0., 12.}, "p");
+   //
    // Note that for the following style of DataFrame definitions, you *must* use aliasses. The original names
    // of columns in HIPO are incompatible with C++ (or Python or anything really) code direct access to these variables.
    //
