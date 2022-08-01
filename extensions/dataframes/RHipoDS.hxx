@@ -79,13 +79,6 @@ public:
    std::vector< std::vector< std::vector<float> > > fVecFloatData;
    std::vector< std::vector< std::vector<double> > > fVecDoubleData;
 
-   hipo::bank RunConfig;
-   int stupid_event_number;
-   int *stupid_event_number_ptr;
-   std::vector<float> stupid_pz;
-   std::vector<float> *stupid_pz_ptr;
-
-
 public:
    int fDebug;
 // private:
@@ -99,7 +92,21 @@ public:
    explicit RHipoDS(std::string_view fileName, int nevt_inspect=100, int debug=0);
    ~RHipoDS() override= default;
 
-   void Finalize() override;
+   void Finalize()
+#if ROOT_VERSION_CODE > ROOT_VERSION(6,27,0)
+   override
+#endif
+   {
+      // Reset the Hipo event pointer back to the first event.
+      fHipoCurrentRecord=0;
+   };
+
+#if ROOT_VERSION_CODE <= ROOT_VERSION(6,27,0)
+   void Finalise() override{
+      // Reset the Hipo event pointer back to the first event.
+      Finalize();
+   };
+#endif
 
    unsigned long GetEntries();
    const std::vector<std::string> &GetColumnNames() const override;
@@ -116,8 +123,6 @@ public:
 
    // Not required utility methods.
    int getEntries(){ return fHipoReader.getEntries(); }
-
-
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Winconsistent-missing-override"

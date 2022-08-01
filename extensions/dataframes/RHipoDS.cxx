@@ -164,11 +164,6 @@ void RHipoDS::SetNSlots(unsigned int nSlots) {
    fNSlots = nSlots;
 }
 
-void RHipoDS::Finalize(){
-   // Reset the Hipo event pointer back to the first event.
-   fHipoCurrentRecord=0;
-}
-
 const std::vector<std::string> &RHipoDS::GetColumnNames() const{
 // Return the names of ALL the active columns.
    return fAllColumns;
@@ -385,30 +380,19 @@ std::vector<void *> RHipoDS::GetColumnReadersImpl(std::string_view col_name, con
    // Verify that the column pointed to by col_name has the correct type, as in ti
    const auto colType = GetTypeNum(col_name);
    if(fDebug>1) std::cout << "GetColumnReadersImpl:: " << col_name << ": colType:" << colType << " type name:" << ti.name()  << std::endl;
-//   if(   (colType == 1 && typeid(char) != ti) ||
-//         (colType == 2 && typeid(short) != ti) ||
-//         (colType == 3 && typeid(int) != ti) ||
-//         (colType == 4 && typeid(float) != ti) ||
-//         (colType == 5 && typeid(double) != ti)  ||
-//         (colType == 6 && typeid(long) != ti )
-//         ){
-//      std::string err = "The type selected for column \"";
-//      err += col_name;
-//      err += "\" does not correspond to column type, which is ";
-//      err += std::to_string(colType);
-//      throw std::runtime_error(err);
-//   }
+
    std::vector<void *> ret(fNSlots);
 
    std::string column_name = col_name.data();
    int col_index = fColumnNameToIndex.at(column_name);
    if(fDebug>1) std::cout << "Index " << col_index << " for column " << column_name.data() << std::endl;
 
-   if( std::find(fActiveColumns.begin(), fActiveColumns.end(), col_index) == fActiveColumns.end()) {
+   auto fActiveColumn_itt = std::find(fActiveColumns.begin(), fActiveColumns.end(), col_index);
+   if(  fActiveColumn_itt == fActiveColumns.end()) {
    // Has this column already been setup for reading? If not, set it up.
    // Yup, this is one big data allocation cluster-fuck.
       fActiveColumns.push_back(col_index);
-      if( fColumnTypeIsVector.at(col_index)) {
+      if( fColumnTypeIsVector.at(col_index)) {   // VECTORS
          switch (fColumnType.at(col_index)) {
             case 1: // vector<char>
             case 2: // vector<short>
@@ -453,7 +437,7 @@ std::vector<void *> RHipoDS::GetColumnReadersImpl(std::string_view col_name, con
                std::cout << "We got a column type issue. ColIndex: " << col_index << " ColType:"
                          << fColumnType.at(col_index);
          }
-      }else{
+      }else{   // SCALARS = NOT VECTORS
             switch (fColumnType.at(col_index)) {
                case 1:  // char
                case 2:  // short
@@ -499,11 +483,15 @@ std::vector<void *> RHipoDS::GetColumnReadersImpl(std::string_view col_name, con
                             << fColumnType.at(col_index);
          }
       }
+   }else{  // WOA, we told you about this variable already. Okay, older ROOT versions ask again, so here it is.
+      int active_index = std::distance(fActiveColumns.begin(), fActiveColumn_itt);
+      for(int i=0; i< fNSlots; ++i) {
+         ret[i] = &fColumnPointers[active_index][i];
+      }
    }
 
    return ret;
 }
-
 
 ClassImp(RHipoDS);
 

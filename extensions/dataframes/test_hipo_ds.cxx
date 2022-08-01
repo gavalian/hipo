@@ -7,6 +7,16 @@
 #include "RHipoDS.hxx"
 #include "TCanvas.h"
 
+using namespace ROOT;
+using namespace ROOT::RDF;
+
+std::vector<float> v_abs(std::vector<float>  &x, std::vector<float> &y, std::vector<float> &z){ std::vector<float> out;
+   for(int i=0; i< x.size(); ++i){
+      out.push_back(sqrt(x[i]*x[i]+y[i]*y[i]+z[i]*z[i]));
+   };
+   return out;
+};
+
 int main(int argc, char **argv) {
    // Very simple test of the Hipo DataFrame.
    // ROOT::EnableImplicitMT();
@@ -35,16 +45,17 @@ int main(int argc, char **argv) {
    auto h_pz = df2.Histo1D({"h_pz", "P_z", 1000, 0., 12.},"pz");
 
    // Lambda function for the absolute of a vector component set.
-   auto v_abs = [](
+   auto v_abs_l = [](
          std::vector<float> &x, std::vector<float> &y, std::vector<float> &z)
-               { RVec<double> out;
-                  for(int i=0; i< x.size(); ++i){
-                     out.push_back(sqrt(x[i]*x[i]+y[i]*y[i]+z[i]*z[i]));
-                  };
-                  return out;
-               };
+   { RVec<double> out;
+      for(int i=0; i< x.size(); ++i){
+         out.push_back(sqrt(x[i]*x[i]+y[i]*y[i]+z[i]*z[i]));
+      };
+      return out;
+   };
 
    auto h_p = df2.Define("p",v_abs,{"px","py","pz"}).Histo1D({"h_p","P (Momentum)", 1000, 0., 12.}, "p");
+//   auto h_p = df2.Define("p","vector<float> out;for(int i=0; i< px.size(); ++i){out.push_back(sqrt(px[i]*px[i]+py[i]*py[i]+pz[i]*pz[i]));}; return out;").Histo1D({"h_p","P (Momentum)", 1000, 0., 12.}, "p");
 
    TCanvas* c = new TCanvas("c", "Test RHipoDS", 0, 0, 2000, 1000);
    c->Divide(2, 1);
