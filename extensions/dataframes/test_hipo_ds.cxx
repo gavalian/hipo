@@ -22,8 +22,16 @@ int main(int argc, char **argv) {
    // ROOT::EnableImplicitMT();
    int N_open = 100;
    std::chrono::nanoseconds delta_t;
+
+   if(argc < 2){
+      std::cout << "Please specify a HIPO data file on the command line. (no wildcards, only one file.) \n";
+      return 1;
+   }else{
+      std::cout << "Opening file " << argv[1] << std::endl;
+   }
+
    auto start = std::chrono::high_resolution_clock::now();
-   auto ds = std::make_unique<RHipoDS>("/data/CLAS12/data/hipo/rec_clas_016214.evio.00001.hipo", N_open);
+   auto ds = std::make_unique<RHipoDS>(argv[1], N_open);
    auto stop = std::chrono::high_resolution_clock::now();
    delta_t = std::chrono::duration_cast<std::chrono::nanoseconds>(stop-start);
    printf("Open file in  %6.5f ms  for %6d events = %6.5f ns/event\n",
@@ -55,7 +63,10 @@ int main(int argc, char **argv) {
    };
 
    auto h_p = df2.Define("p",v_abs,{"px","py","pz"}).Histo1D({"h_p","P (Momentum)", 1000, 0., 12.}, "p");
-//   auto h_p = df2.Define("p","vector<float> out;for(int i=0; i< px.size(); ++i){out.push_back(sqrt(px[i]*px[i]+py[i]*py[i]+pz[i]*pz[i]));}; return out;").Histo1D({"h_p","P (Momentum)", 1000, 0., 12.}, "p");
+   // Note that for the following style of DataFrame definitions, you *must* use aliasses. The original names
+   // of columns in HIPO are incompatible with C++ (or Python or anything really) code direct access to these variables.
+   //
+   //   auto h_p = df2.Define("p","vector<float> out;for(int i=0; i< px.size(); ++i){out.push_back(sqrt(px[i]*px[i]+py[i]*py[i]+pz[i]*pz[i]));}; return out;").Histo1D({"h_p","P (Momentum)", 1000, 0., 12.}, "p");
 
    TCanvas* c = new TCanvas("c", "Test RHipoDS", 0, 0, 2000, 1000);
    c->Divide(2, 1);

@@ -53,7 +53,7 @@ if(NOT DATAFRAME_IN_MAIN)
     endif()
 endif()
 
-find_package(ROOT COMPONENTS Core RootDataFrame ROOTVecOps)
+find_package(ROOT COMPONENTS Core ROOTDataFrame ROOTVecOps)
 if(NOT ROOT_FOUND)
     message(STATUS "**ROOT*******************************************************************")
     message(STATUS "* We did not find a compatible version of the ROOT libraries.           *")
