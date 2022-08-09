@@ -27,13 +27,7 @@ cd build
 cmake -DCMAKE_INSTALL_PREFIX=/path/to/install/location ..
 make -j8 install
 ```
-NOTE: On a system where the default compiler is NOT c++17 compatible, i.e. Linux at JLab,
-you want to specify the compiler to cmake. You can do so with the following lines:
-```bash
-
-```
-
-This will install the hipo4 library (both .a and .so) in 
+This will install the hipo4 library (both .a and .so) in
 `/path/to/install/location/lib`
 
 You can now load the library into root with:
@@ -46,6 +40,19 @@ root [0] .L libHipoDataFrame.so
 ```
 (For Mac, replace LD_LIBRARY_PATH with DYLD_LIBRARY_PATH
 and the .so with .dylib)
+
+***NOTE***: On a system where the default compiler is NOT c++17 compatible, i.e. Linux at JLab,
+you want to specify the compiler to cmake. You can do so with the following lines:
+```bash
+module use /apps/modulefiles
+module load gcc/9.3.0
+module load cmake/3.22.1
+source ~holtrop/root/bin/thisroot.sh
+cmake .. -DCMAKE_INSTALL_PREFIX=${HOME} -DCMAKE_CXX_COMPILER=$(which g++) -DCMAKE_C_COMPILER=$(which gcc)
+```
+
+However, unfortunately, ***none*** of the installed versions of ROOT (in /apps, or by CLAS12) are 
+currently C++17 compatible, so use the ROOT version installed in `~holtrop/root` or your own.
 
 ## Using the DataFrame
 
