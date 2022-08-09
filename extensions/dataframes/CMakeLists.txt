@@ -5,8 +5,7 @@
 #                                                        #
 ##########################################################
 
-# minimum version of CMake, which is determined by Geant4's requirements
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.22)
 
 project(HipoDataFrame VERSION 0.1)
 
@@ -78,11 +77,12 @@ else()
     set(DS_LINKDEF_FILES
             RHipoDS_LinkDef.h)
 
-    add_library(HipoDataFrame SHARED ${DS_SOURCE_FILES})
+    add_library(HipoDataFrame SHARED ${DS_SOURCE_FILES} )
     target_link_libraries(HipoDataFrame PUBLIC hipo4 ROOT::ROOTDataFrame ROOT::ROOTVecOps ) #  ${ROOT_LIBRARIES}
 
     ROOT_GENERATE_DICTIONARY(HipoDataFrame_Dict ${DS_HEADERS}  LINKDEF ${DS_LINKDEF_FILES} MODULE HipoDataFrame)
     # See this discussion why ROOT_GENERATE_DICTIONARY come *after* add_library() -- https://github.com/root-project/root/issues/8308
+    list(APPEND ADDITIONAL_CLEAN_FILES HipoDataFrame_Dict.cxx)
 
     add_executable(test_hipo_ds test_hipo_ds.cxx)
     target_link_libraries(test_hipo_ds HipoDataFrame ROOT::Core ROOT::Hist)
