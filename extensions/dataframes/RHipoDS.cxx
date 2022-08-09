@@ -17,23 +17,47 @@ ROOT::RDF::MakeHipoDataFrame, which accepts one parameter:
 ////////////////////////////////////////////////////////////////////////
 /// Constructor to create a Hipo RDataSource for RDataFrame.
 /// \param[in] fileName Path of the Hipo file.
-RHipoDS::RHipoDS(std::string_view fileName, int nevt_inspect, int debug) :
-            fHipoFile(fileName), fDebug(debug){
-   // Step 1: Open the Hipo file
-   fHipoReader.open(fHipoFile.c_str());
+RHipoDS::RHipoDS(std::string_view file_pattern, int nevt_inspect, int debug): fDebug(debug) {
+   AddFiles(file_pattern);
+   Init(nevt_inspect);
+}
+
+RHipoDS::RHipoDS(std::vector<std::string> &files, int nevt_inspect, int debug): fDebug(debug) {
+
+   for(auto &file_name: files) {
+      AddFiles(file_name);
+   }
+   Init(nevt_inspect);
+}
+
+std::string RHipoDS::GetTranslatedColumnName(std::string name) const{
+   auto pos = name.find("::");
+   if (pos != -1) name.replace(pos, 2, "_");
+   pos = name.find(".");
+   if (pos != -1) name.replace(pos, 1, "_");
+   return name;
+}
+
+/// Initialize the class for reading from the HIPO files.
+void RHipoDS::Init(int nevt_inspect) {
+
+   if(fHipoFiles.empty()) return;
+
+   fHipoReader.setTags(0);
+   fHipoReader.open(fHipoFiles[0].c_str());
    fHipoCurrentMaxEvent = fHipoReader.getEntries();
    fHipoCurrentMaxRecord = fHipoReader.getNRecords();
 
-   if(fDebug>0) std::cout << "Opened Hipo file " << fileName << " with " << fHipoCurrentMaxEvent << " events. \n";
+   if(fDebug>0) std::cout << "Opened Hipo file " << fHipoFiles[0] << " with " << fHipoCurrentMaxEvent << " events. \n";
 
    fHipoReader.readDictionary(fHipoDict);
 
    // Step 2: Read the schema and construct a column map.
    fAllBankNames = fHipoDict.getSchemaList();
+
    hipo::event event;
    if(nevt_inspect < 0) nevt_inspect = 1<<30; // MAX INT
    int counter = 0;
-
 
    if( nevt_inspect == 0){
       for (int ib = 0; ib < fAllBankNames.size(); ++ib) {
@@ -47,8 +71,14 @@ RHipoDS::RHipoDS(std::string_view fileName, int nevt_inspect, int debug) :
             fBanks.emplace_back(this_bank);   // Put the bank in the bank store.
 
             for (int i = 0; i < sch.getEntries(); ++i) {
+
                std::string full_name = fAllBankNames[ib] + "." + sch.getEntryName(i);
+
+               fAllColumnsPreTranslated.emplace_back(full_name);
+               if(fColumnNameTranslation) full_name = GetTranslatedColumnName(full_name);
+
                fColumnNameToIndex[full_name] = fAllColumns.size();
+
                fAllColumns.emplace_back(full_name);
                fColumnBank.push_back(bank_index);
                fColumnItem.push_back(i);
@@ -59,7 +89,6 @@ RHipoDS::RHipoDS(std::string_view fileName, int nevt_inspect, int debug) :
                   throw std::runtime_error(err);
                }
                fColumnType.push_back(i_type);
-
                fColumnTypeIsVector.push_back(true);
 
                if (fDebug > 1) {
@@ -98,6 +127,10 @@ RHipoDS::RHipoDS(std::string_view fileName, int nevt_inspect, int debug) :
 
                   for (int i = 0; i < sch.getEntries(); ++i) {
                      std::string full_name = fAllBankNames[ib] + "." + sch.getEntryName(i);
+
+                     fAllColumnsPreTranslated.emplace_back(full_name);
+                     if(fColumnNameTranslation) full_name = GetTranslatedColumnName(full_name);
+
                      fColumnNameToIndex[full_name] = fAllColumns.size();
                      fAllColumns.emplace_back(full_name);
                      fColumnBank.push_back(bank_index);
@@ -122,12 +155,15 @@ RHipoDS::RHipoDS(std::string_view fileName, int nevt_inspect, int debug) :
                   auto bank = fBanks[bank_it->second];
                   auto sch = bank.getSchema();
                   std::string full_name = fAllBankNames[ib] + "." + sch.getEntryName(0);  // If one is vector, all are vector.
+                  if(fColumnNameTranslation) full_name = GetTranslatedColumnName(full_name);
+
                   int idx = fColumnNameToIndex.at(full_name);
                   if( !fColumnTypeIsVector[idx]){
                      if(fDebug>1) std::cout << "The column " << full_name << " is actually a vector!\n";
                      fColumnTypeIsVector[idx] = true;
                      for(int i=1; i< sch.getEntries(); ++i){  // So flip all the others too.
                         full_name = fAllBankNames[ib] + "." + sch.getEntryName(i);
+                        if(fColumnNameTranslation) full_name = GetTranslatedColumnName(full_name);
                         idx = fColumnNameToIndex.at(full_name);
                         fColumnTypeIsVector[idx] = true;
                      }
@@ -138,7 +174,7 @@ RHipoDS::RHipoDS(std::string_view fileName, int nevt_inspect, int debug) :
          counter++;
       }
       if(fDebug>0) {
-         std::cout << "Hipo bank profile for " << fileName << std::endl;
+         std::cout << "Hipo bank profile for " << fHipoFiles[0] << std::endl;
          for (auto &itt: bank_column_depth) {
             if (itt.second > 0) printf("%35s : %4d \n", itt.first.c_str(), itt.second);
          }
@@ -147,18 +183,52 @@ RHipoDS::RHipoDS(std::string_view fileName, int nevt_inspect, int debug) :
    fHipoReader.gotoEvent(0);  // Wind back to first event.
 }
 
+/// Add a file, or files, according to the file_glob pattern.
+int  RHipoDS::AddFiles(std::string_view file_glob) {
 
+   glob_t glob_result;
+   memset(&glob_result, 0, sizeof(glob_result));
+
+   int return_value = glob(file_glob.data(), GLOB_TILDE | GLOB_BRACE, NULL, &glob_result);
+   if(return_value != 0) {
+      globfree(&glob_result);
+      if( return_value == GLOB_NOMATCH) return 0;
+      std::stringstream ss;
+      ss << "glob() failed with return_value " << return_value << std::endl;
+      throw std::runtime_error(ss.str());
+   }
+
+   int n_files = glob_result.gl_pathc;
+   for(size_t i = 0; i < n_files; ++i) {
+      fHipoFiles.push_back(std::string(glob_result.gl_pathv[i]));
+   }
+
+   // cleanup
+   globfree(&glob_result);
+   return n_files;
+}
 
 std::string RHipoDS::AsString()
 {
    return "Hipo data source";
 }
 
-unsigned long RHipoDS::GetEntries() {
+unsigned long RHipoDS::GetEntries(bool current_file_only) {
    // Get the total number of entries in the data set.
-   return (unsigned long)fHipoReader.getEntries();
-}
+   if(current_file_only) return (unsigned long)fHipoReader.getEntries();
 
+   int save_hipo_file_index = -1;
+   if(fHipoReader.is_open()) save_hipo_file_index = fHipoFiles_index;
+
+   unsigned long total_events = 0;
+   for(auto &file: fHipoFiles){
+      fHipoReader.open(file.c_str());
+      total_events += fHipoReader.getEntries();
+   }
+   if(save_hipo_file_index>=0) fHipoReader.open(fHipoFiles[save_hipo_file_index].c_str());
+
+   return total_events;
+}
 
 void RHipoDS::SetNSlots(unsigned int nSlots) {
    fNSlots = nSlots;
@@ -182,7 +252,14 @@ std::vector<std::pair<ULong64_t, ULong64_t>> RHipoDS::GetEntryRanges(){
 // Because this is HIPO, this requires *reading* the next Record (or Block) from file.
 
    std::vector<std::pair<ULong64_t, ULong64_t>> entryRanges;
-   if(fHipoCurrentRecord >= fHipoCurrentMaxRecord) return entryRanges;
+   if(fHipoCurrentRecord >= fHipoCurrentMaxRecord){
+      if( ++fHipoFiles_index >= fHipoFiles.size()) return entryRanges;
+      fHipoReader.open(fHipoFiles[fHipoFiles_index].c_str());
+      fHipoCurrentMaxEvent = fHipoReader.getEntries();
+      fHipoCurrentMaxRecord = fHipoReader.getNRecords();
+      fHipoCurrentRecord=0;
+   }
+
    fHipoReader.loadRecord(fHipoRecord, fHipoCurrentRecord);
    fHipoCurrentRecord++;
 
@@ -190,7 +267,7 @@ std::vector<std::pair<ULong64_t, ULong64_t>> RHipoDS::GetEntryRanges(){
 
    // Divide up the event in the record over the slots.
    unsigned int chunkSize = fHipoCurrentMaxEvent / fNSlots;
-   unsigned int remainder =  fHipoCurrentMaxEvent % fNSlots;  // ( fNSlots == 1? 0 : fHipoReader.getEntries() % fNSlots )
+   unsigned int remainder =  ( fNSlots == 1? 0 : fHipoReader.getEntries() % fNSlots );
 
    unsigned int start = 0;
    unsigned int end = start;
@@ -206,19 +283,11 @@ std::vector<std::pair<ULong64_t, ULong64_t>> RHipoDS::GetEntryRanges(){
 
 bool RHipoDS::HasColumn(std::string_view colName) const {
    // See if colName is in fAllColumns
-//   auto location = std::find(fAllColumns.begin(), fAllColumns.end(), colName);
-//   return location != fAllColumns.end();
    return fColumnNameToIndex.count(colName.data()) == 1;
 };
 
 int RHipoDS::GetColNum(std::string_view colName) const{
-   // Get the C++ type for the named column.
-   // Cost: ~ 570ns, string lookup for colName using find, is (N)
-   // Cost: ~ 140ns, map lookup is (log(N)).
-   // auto location = std::find(fAllColumns.begin(), fAllColumns.end(), colName); // ~ 570 ns
-   //auto location = std::lower_bound(fAllColumns.begin(), fAllColumns.end(), colName);
-   // if(location == fAllColumns.end() ) throw std::runtime_error("RHipoDS::GetTypeName - Column Name Not Found.");
-   // int iloc = std::distance(fAllColumns.begin(), location);
+   // Get the C++ index for the named column.
    std::string name = colName.data();
    int iloc = fColumnNameToIndex.at(name);
    return iloc;
@@ -291,10 +360,17 @@ bool RHipoDS::SetEntry(unsigned int slot, ULong64_t entry){
 //   fHipoReader.gotoEvent(entry); // Issue: this may jump around a Block border, slowing the reading.
 //   fHipoReader.read(fHipoEvent);
 
+   if(fHipoReadOnlyPhysicsEvents){
+
+   }
+
    std::vector<int> banks_seen;
    for(int active_index=0; active_index < fActiveColumns.size(); ++active_index){
       int col_index = fActiveColumns[active_index];
       int bank_index = fColumnBank[col_index];
+// #define DO_BANK_SEARCH
+#ifdef DO_BANK_SEARCH
+      // 16.62698 16.81025 16.77813 17.15750
       if( !std::binary_search(banks_seen.begin(), banks_seen.end(), bank_index) ){
          // Bank has not already been processed.
          banks_seen.push_back(bank_index);
@@ -302,6 +378,11 @@ bool RHipoDS::SetEntry(unsigned int slot, ULong64_t entry){
 //         fHipoEvent.getStructure(fBanks[bank_index]);     // Fill the bank with data.
          fHipoRecord.read(fBanks[bank_index], entry);
       }
+#else
+      // Reading the bank each time is faster? - seems so, but marginal difference.
+      // 16.76788 16.71784 16.64359 16.63519
+      fHipoRecord.read(fBanks[bank_index], entry);
+#endif
       // So here, we can assume that the bank has the data we are interested in.
       int nrows = fBanks[bank_index].getRows();
       int data_index = fIndexToData[active_index];

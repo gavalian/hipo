@@ -1,6 +1,8 @@
 //
 // Created by Maurik Holtrop on 7/19/22.
 //
+//pre-fix = 16.6s for 10 hipo files.
+//
 #include <string>
 #include <iostream>
 #include <chrono>
@@ -32,6 +34,7 @@ int main(int argc, char **argv) {
 
    auto start = std::chrono::high_resolution_clock::now();
    auto ds = std::make_unique<RHipoDS>(argv[1], N_open);
+   bool translated = ds->fColumnNameTranslation;
    auto stop = std::chrono::high_resolution_clock::now();
    delta_t = std::chrono::duration_cast<std::chrono::nanoseconds>(stop-start);
    printf("Open file in  %6.5f ms  for %6d events = %6.5f ns/event\n",
@@ -44,10 +47,17 @@ int main(int argc, char **argv) {
 //   }
    auto total_events = ds->GetEntries();
    auto df = RDataFrame(std::move(ds));
-   auto df2 = df.Alias("px", "REC::Particle.px").Alias("py", "REC::Particle.py").Alias("pz", "REC::Particle.pz").Alias("pid", "REC::Particle.pid").Alias("status","REC::Particle.status");
+   RInterface<Detail::RDF::RLoopManager, void> df2 = df;
+   std::string run_config_event = "RUN::config.event";
+   if(translated){
+      df2 = df.Alias("px", "REC_Particle_px").Alias("py", "REC_Particle_py").Alias("pz", "REC_Particle_pz").Alias("pid", "REC_Particle_pid").Alias("status","REC_Particle_status");
+      run_config_event = "RUN_config_event";
+   }else{
+      df2 = df.Alias("px", "REC::Particle.px").Alias("py", "REC::Particle.py").Alias("pz", "REC::Particle.pz").Alias("pid", "REC::Particle.pid").Alias("status","REC::Particle.status");
+   }
 
    auto h_pid=df2.Histo1D({"h_pid","Particle ID",4601,-2300,2300},"pid");
-   auto h_evt = df2.Histo1D({"h_evt", "Event number", 1000001, 0, 1000000}, "RUN::config.event");
+   auto h_evt = df2.Histo1D({"h_evt", "Event number", 1000001, 0, 1000000}, run_config_event);
    auto h_px = df2.Histo1D({"h_px", "P_x", 1000, 0., 12.},"px");
    auto h_py = df2.Histo1D({"h_py", "P_y", 1000, 0., 12.},"py");
    auto h_pz = df2.Histo1D({"h_pz", "P_z", 1000, 0., 12.},"pz");
@@ -87,8 +97,7 @@ int main(int argc, char **argv) {
    stop = std::chrono::high_resolution_clock::now();
    delta_t = std::chrono::duration_cast<std::chrono::nanoseconds>(stop-start);
    time_ns = double(delta_t.count());
-   printf("processed events = %7lu  in  %6.5f s, or %10.3f ns/event. \n", total_events, time_ns*1.e-9,
-          time_ns/total_events);
+//   printf("processed events = %7lu  in  %6.5f s, or %10.3f ns/event. \n", total_events, time_ns*1.e-9, time_ns/total_events);
 
    c->Print("demo1.pdf");
 
@@ -115,8 +124,6 @@ int main(int argc, char **argv) {
    stop = std::chrono::high_resolution_clock::now();
    delta_t = std::chrono::duration_cast<std::chrono::nanoseconds>(stop-start);
    time_ns = double(delta_t.count());
-   printf("processed events = %7lu  in  %6.5f s, or %10.3f ns/event. \n", total_events, time_ns*1.e-9,
-          time_ns/total_events);
-
+//   printf("processed events = %7lu  in  %6.5f s, or %10.3f ns/event. \n", total_events, time_ns*1.e-9, time_ns/total_events);
    c->Print("demo2.pdf");
 }
