@@ -27,63 +27,63 @@
  *   For more information contact author at gavalian@jlab.org
  *   Department of Experimental Nuclear Physics, Jefferson Lab.
  */
- /**
-  * <pre>
-  *
-  * FILE HEADER STRUCTURE ( 56 bytes, 14 integers (32 bit) )
-  *
-  *    +----------------------------------+
-  *  1 |              ID                  | // HIPO: 0x43455248, Evio: 0x4556494F
-  *    +----------------------------------+
-  *  2 +          File Number             | // split file #
-  *    +----------------------------------+
-  *  3 +         Header Length            | // 14 (words)
-  *    +----------------------------------+
-  *  4 +      Record (Index) Count        |
-  *    +----------------------------------+
-  *  5 +      Index Array Length          | // bytes
-  *    +-----------------------+----------+
-  *  6 +       Bit Info        | Version  | // version (8 bits)
-  *    +-----------------------+----------+
-  *  7 +      User Header Length          | // bytes
-  *    +----------------------------------+
-  *  8 +          Magic Number            | // 0xc0da0100
-  *    +----------------------------------+
-  *  9 +          User Register           |
-  *    +--                              --+
-  * 10 +                                  |
-  *    +----------------------------------+
-  * 11 +         Trailer Position         | // File offset to trailer head (64 bits).
-  *    +--                              --+ // 0 = no offset available or no trailer exists.
-  * 12 +                                  |
-  *    +----------------------------------+
-  * 13 +          User Integer 1          |
-  *    +----------------------------------+
-  * 14 +          User Integer 2          |
-  *    +----------------------------------+
-  *
-  * -------------------
-  *   Bit Info Word
-  * -------------------
-  *     0-7  = version
-  *     8    = true if dictionary is included (relevant for first record only)
-  *     9    = true if this file has "first" event (in every split file)
-  *    10    = File trailer with index array exists
-  *    11-19 = reserved
-  *    20-21 = pad 1
-  *    22-23 = pad 2
-  *    24-25 = pad 3 (always 0)
-  *    26-27 = reserved
-  *    28-31 = general header type: 1 = Evio file
-  *                                 2 = Evio extended file
-  *                                 5 = HIPO file
-  *                                 6 = HIPO extended file
-  *
-  * </pre>
-  *
-  * @version 6.0
-  * @since 6.0 9/6/17
-  */
+/**
+ * <pre>
+ *
+ * FILE HEADER STRUCTURE ( 56 bytes, 14 integers (32 bit) )
+ *
+ *    +----------------------------------+
+ *  1 |              ID                  | // HIPO: 0x43455248, Evio: 0x4556494F
+ *    +----------------------------------+
+ *  2 +          File Number             | // split file #
+ *    +----------------------------------+
+ *  3 +         Header Length            | // 14 (words)
+ *    +----------------------------------+
+ *  4 +      Record (Index) Count        |
+ *    +----------------------------------+
+ *  5 +      Index Array Length          | // bytes
+ *    +-----------------------+----------+
+ *  6 +       Bit Info        | Version  | // version (8 bits)
+ *    +-----------------------+----------+
+ *  7 +      User Header Length          | // bytes
+ *    +----------------------------------+
+ *  8 +          Magic Number            | // 0xc0da0100
+ *    +----------------------------------+
+ *  9 +          User Register           |
+ *    +--                              --+
+ * 10 +                                  |
+ *    +----------------------------------+
+ * 11 +         Trailer Position         | // File offset to trailer head (64 bits).
+ *    +--                              --+ // 0 = no offset available or no trailer exists.
+ * 12 +                                  |
+ *    +----------------------------------+
+ * 13 +          User Integer 1          |
+ *    +----------------------------------+
+ * 14 +          User Integer 2          |
+ *    +----------------------------------+
+ *
+ * -------------------
+ *   Bit Info Word
+ * -------------------
+ *     0-7  = version
+ *     8    = true if dictionary is included (relevant for first record only)
+ *     9    = true if this file has "first" event (in every split file)
+ *    10    = File trailer with index array exists
+ *    11-19 = reserved
+ *    20-21 = pad 1
+ *    22-23 = pad 2
+ *    24-25 = pad 3 (always 0)
+ *    26-27 = reserved
+ *    28-31 = general header type: 1 = Evio file
+ *                                 2 = Evio extended file
+ *                                 5 = HIPO file
+ *                                 6 = HIPO extended file
+ *
+ * </pre>
+ *
+ * @version 6.0
+ * @since 6.0 9/6/17
+ */
 /*
  * File:   reader.h
  * Author: gavalian
@@ -118,44 +118,44 @@
 
 namespace hipo {
 
-  //  typedef struct fileHeader_t {
- struct fileHeader_t {
-    int  uniqueid{};
-    int  filenumber{};
-    int  headerLength{}; // in words (usually 14)
-    int  recordCount{};
-    int  indexArrayLength{}; // in bytes
-    int  bitInfo{};
-    int  version{};
-    int  userHeaderLength{};
-    int  magicNumber{};
-    long userRegister{};
-    long trailerPosition{};
-    long firstRecordPosition{};
- };// fileHeader_t;
+   //  typedef struct fileHeader_t {
+   struct fileHeader_t {
+      int  uniqueid{};
+      int  filenumber{};
+      int  headerLength{}; // in words (usually 14)
+      int  recordCount{};
+      int  indexArrayLength{}; // in bytes
+      int  bitInfo{};
+      int  version{};
+      int  userHeaderLength{};
+      int  magicNumber{};
+      long userRegister{};
+      long trailerPosition{};
+      long firstRecordPosition{};
+   };// fileHeader_t;
 
 
-  //  typedef struct recordInfo_t {
-  struct recordInfo_t {
+   //  typedef struct recordInfo_t {
+   struct recordInfo_t {
       long recordPosition{};
       int  recordLength{};
       int  recordEntries{};
       long userWordOne{};
       long userWordTwo{};
-  };// recordInfo_t;
+   };// recordInfo_t;
 
 
-  /**
-  * READER index class is used to construct entire events
-  * sequence from all records, and provides ability to canAdvance
-  * through events where record number is automatically calculated
-  * and triggers reading of the next record when events in the current
-  * record are exhausted.
-  */
+   /**
+   * READER index class is used to construct entire events
+   * sequence from all records, and provides ability to canAdvance
+   * through events where record number is automatically calculated
+   * and triggers reading of the next record when events in the current
+   * record are exhausted.
+   */
 
-  class readerIndex {
+   class readerIndex {
 
-    private:
+   private:
       std::vector<int>  recordEvents;
       std::vector<long> recordPosition;
 
@@ -187,70 +187,71 @@ namespace hipo {
 
       //dglazier
       int getNRecords() const {return recordEvents.size();}
-    void show();
+      void show();
       void rewind(){
-        currentRecord = -1; currentEvent  = -1; currentRecordEvent = -1;
+         currentRecord = -1; currentEvent  = -1; currentRecordEvent = -1;
       }
       void clear(){
-        recordEvents.clear(); recordPosition.clear();
+         recordEvents.clear(); recordPosition.clear();
       }
       void reset(){
-        currentRecord = 0; currentEvent  = 0; currentRecordEvent = 0;
+         currentRecord = 0; currentEvent  = 0; currentRecordEvent = 0;
       }
-};
+   };
 
-  class reader {
+   class reader {
 
-    private:
+   private:
 
-        fileHeader_t      header{};
-        hipo::utils       hipoutils;
-        std::ifstream     inputStream;
-        long              inputStreamSize{};
+      fileHeader_t      header{};
+      hipo::utils       hipoutils;
+      std::ifstream     inputStream;
+      long              inputStreamSize{};
 
-        hipo::record       inputRecord;
-        hipo::readerIndex  readerEventIndex;
-        std::vector<long>  tagsToRead;
-	short _verbose = {0} ;
+      hipo::record       inputRecord;
+      hipo::readerIndex  readerEventIndex;
+      std::vector<long>  tagsToRead;
+      short _verbose = {0} ;
 
-        std::map<std::string,std::string>  userConfig;
+      std::map<std::string,std::string>  userConfig;
 
-        void  readHeader();
-        void  readIndex();
-    
-    public:
+      void  readHeader();
+      void  readIndex();
 
-        reader();
-        reader(const reader &r){}
+   public:
 
-        ~reader();
+      reader();
+      reader(const reader &r){}
 
-        void  about();
-        void  readDictionary(hipo::dictionary &dict);
-        void  getStructure(hipo::structure &structure,int group, int item);
-        void  getStructureNoCopy(hipo::structure &structure,int group, int item);
+      ~reader();
 
-        void readUserConfig(std::map<std::string,std::string> &mapConfig);
-    //std::string getUserConfig(const char *key);
-        
-        void  open(const char *filename);
-        void  setTags(int tag){ tagsToRead.push_back(tag);}
-	void  setTags(std::vector<long> tags){ tagsToRead=std::move(tags);}
-	void  setVerbose(short level=1){_verbose=level;}
-	      
-	bool  hasNext();
-        bool  next();
-        bool  gotoEvent(int eventNumber);
-        bool  gotoRecord(int irec);
-        bool  next(hipo::event &dataevent);
-        void  read(hipo::event &dataevent);
-        void  printWarning();
-    //void  showUserConfig();
-	int getNRecords() const {return readerEventIndex.getNRecords()-1;}
-	bool  nextInRecord();
-	bool loadRecord(int irec);
-    bool loadRecord(hipo::record &record, int irec); 
-	int  getEntries(){return readerEventIndex.getMaxEvents();}
-  };
+      void  about();
+      void  readDictionary(hipo::dictionary &dict);
+      void  getStructure(hipo::structure &structure,int group, int item);
+      void  getStructureNoCopy(hipo::structure &structure,int group, int item);
+
+      void readUserConfig(std::map<std::string,std::string> &mapConfig);
+      //std::string getUserConfig(const char *key);
+
+      void  open(const char *filename);
+      bool  is_open(){ return inputStream.is_open();}
+      void  setTags(int tag){ tagsToRead.push_back(tag);}
+      void  setTags(std::vector<long> tags){ tagsToRead=std::move(tags);}
+      void  setVerbose(short level=1){_verbose=level;}
+
+      bool  hasNext();
+      bool  next();
+      bool  gotoEvent(int eventNumber);
+      bool  gotoRecord(int irec);
+      bool  next(hipo::event &dataevent);
+      void  read(hipo::event &dataevent);
+      void  printWarning();
+      //void  showUserConfig();
+      int getNRecords() const {return readerEventIndex.getNRecords()-1;}
+      bool  nextInRecord();
+      bool loadRecord(int irec);
+      bool loadRecord(hipo::record &record, int irec);
+      int  getEntries(){return readerEventIndex.getMaxEvents();}
+   };
 }
 #endif /* HIPOREADER_H */
