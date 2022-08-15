@@ -149,7 +149,9 @@ class writer {
     hipo::dictionary      writerDictionary;
     std::vector<hipo::recordInfo_t>   writerRecordInfo;
     std::map<std::string,std::string> userConfig;
-  
+    
+    std::map<int,hipo::recordbuilder> extendedBuilder;
+
     void writeIndexTable();
 
   public:

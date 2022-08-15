@@ -73,6 +73,7 @@ namespace hipo {
         void   init(const char *buffer, int size);
         void   getStructure(hipo::structure &str, int group, int item);
         int    getTag();
+        void   setTag(int tag);
         void   getStructure(hipo::bank &b);
         void   read(hipo::bank &b);
         void   addStructure(hipo::structure &str);

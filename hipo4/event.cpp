@@ -125,6 +125,10 @@ namespace hipo {
       return eventTag;
     }
 
+    void  event::setTag(int tag){
+      *(reinterpret_cast<uint32_t*>(&dataBuffer[8])) = tag;
+    }
+
     void event::init(std::vector<char> &buffer){
         dataBuffer.resize(buffer.size());
         std::memcpy(&dataBuffer[0],&buffer[0],buffer.size());
