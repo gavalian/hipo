@@ -13,10 +13,12 @@ H1F   h = new H1F("h",120,0.0,10.0);
 double px,py,pz,vx,vy,vz,vt;
 
 BenchmarkTimer t = new BenchmarkTimer();
+BenchmarkTimer op = new BenchmarkTimer();
 t.resume();
 while(r.hasNext()){
     r.nextEvent(e);
     e.read(p);
+    op.resume();
     int rows = p.getRows();
     for(int row = 0; row < rows; row++){
       px = p.getFloat(1,row);
@@ -30,9 +32,11 @@ while(r.hasNext()){
 	 + vt + p.getInt(0,row)*p.getFloat(9,row)*p.getFloat(10,row)+p.getInt(11,row) - p.getInt(8,row);
        h.fill(value);
     }
+    op.pause();
 }
 t.pause();
 
 System.out.println(t);
+System.out.println(op);
 }
 
