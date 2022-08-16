@@ -129,7 +129,10 @@ namespace hipo {
         
         void   readEvent( std::vector<char> &vec, int index);
         void   readHipoEvent(hipo::event &event, int index);
+        
         void   getData(   hipo::data &data, int index);
+        //void   getBank(   hipo::bank &bank, int index);
+
         void   getEventsMap(std::vector<std::pair<int,int>> &emap);
 
         hipo::benchmark  &getReadBenchmark(){ return readBenchmark;}

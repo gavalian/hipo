@@ -88,6 +88,73 @@ printf("   copy structures : time = %10.2f sec, count = %d\n\n\n", copyBenchmark
 printf("total time = %10.2f sec\n\n",
        readerBenchmark.getTimeSec()+operationBenchmark.getTimeSec()+copyBenchmark.getTimeSec());
 }
+void benchmark_noeventcopy(const char *file){
+  hipo::reader  reader;
+   hipo::record  record;
+  int count_positive = 0;
+   int count_negative = 0;
+   int ev = 0;
+   int counter = 0;
+   reader.open(file);
+   hipo::dictionary  dict;
+   reader.readDictionary(dict);
+   hipo::bank  particles(dict.getSchema("REC::Particle"));
+   int nrec = reader.getNRecords();
+   TH1F *hbench = new TH1F("HBENCH2","",120,0.0,10.0);
+  float lpx,lpy,lpz,lvx,lvy,lvz;
+float px,py,pz,vx,vy,vz,vt,beta,chi2pid;
+   int pid;
+   int16_t status;
+   int8_t  charge;
+   int pid_index = 0;
+   hipo::benchmark  readerBenchmark;
+   hipo::benchmark  copyBenchmark;
+   hipo::benchmark  operationBenchmark;
+
+
+  readerBenchmark.resume();
+  for(int i =0 ;i < nrec; i++){
+    reader.loadRecord(record,i);
+    int nevt = record.getEventCount();
+    //printf("event size = %d\n", nevt);
+    for(int r = 0; r < nevt; r++){
+      copyBenchmark.resume();
+      // the particle column 0 - is PID
+      // the call will return the address and the length
+      // of the 0-th column from particle bank in the prt data class.
+     record.read(particles,r);
+
+   copyBenchmark.pause();
+
+      //int col_size = pid.getDataSize();
+      //printf("-> rows %8d \n",col_size);
+      operationBenchmark.resume();
+ int nrows = particles.getRows();
+     for(int row = 0; row < nrows; row++){
+       px = particles.getFloat(1,row);
+       py = particles.getFloat(2,row);
+       pz = particles.getFloat(3,row);
+       vx = particles.getFloat(4,row);
+       vy = particles.getFloat(5,row);
+       vz = particles.getFloat(6,row);
+       vt = particles.getFloat(7,row);
+       
+       double value =  sqrt(px*px + py*py + pz*pz)*sqrt(vx*vx+vy*vy+vz*vz)
+	 + vt + particles.getInt(0,row)*particles.getFloat(9,row)*particles.getFloat(10,row)+particles.getInt(11,row) - particles.getInt(8,row);
+       hbench->Fill(value);
+     }
+      operationBenchmark.pause();
+    }
+  }
+   readerBenchmark.pause();
+   printf("processed events = %d (%d, %d) , \n\n\n\t benchmark : time = %10.5f sec, count = %d , \n\t operation : time = %10.5f sec, count = %d\n",
+       counter,count_positive,count_negative,
+       (readerBenchmark.getTimeSec()),readerBenchmark.getCounter(),
+       (operationBenchmark.getTimeSec()),operationBenchmark.getCounter());
+printf("   copy structures : time = %10.5f sec, count = %d\n\n\n", copyBenchmark.getTimeSec(), copyBenchmark.getCounter());
+printf("total time = %10.2f sec\n\n",
+       readerBenchmark.getTimeSec()+operationBenchmark.getTimeSec()+copyBenchmark.getTimeSec());
+}
 
 void benchmark_nocopy(const char *file){
    hipo::reader  reader;
@@ -145,7 +212,7 @@ void benchmark_nocopy(const char *file){
       record.getColumn(beta,     9, particle, r);
       record.getColumn(chi2pid,     10, particle, r);
       record.getColumn(status,     11, particle, r);
-      
+
    copyBenchmark.pause();
       int col_size = pid.getDataSize();
       //printf("-> rows %8d \n",col_size);
@@ -197,6 +264,8 @@ int main(int argc, char** argv) {
 
    benchmark(inputFile);
 benchmark_nocopy(inputFile);
+
+benchmark_noeventcopy(inputFile);
 
    /*
    hipo::reader  reader;
