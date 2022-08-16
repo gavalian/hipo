@@ -127,7 +127,8 @@ void benchmark_nocopy(const char *file){
   for(int i =0 ;i < nrec; i++){
     reader.loadRecord(record,i);
     int nevt = record.getEventCount();
-    for(int r = 0; r < events.size(); r++){
+    //printf("event size = %d\n", nevt);
+    for(int r = 0; r < nevt; r++){
       copyBenchmark.resume();
       // the particle column 0 - is PID
       // the call will return the address and the length
@@ -144,8 +145,10 @@ void benchmark_nocopy(const char *file){
       record.getColumn(beta,     9, particle, r);
       record.getColumn(chi2pid,     10, particle, r);
       record.getColumn(status,     11, particle, r);
+      
    copyBenchmark.pause();
       int col_size = pid.getDataSize();
+      //printf("-> rows %8d \n",col_size);
       operationBenchmark.resume();
       for(int c = 0; c < col_size; c++){
         lpx = *reinterpret_cast<const float*>(&px.getDataPtr()[8+c*4]);
@@ -161,7 +164,7 @@ void benchmark_nocopy(const char *file){
            * (*reinterpret_cast<const float*>(&chi2pid.getDataPtr()[8+c*4]))
            + (*reinterpret_cast<const int16_t*>(&status.getDataPtr()[8+c*2]))
             - (*reinterpret_cast<const int8_t*>(&charge.getDataPtr()[8+c*4]));
-        
+          //printf("\t--->>> row %8d , v = %14.8f\n",c,value);
           hbench->Fill(value);
       }
       operationBenchmark.pause();
