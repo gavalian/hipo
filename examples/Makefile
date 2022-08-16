@@ -14,7 +14,7 @@ LD        := g++
 LDFLAGS   :=
 
 
-all:  writeFile readFile readFileTags showFile schema writeUserHeader
+all:  writeFile readFile readFileTags showFile schema writeUserHeader tupleFile
 
 readEvents: readEvents.o
 	$(CXX) -o readEvents.exe $<  $(HIPOLIBS) $(LZ4LIBS)
@@ -39,6 +39,9 @@ readFusion: readFusion.o
 
 readFileTags: readFileTags.o
 	$(CXX) -o readFileTags.exe $<   $(HIPOLIBS) $(LZ4LIBS)
+
+tupleFile: tupleFile.o
+	$(CXX) -o tupleFile.exe $<   $(HIPOLIBS) $(LZ4LIBS)
 
 writeFile: writeFile.o
 	$(CXX) -o writeFile.exe $<   $(HIPOLIBS) $(LZ4LIBS)

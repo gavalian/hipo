@@ -56,9 +56,11 @@ namespace hipo {
       void setAddress(const char *address);
 
     protected:
+
       void initStructureBySize(int __group, int __item, int __type, int __size);
       std::vector<char>  &getStructureBuffer(){ return structureBuffer;}
       int                 getStructureBufferSize(){ return 8+getSize();}
+      friend class tuple;
     public:
 
       structure(){ structureAddress = nullptr;}

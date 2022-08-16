@@ -153,7 +153,8 @@ class writer {
     std::map<int,hipo::recordbuilder> extendedBuilder;
 
     void writeIndexTable();
-
+    int  verbose = 1;
+  
   public:
 
      writer(){};
@@ -172,6 +173,7 @@ class writer {
      void setUserIntegerOne(long userIntOne);
      void setUserIntegerTwo(long userIntTwo);
      void flush();
+     void setVerbose(int level){ verbose = level;}
 };
 
 };
