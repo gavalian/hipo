@@ -57,7 +57,7 @@ void convert(const std::string &pathInput, const std::string &pathOutput, int co
    treeOutput->Branch("vx",      outVx,      "vx[count]/F",      512000);
    treeOutput->Branch("vy",      outVy,      "vy[count]/F",      512000);
    treeOutput->Branch("vz",      outVz,      "vz[count]/F",      512000);
-   treeOutput->Branch("vz",      outVt,      "vt[count]/F",      512000);
+   treeOutput->Branch("vt",      outVt,      "vt[count]/F",      512000);
    treeOutput->Branch("beta",    outBeta,    "beta[count]/F",    512000);
    treeOutput->Branch("chi2pid", outChi2pid, "chi2pid[count]/F", 512000);
    treeOutput->Branch("charge",  outCharge,  "charge[count]/B",  512000);

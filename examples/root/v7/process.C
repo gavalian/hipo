@@ -115,7 +115,7 @@ void DrawOptimized(TTree *tree)
       br_status->GetEntry(entryId);
 
 
-      for (int i = 0; i < count; ++i) {	
+      for (int i = 0; i < count; ++i) {
 	h->Fill(
 		sqrt(px[i]*px[i] + py[i]*py[i] + pz[i]*pz[i])*sqrt(vx[i]*vx[i]+vy[i]*vy[i]+vz[i]*vz[i])
 		+ vt[i] + pid[i]*beta[i]*chi2pid[i]+status[i] - charge[i]);
