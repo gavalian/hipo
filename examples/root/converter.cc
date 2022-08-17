@@ -146,7 +146,7 @@ int main(int argc, char** argv) {
       writerBenchmark.pause();
 
       writerHipoBenchmark.resume();
-      writer.addEvent(event);
+      if(vec_pid.size()>0) writer.addEvent(event);
       writerHipoBenchmark.pause();
       //printf("---------- END OF PARTICLE BANK -------\n");
       counter++;

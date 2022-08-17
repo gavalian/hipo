@@ -95,12 +95,13 @@ void DrawOptimized(TTree *tree)
    tree->SetBranchAddress("status", status, &br_status);
 
    auto h = new TH1D("", "", 120, 0, 10);
-
+   long runtime = 0;
    auto nEntries = tree->GetEntries();
    printf("drawing optimized, entries = %ld\n",nEntries);
    
    for (decltype(nEntries) entryId = 0; entryId < nEntries; ++entryId) {
       tree->LoadTree(entryId);
+      auto tsStart = std::chrono::steady_clock::now();
       br_count->GetEntry(entryId);
       br_px->GetEntry(entryId);
       br_py->GetEntry(entryId);
@@ -120,8 +121,10 @@ void DrawOptimized(TTree *tree)
 		sqrt(px[i]*px[i] + py[i]*py[i] + pz[i]*pz[i])*sqrt(vx[i]*vx[i]+vy[i]*vy[i]+vz[i]*vz[i])
 		+ vt[i] + pid[i]*beta[i]*chi2pid[i]+status[i] - charge[i]);
       }
+      auto tsStop = std::chrono::steady_clock::now();
+      runtime += std::chrono::duration_cast<std::chrono::microseconds>(tsStop - tsStart).count();
    }
-
+   std::cout << "Runtime algo: " << runtime << " us" << std::endl;
    new TCanvas("c1","",10,10,800,600);
    h->DrawCopy();
 }
@@ -132,7 +135,7 @@ void draw(const char *pathInput, How how)
    auto file = TFile::Open(pathInput);
    auto tree = file->Get<TTree>("clas12");
    printf("drawing method = %d\n",how);
-   
+
    auto tsStart = std::chrono::steady_clock::now();
    switch (how) {
    case kTreeDraw:
@@ -152,7 +155,7 @@ void draw(const char *pathInput, How how)
    }
    auto tsStop = std::chrono::steady_clock::now();
    auto runtime = std::chrono::duration_cast<std::chrono::microseconds>(tsStop - tsStart).count();
-   std::cout << "Runtime: " << runtime << "us" << std::endl;
+   std::cout << "Runtime: " << runtime << " us" << std::endl;
 }
 
 
