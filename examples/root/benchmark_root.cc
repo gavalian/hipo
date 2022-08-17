@@ -41,41 +41,44 @@ int main(int argc, char** argv) {
    f->GetObject("clas12",tree);
 
    std::vector<Int_t>    *vec_pid;
-   std::vector<Float_t>  *vec_px;
+   std::vector<float>  *vec_px;
    std::vector<Float_t>  *vec_py;
    std::vector<Float_t>  *vec_pz;
    std::vector<Float_t>  *vec_vx;
    std::vector<Float_t>  *vec_vy;
    std::vector<Float_t>  *vec_vz;
+   std::vector<Float_t>  *vec_vt;
    std::vector<Char_t>   *vec_charge;
    std::vector<Float_t>  *vec_beta;
    std::vector<Float_t>  *vec_chi2pid;
    std::vector<Short_t>  *vec_status;
 
-   TBranch        *b_pid;   //!
+     TBranch        *b_pid;   //!
      TBranch        *b_px;   //!
      TBranch        *b_py;   //!
      TBranch        *b_pz;   //!
      TBranch        *b_vx;   //!
      TBranch        *b_vy;   //!
      TBranch        *b_vz;   //!
+     TBranch        *b_vt;   //!
      TBranch        *b_beta;   //!
      TBranch        *b_chi2pid;   //!
      TBranch        *b_charge;   //!
      TBranch        *b_status;   //!
 
-   tree->SetBranchAddress("pid",&vec_pid,&b_pid);
-   tree->SetBranchAddress("px",&vec_px,&b_px);
-   tree->SetBranchAddress("py",&vec_py,&b_py);
+     //   tree->SetBranchAddress("pid",&vec_pid,&b_pid);
+     tree->SetBranchAddress("px",&vec_px,&b_px);
+     /* tree->SetBranchAddress("py",&vec_py,&b_py);
    tree->SetBranchAddress("pz",&vec_pz,&b_pz);
    tree->SetBranchAddress("vx",&vec_vx,&b_vx);
    tree->SetBranchAddress("vy",&vec_vy,&b_vy);
    tree->SetBranchAddress("vz",&vec_vz,&b_vz);
+   tree->SetBranchAddress("vt",&vec_vt,&b_vt);
    tree->SetBranchAddress("beta",&vec_beta,&b_beta);
    tree->SetBranchAddress("chi2pid",&vec_chi2pid,&b_chi2pid);
    tree->SetBranchAddress("charge",&vec_charge,&b_charge);
    tree->SetBranchAddress("status",&vec_status,&b_status);
-
+   */
    Long64_t nentries = tree->GetEntriesFast();
    printf("---> tree entries = %lld\n",nentries);
    int counter = 0;
@@ -95,7 +98,7 @@ int main(int argc, char** argv) {
        operBenchmark.resume();
        int size = vec_pid->size();
        for(int i = 0; i < size ; i++){
-         vec.SetXYZ((*vec_px)[i],(*vec_py)[i],(*vec_pz)[i]);
+	 /* vec.SetXYZ((*vec_px)[i],(*vec_py)[i],(*vec_pz)[i]);
          int charge = (*vec_charge)[i];
          if(vec.Mag()>5.0){
            if(charge>0){
@@ -103,7 +106,7 @@ int main(int argc, char** argv) {
            } else {
              count_negative++;
            }
-         }
+	   }*/
        }
        counter++;
        operBenchmark.pause();
