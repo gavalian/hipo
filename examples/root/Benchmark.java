@@ -21,6 +21,32 @@ import j4np.hipo5.io.*;
 
 public class Benchmark {
 
+    public static void writerBenchmark(String file){
+	HipoReader r = new HipoReader(file);
+	Bank   p = r.getBank("REC::Particle");
+	Event  e = new Event();
+	HipoWriter w = new HipoWriter();
+	w.getSchemaFactory().copy(r.getSchemaFactory());
+	w.open(file+"_java.h5");
+	
+	BenchmarkTimer t = new BenchmarkTimer();
+
+	Event eo = new Event();
+	while(r.hasNext()){
+	    r.nextEvent(e);
+	    e.read(p);
+	    eo.reset();
+	    if(p.getRows()>0){
+		t.resume();
+		eo.write(p);
+		w.addEvent(eo);
+		t.pause();
+	    }
+	}
+	
+	System.out.println(t);
+    }
+    
     public static void benchmark(String file){
 
 	HipoReader r = new HipoReader(file);
