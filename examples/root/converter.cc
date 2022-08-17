@@ -146,16 +146,20 @@ int main(int argc, char** argv) {
       writerBenchmark.pause();
 
       writerHipoBenchmark.resume();
-      if(vec_pid.size()>0) writer.addEvent(event);
+      if(vec_pid.size()>0){
+         //event.reset();
+         //event.addStructure(particles);
+         writer.addEvent(event);
+      }
       writerHipoBenchmark.pause();
       //printf("---------- END OF PARTICLE BANK -------\n");
       counter++;
    }
    f->Close();
    writer.close();
-   printf("processed events = %d, benchmark (WRITE) : time = %10.2f sec , count = %d\n",
+   printf("processed events = %d, root      (WRITE) : time = %10.2f sec , count = %d\n",
       counter,writerBenchmark.getTimeSec(),writerBenchmark.getCounter());
-  printf("processed events = %d, hipo      (WRITE) : time = %10.2f sec , count = %d\n",
+   printf("processed events = %d, hipo      (WRITE) : time = %10.2f sec , count = %d\n",
          counter,writerHipoBenchmark.getTimeSec(),writerHipoBenchmark.getCounter());
    printf("processed events = %d, benchmark (READ)  : time = %10.2f sec , count = %d\n",
       counter,readerBenchmark.getTimeSec(),readerBenchmark.getCounter());

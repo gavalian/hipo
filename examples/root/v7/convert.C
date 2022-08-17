@@ -64,6 +64,8 @@ void convert(const std::string &pathInput, const std::string &pathOutput, int co
    treeOutput->Branch("status",  outStatus,  "status[count]/S",  512000);
 
    int nEv = 0;
+   long runtime = 0;
+
    while(reader.Next()) {
       if (++nEv % 100000 == 0)
          std::cout << "Converted " << nEv << " events" << std::endl;
@@ -84,10 +86,14 @@ void convert(const std::string &pathInput, const std::string &pathOutput, int co
          outCharge[i]   = charge->at(i);
          outStatus[i]   = status->at(i);
       }
+      auto tsStart = std::chrono::steady_clock::now();
       treeOutput->Fill();
+      auto tsStop = std::chrono::steady_clock::now();
+      runtime += std::chrono::duration_cast<std::chrono::microseconds>(tsStop - tsStart).count();
    }
    fileOutput->Write();
    fileOutput->Close();
+   std::cout << "writing time : " << runtime << " usec" << std::endl; 
 }
 
 
