@@ -47,6 +47,87 @@ public class Benchmark {
 	System.out.println(t);
     }
     
+	public double calculate(Bank p, H1F h){
+		int nrows = p.getRows();
+		double value = 0;;
+		for(int row = 0; row < nrows; row++){
+		double px = p.getFloat(1,row);
+		double py = p.getFloat(2,row);
+		double pz = p.getFloat(3,row);
+		double vx = p.getFloat(4,row);
+		double vy = p.getFloat(5,row);
+		double vz = p.getFloat(6,row);
+		double vt = p.getFloat(7,row);
+		//double value =  Math.sqrt(px*px + py*py + pz*pz)*Math.sqrt(vx*vx+vy*vy+vz*vz)
+		 value =  (px*px + py*py + pz*pz)*(vx*vx+vy*vy+vz*vz)		
+		    	 + vt + p.getInt(0,row)*p.getFloat(9,row)*p.getFloat(10,row)
+				 +p.getInt(11,row) - p.getInt(8,row);
+				 h.fill(value);
+		}
+		return value;
+	}
+	public double calculateRow(Bank p, int row){
+		double value = 0;;
+		/*double px = p.getFloat(1,row);
+		double py = p.getFloat(2,row);
+		double pz = p.getFloat(3,row);
+		double vx = p.getFloat(4,row);
+		double vy = p.getFloat(5,row);
+		double vz = p.getFloat(6,row);
+		double vt = p.getFloat(7,row);
+*/
+		value =  Math.sqrt(p.getFloat(1,row)*p.getFloat(1,row) 
+		+ p.getFloat(2,row)*p.getFloat(2,row) + 
+		p.getFloat(3,row)*p.getFloat(3,row))*
+		Math.sqrt(
+			p.getFloat(4,row)*p.getFloat(4,row)
+			+ p.getFloat(5,row)*p.getFloat(5,row) + p.getFloat(6,row)*p.getFloat(6,row))
+		    	 + p.getFloat(7,row) + p.getInt(0,row)*p.getFloat(9,row)*p.getFloat(10,row)
+				 +p.getInt(11,row) - p.getInt(8,row);
+		//double value =  Math.sqrt(px*px + py*py + pz*pz)*Math.sqrt(vx*vx+vy*vy+vz*vz)
+		 /*value =  Math.sqrt(px*px + py*py + pz*pz)*Math.sqrt(vx*vx+vy*vy+vz*vz)		
+		    	 + vt + p.getInt(0,row)*p.getFloat(9,row)*p.getFloat(10,row)
+				 +p.getInt(11,row) - p.getInt(8,row);*/
+
+		return value;
+	}
+
+	public void readBenchmark(String file){
+		HipoReader r = new HipoReader(file);
+		Bank p = r.getBank("REC::Particle");
+		
+		Event e = new Event();
+		H1F   h = new H1F("h",120,0.0,10.0);
+		double px,py,pz,vx,vy,vz,vt;
+		
+		BenchmarkTimer t = new BenchmarkTimer();
+		BenchmarkTimer op = new BenchmarkTimer();
+		t.resume();
+
+		while(r.hasNext()){
+			//r.next();
+			r.nextEvent(e);
+			e.read(p);
+			op.resume();
+			//calculate(p,h);
+			int rows = p.getRows();
+			double value = 0;
+	        for(int row = 0; row < rows; row++){
+			  value = calculateRow(p,row);
+			  //System.out.println(calculateRow(p,row));
+			  h.fill(value);
+			}
+			//h.fill(value);
+			op.pause();
+		}
+		t.pause();
+	
+	System.out.println(t);
+	System.out.println(op);
+	}
+
+
+
     public static void benchmark(String file){
 
 	HipoReader r = new HipoReader(file);
@@ -67,7 +148,7 @@ public class Benchmark {
 	    op.resume();
 	    int rows = p.getRows();
 	        for(int row = 0; row < rows; row++){
-		px = p.getFloat(1,row);
+	    px = p.getFloat(1,row);
 		py = p.getFloat(2,row);
 		pz = p.getFloat(3,row);
 		vx = p.getFloat(4,row);
@@ -75,9 +156,9 @@ public class Benchmark {
 		vz = p.getFloat(6,row);
 		vt = p.getFloat(7,row);
 		//double value =  Math.sqrt(px*px + py*py + pz*pz)*Math.sqrt(vx*vx+vy*vy+vz*vz)
-		double value =  (px*px + py*py + pz*pz)*(vx*vx+vy*vy+vz*vz);
-		    // + vt + p.getInt(0,row)*p.getFloat(9,row)*p.getFloat(10,row)+p.getInt(11,row) - p.getInt(8,row);
-		//h.fill(value);
+		double value =  (px*px + py*py + pz*pz)*(vx*vx+vy*vy+vz*vz)
+		     + vt + p.getInt(0,row)*p.getFloat(9,row)*p.getFloat(10,row)+p.getInt(11,row) - p.getInt(8,row);
+		h.fill(value);
 		}
 	    op.pause();
 	}
@@ -89,9 +170,12 @@ public class Benchmark {
 
 
     public static void main(String[] args){
-	int iter = 25;
+	int iter = 75;
+	Benchmark b = new Benchmark();
 	for(int j = 0; j < iter; j++){
-	    Benchmark.benchmark(args[0]);
+	    //Benchmark.benchmark(args[0]);
+		//Benchmark b = new Benchmark();
+		b.readBenchmark(args[0]);
 	}
     }
 }

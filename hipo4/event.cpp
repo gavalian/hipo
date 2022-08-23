@@ -112,7 +112,8 @@ namespace hipo {
         if(data_size>0){
 	        if((evt_size + str_size)<evt_capacity){
 	           memcpy(&dataBuffer[evt_size], &str.getStructureBuffer()[0],str_size);
-	            *(reinterpret_cast<uint32_t*>(&dataBuffer[4])) = (evt_size + str_size + 24);
+	            //*(reinterpret_cast<uint32_t*>(&dataBuffer[4])) = (evt_size + str_size + 24);
+              *(reinterpret_cast<uint32_t*>(&dataBuffer[4])) = (evt_size + str_size);
 	          } else {
 	              printf("event::add : error adding structure with size = %5d (capacity = %5d, size = %5d)\n",
 		              str_size,evt_capacity, evt_size);

@@ -54,11 +54,10 @@ namespace hipo {
         schemaEvent.reset();
         structure schemaNode(120,2,schemaString);
         structure schemaNodeJson(120,1,schemaStringJson);
-        schemaEvent.addStructure(schemaNode);
         schemaEvent.addStructure(schemaNodeJson);
-        schemaEvent.show();
+        schemaEvent.addStructure(schemaNode);
+	      schemaEvent.show();
         builder.addEvent(schemaEvent);
-
     }
 
     //-------------------------------------------------------------------------

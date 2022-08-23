@@ -25,7 +25,7 @@ void convert(const std::string &pathInput, const std::string &pathOutput, int co
    TTreeReaderValue<std::vector<float>> vt(reader, "vt");
    TTreeReaderValue<std::vector<float>> beta(reader, "beta");
    TTreeReaderValue<std::vector<float>> chi2pid(reader, "chi2pid");
-   TTreeReaderValue<std::vector<char>>  charge(reader, "charge");
+   TTreeReaderValue<std::vector<short>>  charge(reader, "charge");
    TTreeReaderValue<std::vector<short>> status(reader, "status");
 
    auto fileOutput = new TFile(pathOutput.c_str(), "RECREATE");
@@ -47,10 +47,10 @@ void convert(const std::string &pathInput, const std::string &pathOutput, int co
    float outVt[1000];
    float outBeta[1000];
    float outChi2pid[1000];
-   char  outCharge[1000];
+   short  outCharge[1000];
    short outStatus[1000];
    treeOutput->Branch("count",   &count,     "count/I",          512000);
-   treeOutput->Branch("pid",     outPid,     "pid[count]/F",     512000);
+   treeOutput->Branch("pid",     outPid,     "pid[count]/I",     512000);
    treeOutput->Branch("px",      outPx,      "px[count]/F",      512000);
    treeOutput->Branch("py",      outPy,      "py[count]/F",      512000);
    treeOutput->Branch("pz",      outPz,      "pz[count]/F",      512000);
@@ -85,6 +85,7 @@ void convert(const std::string &pathInput, const std::string &pathOutput, int co
          outChi2pid[i]  = chi2pid->at(i);
          outCharge[i]   = charge->at(i);
          outStatus[i]   = status->at(i);
+	 //std::cout << " charge = " << outCharge[i] << " ::: " << charge->at(i)  << std::endl;
       }
       auto tsStart = std::chrono::steady_clock::now();
       treeOutput->Fill();

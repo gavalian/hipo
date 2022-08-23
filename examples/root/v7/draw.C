@@ -49,7 +49,7 @@ void DrawTree(TTree *tree)
 void DrawOptimized(TTree *tree)
 {
    int count;
-   float   pid[1000];
+   int   pid[1000];
    float px[1000];
    float py[1000];
    float pz[1000];

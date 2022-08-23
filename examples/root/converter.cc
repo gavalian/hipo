@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
    std::vector<Float_t>  vec_vy;
    std::vector<Float_t>  vec_vz;
    std::vector<Float_t>  vec_vt;
-   std::vector<Char_t>   vec_charge;
+   std::vector<Short_t>   vec_charge;
    std::vector<Float_t>  vec_beta;
    std::vector<Float_t>  vec_chi2pid;
    std::vector<Short_t>  vec_status;
@@ -135,7 +135,7 @@ int main(int argc, char** argv) {
          vec_vt[row]  = particles.getFloat("vt",row);
          vec_beta[row]  = particles.getFloat("beta",row);
          vec_chi2pid[row]  = particles.getFloat("chi2pid",row);
-         vec_charge[row] = (int8_t) particles.getByte("charge",row);
+         vec_charge[row] = (int16_t) particles.getByte("charge",row);
          vec_status[row] = (int16_t) particles.getShort("status",row);
          //printf("%6d : %6d %8.4f %8.4f %8.4f\n",row,pid,px,py,pz);
       }
