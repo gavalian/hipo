@@ -136,7 +136,7 @@ public class Benchmark {
 
 
 
-    public static void benchmark(String file){
+    public static double benchmark(String file){
 
 	HipoReader r = new HipoReader(file);
 	Bank p = r.getBank("REC::Particle");
@@ -174,6 +174,7 @@ public class Benchmark {
 	
 	System.out.println(t);
 	System.out.println(op);
+	return t.getSeconds();
     }
 
 
@@ -190,18 +191,19 @@ public class Benchmark {
 	b.writerBenchmark(filename);
 	String rfile = filename + "_java.h5";
 
+	double realTime = b.readBenchmark(rfile);
 	b.readBenchmark(rfile);
-	b.readBenchmark(rfile);
+	
 	List<Double> times = new ArrayList<>();
 	
 	for(int j = 0; j < iter; j++){
 	    //Benchmark.benchmark(args[0]);
 		//Benchmark b = new Benchmark();
-		double v = b.readBenchmark(rfile);
+		double v = Benchmark.benchmark(rfile);
 		times.add(v);
 	}
 
-	System.out.printf("[FIN] (Java) hipo read  : %10.4f\n",Benchmark.average(times));
+	System.out.printf("[FIN] (Java) hipo read  : %10.4f\n",realTime);
     }
 }
 
