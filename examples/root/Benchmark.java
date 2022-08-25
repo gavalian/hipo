@@ -8,6 +8,8 @@ import twig.widgets.LatexText.TextRotate;
 import twig.widgets.LatexText.TextAlign;
 import twig.graphics.*;
 import twig.config.*;
+import java.util.ArrayList;
+import java.util.List;
 //--------------------------------------
 // Utils import
 //--------------------------------------
@@ -22,10 +24,12 @@ import j4np.hipo5.io.*;
 public class Benchmark {
 
     public static void writerBenchmark(String file){
+
 	HipoReader r = new HipoReader(file);
 	Bank   p = r.getBank("REC::Particle");
 	Event  e = new Event();
 	HipoWriter w = new HipoWriter();
+
 	w.getSchemaFactory().copy(r.getSchemaFactory());
 	w.open(file+"_java.h5");
 	
@@ -44,7 +48,9 @@ public class Benchmark {
 	    }
 	}
 	
+	w.close();
 	System.out.println(t);
+	System.out.printf("[FIN] (Java) hipo write : %10.4f sec\n",t.getSeconds());
     }
     
 	public double calculate(Bank p, H1F h){
@@ -92,7 +98,7 @@ public class Benchmark {
 		return value;
 	}
 
-	public void readBenchmark(String file){
+	public double readBenchmark(String file){
 		HipoReader r = new HipoReader(file);
 		Bank p = r.getBank("REC::Particle");
 		
@@ -124,6 +130,8 @@ public class Benchmark {
 	
 	System.out.println(t);
 	System.out.println(op);
+	System.out.printf("\nexecution time : %10.4f sec\n",t.getSeconds());
+	return t.getSeconds();
 	}
 
 
@@ -169,14 +177,31 @@ public class Benchmark {
     }
 
 
+    public static double average(List<Double> list){
+	double summ = 0.0;
+	for(Double v : list) summ += v;
+	return summ/list.size();
+    }
+    
     public static void main(String[] args){
-	int iter = 75;
+	int iter = 5;
+	String filename = args[0];
 	Benchmark b = new Benchmark();
+	b.writerBenchmark(filename);
+	String rfile = filename + "_java.h5";
+
+	b.readBenchmark(rfile);
+	b.readBenchmark(rfile);
+	List<Double> times = new ArrayList<>();
+	
 	for(int j = 0; j < iter; j++){
 	    //Benchmark.benchmark(args[0]);
 		//Benchmark b = new Benchmark();
-		b.readBenchmark(args[0]);
+		double v = b.readBenchmark(rfile);
+		times.add(v);
 	}
+
+	System.out.printf("[FIN] (Java) hipo read  : %10.4f\n",Benchmark.average(times));
     }
 }
 

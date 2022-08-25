@@ -19,26 +19,26 @@ LD        := g++
 LDFLAGS   := $(ROOTLDFLAGS)
 
 
-all: converter benchmark_root benchmark_hipo benchmark_hipo_cwise benchmark_hipo_ana
+all: converter benchmark
 
 converter: converter.o
-	$(CXX) -o converter $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
+	$(CXX) -o converter.exe $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
 
-benchmark_root: benchmark_root.o
-	$(CXX) -o benchmark_root.exe $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
+#benchmark_root: benchmark_root.o
+#	$(CXX) -o benchmark_root.exe $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
+#
+#benchmark_hipo: benchmark_hipo.o
+#	$(CXX) -o benchmark_hipo.exe $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
 
-benchmark_hipo: benchmark_hipo.o
-	$(CXX) -o benchmark_hipo.exe $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
-
-benchmark_hipo_cwise: benchmark_hipo_cwise.o
-	$(CXX) -o benchmark_hipo_cwise.exe $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
-
-benchmark_hipo_ana: benchmark_hipo_ana.o
-	$(CXX) -o benchmark_hipo_ana.exe $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
+benchmark: benchmark.o
+	$(CXX) -o benchmark.exe $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
+#
+#benchmark_hipo_ana: benchmark_hipo_ana.o
+#	$(CXX) -o benchmark_hipo_ana.exe $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
 
 clean:
 	@echo 'Removing all build files'
-	@rm -rf *.o converter *~ benchmark_*.exe
+	@rm -rf *.o converter.exe *~ benchmark*.exe *.class
 #=====================================================================
 # COMPILE RULES
 #=====================================================================
