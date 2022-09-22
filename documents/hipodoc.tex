@@ -1,0 +1,243 @@
+\documentclass[preprint,12pt]{elsarticle}
+%\documentclass{article}
+\usepackage{bytefield}
+\usepackage{xcolor}
+\usepackage[margin=1.0in]{geometry}
+
+
+\definecolor{lightgray}{rgb}{0.96,0.92,0.92}
+\definecolor{lightcyan}{rgb}{0.9,0.9,0.99}
+\definecolor{lightblue}{rgb}{0.78,0.81,0.91}
+\definecolor{lightgreen}{rgb}{0.75,0.91,0.85}
+\definecolor{lightred}{rgb}{0.956,0.73,0.71}
+\definecolor{lightorange}{rgb}{0.975,0.86,0.77}
+
+\title{HIPO Data Format Specifications}
+\author{Gagik Gavalian (Jefferson Lab)}
+\date{09/21/2022}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+The High-Performance Output (HIPO) data format was developed at Jefferson Lab for storing data from the reconstruction of
+CLAS12 detector experimental data. The main goal was to develop a data format that has compression and structured data 
+storage that can allow for random access to events stored in the file. The following sections give a detailed description of node, event 
+, and record structures of HIPO data format.
+
+\section{Data Arrays Format}
+
+An event is a collection of data array entries. The data array (called "node" in HIPO), consists of a header and data field. The structure 
+of the node is shown in Figure~\ref{node:header}.
+
+\begin{figure*}[ht!]
+\vspace{0.4in}
+\begin{bytefield}[bitwidth=1.1em]{32}
+  \bitheader{0-31} \\
+\begin{rightwordgroup}{Node \\ Header}
+\bitbox{16}[bgcolor=lightred]{Group} & \bitbox{8}[bgcolor=lightgreen]{Item} & \bitbox{8}[bgcolor=lightblue]{Type} \\
+\bitbox{24}[bgcolor=lightgray]{Node Length (bytes) } & \bitbox{8}[bgcolor=lightgray]{Header Length} 
+\end{rightwordgroup} \\
+  \wordbox{3}{Node Data}
+\end{bytefield}
+\caption{Structure of the node.}
+\label{node:header}
+\end{figure*}
+
+There are several node types summarized in table~\ref{data:types}. 
+
+\begin{table}[h!]
+\begin{center}
+
+\begin{tabular}{r|r}
+Value & Description \\
+\hline
+\hline
+1 & byte array  (8 bits) \\
+2 & short array (16 bits) \\
+3 & int array (32 bits) \\
+4 & float array (32 bit) \\
+5 & double array (64 bit) \\
+6 & string array (ASCII characters) \\
+7 & Group of Nodes \\
+8 & long array (64 bit) \\
+9 & vector array (3 floats per entry) \\
+10 & Composite array (contains format string) \\
+11 & Table (tabular data banks, interpreted with schema)
+\end{tabular}
+
+\end{center}
+\caption{Node types.}
+\label{data:types}
+\end{table}
+
+
+{\bf Group:} Each node has a group identifier associated with it, the group number is used to identify the module that produced 
+the bank. In our data processing applications, each detector is assigned a group number and all banks produced by a specific 
+detector module will have the same group numbers.
+
+{\bf Item:} Each module can produce multiple banks, and the item property is used to enumerate the banks. Together with group numbers,
+they should be unique within the event. When reading a specific node from the event, the event will scan to the first occurrence of the unique combination 
+of (group,item) and will ignore the following copies.
+
+{\bf Type:} Each node has a field describing the type of the node. All possible types are summarized in Table~\ref{data:types}.
+
+{\bf Node Length:} 24 bits representing the length of the node data in bytes (excluding the header). The total length of the structure is 
+(Node Length)+8.
+
+{\bf Header Length:} The node can have a header describing the node structure. For primitive types, it is set to 0. For composite banks
+the header length records the number of bytes used for the node descriptor, so the length of the data stored in the node will be:
+\begin{equation}
+(Node Data Length) = (Node Length) - (Header Length)
+\end{equation}
+ 
+ For complex bank structures that require schema versioning, the node header will contain several words, that will have unique 
+ identifiers to verify the schema before parsing and reading the node data. For these cases, it's better for users to use the standard 
+ API either in C++ or Java library.
+  
+
+\section{Data Event Format}
+
+The event in HIPO data format is a collection of data array entries each of them having unique identifiers.
+The structure of the event is shown in Figure~\ref{event:header}. 
+
+%The events in HIPO file are stored in records. The number of events inside the record depends on
+%event sizes and the required maximum size for the record. 
+
+\begin{figure*}[ht!]
+\vspace{0.4in}
+\begin{bytefield}[bitwidth=1.1em]{32}
+  \bitheader{0-31} \\
+\begin{rightwordgroup}{Event \\ Header}
+\bitbox{16}[bgcolor=lightblue]{Event Identifier String} &  \bitbox{16}[bgcolor=lightgreen]{Version String} \\
+\bitbox{32}[bgcolor=lightgray]{Event Length (in bytes)} \\
+ \bitbox{32}[bgcolor=lightgray]{Event Tag} \\
+ \bitbox{32}[bgcolor=lightgray]{Event Mask} 
+\end{rightwordgroup} \\
+\wordbox{1}{Node~1} \\
+         \wordbox{1}{Node~2} \\
+         \wordbox[]{1}{$\vdots$} \\[1ex]
+         \wordbox{1}{Node~$N$}
+\end{bytefield}
+\label{event:header}
+\caption{Structure of the event with the event description.}
+\end{figure*}
+
+The event identifier word is used to verify that this structure is a HIPO event. The convention used here is
+to write 4 ascii characters that will also contain the variation (or a version of the event structure). For version 4
+the identifier word is {\tt "EV4a"} in version 5 of the library it changed to {\tt "EV5b"}.
+
+{\bf Event Length:} The event length contains the total length of the event, including the header size in bytes. 
+ The newly created empty event therefore will have the length set to 16.
+ 
+ {\bf Event Tag:} Event tags are used to sort events within the HIPO file stream. events with different tags are stored
+ in different records which allow fast access to certain events tagged similarly. This feature is used in data acquisition applications
+ to assign different tags to events from different triggers to have them easily accessible within a large file. Tags are also used in 
+ physics applications to separate different physics event types (or event topologies) inside the file.
+ 
+{\bf Event Mask:} Event mask allows users to assign masks to each event (usually by flipping a bit on and off). It is up to the user 
+to assign meaning and function to this field. In our data processing applications, it is used to create parallel output streams to write 
+a file. When experimental data is processed, it contains different types of events for different physics analyses. There is a need 
+to filter events from a large dataset that the user has to analyze to avoid the overhead of reading the entire data set. We use the mask 
+filed in the event to let several analysis modules mark the events that match their selection criteria and an automated tool distributes 
+these events into parallel outputs.
+
+{\bf NOTE! : } It is important to understand that the tag is used to mark the event with a unique identifier, and automated tools will write 
+this event into a specific record, and only one instance of this event is present. However, with masks, the event will appear in as many 
+parallel streams as many mask bits are set. So setting multiple masks on the event will make the event be exported to multiple 
+outputs.
+
+\section{Data Record Format}
+
+Records in HIPO data format are a collection of events that are grouped together for compression and bulk I/O.
+The structure of records is shown in Figure~\ref{record:header}.
+
+\begin{figure*}[ht!]
+\vspace{0.4in}
+\begin{center}
+\begin{bytefield}[bitwidth=1.1em]{32}
+%\begin{bytefield}[bitwidth=0.9em]{32}
+  \bitheader{0-31} \\
+\begin{rightwordgroup}{Record \\ Header \\ 14 Words}
+\bitbox{32}[bgcolor=lightorange]{Record Length (words)} \\
+\bitbox{32}[bgcolor=lightgray]{Record Number} \\
+\bitbox{32}[bgcolor=lightgray]{Header Length (words)} \\
+\bitbox{32}[bgcolor=lightgray]{Event (Index) Count} \\
+\bitbox{32}[bgcolor=lightgray]{Index Array Length (bytes)} \\
+\bitbox{24}[bgcolor=lightred]{Bit Info} & \bitbox{8}[bgcolor=lightblue]{Version}  \\
+\bitbox{32}[bgcolor=lightgray]{User Header Length (bytes)} \\
+\bitbox{32}[bgcolor=lightgray]{Magic Number (0xc0da0100)} \\
+\bitbox{32}[bgcolor=lightgray]{Uncompressed Data Length} \\
+\bitbox{8}[bgcolor=lightred]{Compression Type} & \bitbox{24}[bgcolor=lightgreen]{Compressed Data Length}  \\
+\bitbox{32}[bgcolor=lightgray]{User Register 1 (low 32 bits)} \\
+\bitbox{32}[bgcolor=lightgray]{User Register 1 (high 32 bits)} \\
+\bitbox{32}[bgcolor=lightgray]{User Register 2 (low 32 bits)} \\
+\bitbox{32}[bgcolor=lightgray]{User Register 2 (high 32 bits)} 
+\end{rightwordgroup} \\
+  \wordbox{2}{Index Description Array} \\
+  \wordbox{2}{User Header} \\
+  \wordbox{3}{Data}
+\end{bytefield}
+\end{center}
+\caption{Record header structure.}
+\label{record:header}
+\end{figure*}
+
+{\bf Record Length:} The number of words (32 bit) in the record.
+
+{\bf Record Number:} A unique number that can be assigned to a record to identify it in the stream. For example, it can be a sequential 
+number that observes the order of records.
+
+{\bf Header Length:} The number of words in the record header (14 by default). In case the header needs to be expanded to accommodate more information
+this number can be changed to define the number of words used in the custom version of the header.
+
+{\bf Event (Index) Count:} The number of events in the record. This number is also used to verify the length of the index array.
+
+{\bf Index Array Length:} Each record contains an array containing the length of each event in the record. This may seem redundant for event formats that 
+already contain information describing its length, but the format was designed to store any kind of data by just providing the record with an array of 
+bytes to store and the length of that array. Typically the length of this array is $4\times$(number of events), since we use 4 bytes to store the length of an event. 
+If the stored events already contain the length 
+information the index array can be omitted and events can be read from the record sequentially by checking the length of each event in order.
+
+{\bf Bit Info:} This field contains information about all bit paddings in different parts of the record.
+Here is the description of each field:
+  
+  \begin{itemize}
+  \item    8    = true if a dictionary is included (relevant for first record only)
+ \item    9    = true if this record has the "first" event (to be in every split file)
+ \item    10    = true if this record is the last in the file or stream
+ \item    11-14 = reserved
+ \item    15-19 = reserved
+ \item    20-21 = padding of the index array
+ \item    22-23 = padding of the user header
+ \item    24-25 = padding of the event data buffer
+ \item    26-27 = reserved
+ \item    28-31 = general header type: 4 = HIPO record, 7 = HIPO file trailer
+ \end{itemize}
+
+The padding here is the number of bytes (usually {\tt 0}s) added to each buffer to complete them to a word (multiple of 4 bytes).
+
+{\bf Version:} The version of the software that produced this record.
+ 
+{\bf User Header Length:} Each record may store a user-defined array to store various types of information, such as data node dictionaries, experimental setup
+configuration, or just text describing the data. This field shows the size of the user header stored within the record.
+
+{\bf Magic Number:} This number (equal to {\tt 0xC0DA0100}) is used to determine the endianness of the data.
+
+{\bf Uncompressed Data Length:} is the total length of the data buffer (including index array, user header, and events buffer) in the record in the uncompressed state. This is used to allocate the decompression buffer properly and to check the data size after de-compression for consistency. 
+
+{\bf Compression Type:} Two compression algorithms are supported by the standard HIPO library (LZ4 and GZIP), and identifiers 1-3 are reserved for these algorithms 
+(1 and 2 - LZ4, 3 - GZIP). the value 0 in this field means that data is not compressed. 
+
+{\bf Compressed Data Length:} The compressed length of the buffer (including index array, user header, and events buffer) is stored. If the compression byte is equal to 0,
+this length must match with {\bf Uncompressed Data Length}.
+
+{\bf User Register 1:} Long value (64 bits) at the end of the record is used for assigning tags to the record. In the HIPO file footer, the information about each record position 
+as well as the tags (values of user registers) are stored, so if desired only specific records can be read from the file. The events with tags (the 3rd word in the event header)
+transfer their tag to "User Register 1 (low 32 bits)".
+
+{\bf User Register 2:} Reserver register for future use.
+ 
+
+\end{document}
