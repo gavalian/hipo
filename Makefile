@@ -31,6 +31,7 @@ shlib:
 	@test -f lz4/lib/liblz4.$(SHAREDEXT) && cp lz4/lib/liblz4.$(SHAREDEXT) slib/.
 #	@test -f lz4/lib/liblz4.so && cp lz4/lib/liblz4.so lib/.
 	@cd hipo4 ; make slibhipo
+	@mv slib/liblz4.dylib slib/liblz4.so
 
 clean:
 	@cd lz4; make clean
