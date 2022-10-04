@@ -17,7 +17,9 @@ ifeq ($(OSTYPE),darwin)
   SHAREDEXT=dylib
 endif
 
-all: 
+all: lib shlib
+
+lib: 
 	@test -d lib || mkdir -p lib
 	@cd lz4 ; make lz4
 	@cp lz4/lib/liblz4.a lib/.
