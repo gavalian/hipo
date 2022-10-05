@@ -33,16 +33,20 @@ HIPO files from Python. There is a python interface included in the package
 (in directory python) implemented using ctypes that provides direct access to
 the hipo4 shared library. No external dependencies and no compilation required.
 Just provide the directory location where the lz4 and hipo4 shared libraries can
-be found and use it. Here is an eaxmple of how to read a file produced by the
-example code writeFile.cpp (in examples directory):
+be found and use it.
+For this example to work, compile the main directory producing the shared libraries.
+The go to examples directory and compile, then run the writeFile.exe code, which
+produces a file with a name "example_output.hipo". Here is an eaxmple of how to
+read a file produced by the example code writeFile.cpp (in examples directory):
+
 
 ``` python
  # example of reading hipo file from python
  from hipolib import hreader
 
- filename = '../examples/example_output.hipo'
+ filename = '../../examples/example_output.hipo'
  # the directory with shared libraries provided
- reader = hreader('../slib')
+ reader = hreader('../../slib')
  reader.open(filename)
  # define banks that will be read with each next() call
  reader.define('event::particle')
