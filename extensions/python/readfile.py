@@ -1,9 +1,9 @@
 # example of reading hipo file from python
 from hipolib import hreader
 
-filename = '../examples/example_output.hipo'
+filename = '../../examples/example_output.hipo'
 # the directory with shared libraries provided
-reader = hreader('../slib')
+reader = hreader('../../slib')
 reader.open(filename)
 # define banks that will be read with each next() call
 reader.define('event::particle')
