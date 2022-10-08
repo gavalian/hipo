@@ -87,6 +87,13 @@ else()
     add_executable(test_hipo_ds test_hipo_ds.cxx)
     target_link_libraries(test_hipo_ds HipoDataFrame ROOT::Core ROOT::Hist)
 
+    add_executable(test_hipo_speed test_hipo_speed.cxx)
+    target_link_libraries(test_hipo_speed HipoDataFrame ROOT::Core ROOT::Hist)
+
+    add_executable(test_root_speed test_root_speed.cxx)
+    target_link_libraries(test_root_speed ROOT::Core ROOT::Hist ROOT::ROOTDataFrame ROOT::ROOTVecOps)
+
+
     include(CMakePackageConfigHelpers)
     # Write a package versioning file based on the project version (see top)
     write_basic_package_version_file(

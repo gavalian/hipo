@@ -471,7 +471,7 @@ std::vector<void *> RHipoDS::GetColumnReadersImpl(std::string_view col_name, con
    auto fActiveColumn_itt = std::find(fActiveColumns.begin(), fActiveColumns.end(), col_index);
    if(  fActiveColumn_itt == fActiveColumns.end()) {
    // Has this column already been setup for reading? If not, set it up.
-   // Yup, this is one big data allocation cluster-fuck.
+   // Yup, this is one big data allocation clusterfuck.
       fActiveColumns.push_back(col_index);
       if( fColumnTypeIsVector.at(col_index)) {   // VECTORS
          switch (fColumnType.at(col_index)) {
@@ -576,8 +576,8 @@ std::vector<void *> RHipoDS::GetColumnReadersImpl(std::string_view col_name, con
 
 ClassImp(RHipoDS);
 
-RDataFrame MakeHipoDataFrame(std::string_view fileName){
-   RDataFrame tdf(std::make_unique<RHipoDS>(fileName));
+RDataFrame MakeHipoDataFrame(std::string_view fileName, int n_inspect){
+   RDataFrame tdf(std::make_unique<RHipoDS>(fileName, n_inspect));
    return tdf;
 }
 

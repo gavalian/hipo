@@ -36,7 +36,7 @@ public:
    bool fHipoReadOnlyPhysicsEvents = true;
 
    const std::vector<std::string> fgCollTypeNumToString{ // ORDER is important here. C++ so go +1
-      "zero", "char", "short", "int", "float", "double", "long", "None1", "long"};
+      "zero", "short", "short", "int", "float", "double", "long", "None1", "long"};
    std::vector<std::string> fHeaders;
    std::map<std::string, ColType_t> fColTypes;
 
@@ -99,8 +99,8 @@ protected:
    std::string AsString() override;
 
 public:
-   explicit RHipoDS(std::string_view file_pattern, int nevt_inspect=100, int debug=0);
-   explicit RHipoDS(std::vector<std::string> &files, int nevt_inspect=100, int debug=0);
+   explicit RHipoDS(std::string_view file_pattern, int nevt_inspect=10000, int debug=0);
+   explicit RHipoDS(std::vector<std::string> &files, int nevt_inspect=1000, int debug=0);
    ~RHipoDS() override= default;
 
    void Finalize()
@@ -151,6 +151,6 @@ ClassDef(RHipoDS, 0);
 ///////////////////////////////////////////////////////////////////////////////////////////////
 /// \brief Factory method to create a CSV RDataFrame.
 /// \param[in] fileName Path of the Hipo file.
-RDataFrame MakeHipoDataFrame(std::string_view fileName);
+RDataFrame MakeHipoDataFrame(std::string_view fileName, int n_inpect = 10000);
 
 #endif //HIPODATAFRAME_RHIPODS_HXX

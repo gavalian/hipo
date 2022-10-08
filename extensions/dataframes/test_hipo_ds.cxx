@@ -22,11 +22,11 @@ std::vector<float> v_abs(std::vector<float>  &x, std::vector<float> &y, std::vec
 int main(int argc, char **argv) {
    // Very simple test of the Hipo DataFrame.
    // ROOT::EnableImplicitMT();
-   int N_open = 100;
+   int N_open = 100000;
    std::chrono::nanoseconds delta_t;
 
    if(argc < 2){
-      std::cout << "Please specify a HIPO data file on the command line. (no wildcards, only one file.) \n";
+      std::cout << "Please specify a HIPO data file on the command line. (Only one file.) \n";
       return 1;
    }else{
       std::cout << "Opening file " << argv[1] << std::endl;
@@ -34,6 +34,7 @@ int main(int argc, char **argv) {
 
    auto start = std::chrono::high_resolution_clock::now();
    auto ds = std::make_unique<RHipoDS>(argv[1], N_open);
+   auto cols_ds = ds->GetColumnNames();
    bool translated = ds->fColumnNameTranslation;
    auto stop = std::chrono::high_resolution_clock::now();
    delta_t = std::chrono::duration_cast<std::chrono::nanoseconds>(stop-start);
@@ -47,6 +48,7 @@ int main(int argc, char **argv) {
 //   }
    auto total_events = ds->GetEntries();
    auto df = RDataFrame(std::move(ds));
+   auto cols_df = df.GetColumnNames();
    RInterface<Detail::RDF::RLoopManager, void> df2 = df;
    std::string run_config_event = "RUN::config.event";
    if(translated){
