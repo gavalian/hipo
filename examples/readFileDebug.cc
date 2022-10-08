@@ -49,7 +49,11 @@ void debug1(const char *file){
     current_event++;
     counter++;
     event.getStructure(runinfo);
+    event.getStructure(particles);
     printf("Evt: %6d  = run: %5d  event: %6d \n", current_event, runinfo.getInt("run", 0), runinfo.getInt("event", 0));
+    if(particles.getRows()>0){
+      printf("\t==> particles px = %f, with double = %f\n",particles.getFloat("px",0),particles.getDouble("px",0));
+    }
   }
   printf("processed events = %d\n",counter);
 }
@@ -117,8 +121,6 @@ void debug3(const char *file){
           *reinterpret_cast<const float *> (&ptrpx.getDataPtr()[c*4])
           );
       }
-
-
     }
   }
 }
@@ -138,8 +140,8 @@ int main(int argc, char** argv) {
    }
 
 
-//   debug1(inputFile);
+   debug1(inputFile);
 //    debug2(inputFile);
-debug3(inputFile);
+//debug3(inputFile);
 }
 //### END OF GENERATED CODE

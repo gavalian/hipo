@@ -18,7 +18,7 @@ class hreader:
             (use it wisely)
         """
         self.libPath    = libfilename
-        self.lz4lib     = ctypes.CDLL(self.libPath+'/liblz4.dylib');
+        self.lz4lib     = ctypes.CDLL(self.libPath+'/liblz4.so');
         self.hipo4lib   = ctypes.CDLL(self.libPath+'/libhipo4.so')
         self.status     = ctypes.c_int(0)
         self.handle     = -1
