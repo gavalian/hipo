@@ -236,8 +236,10 @@ extern "C" {
          int handle = hFusion.open(filename); return handle;
     }
 
+  
     bool   fusion_next(int handle){ return hFusion.next(handle);}
     void   fusion_define(int handle, const char *bank){ hFusion.define(handle,bank);}
+    void   fusion_describe(int handle, const char *bank){ hFusion.describe(handle,bank);}
     int    fusion_bankSize(int handle, const char *bank){ return hFusion.getSize(handle,bank);}
     
     int    fusion_get_int(int handle, const char *bank, const char *entry, int row){ 
