@@ -57,7 +57,7 @@ class hreader:
             hreader.define(bankname) function call.
         """
         status = self.hipo4lib.fusion_next(self.handle)
-        return status
+        return status==1
 
     def getInt(self,bank,entry,row):
         """ returns an integer value for entry and row from requested bank. call getSize()
