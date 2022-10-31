@@ -13,7 +13,7 @@
 #
 SHAREDEXT=so
 
-ifeq ($(OSTYPE),darwin)
+ifneq (,$(findstring darwin,$(OSTYPE)))
   SHAREDEXT=dylib
 endif
 
