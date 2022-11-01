@@ -8,8 +8,8 @@ HIPOLIBS    := -L../../lib -lhipo4
 LZ4LIBS     := -L../../lz4/lib -llz4
 LZ4INCLUDES := -I../../lz4/lib
 
-XROOTDINCLUDES := -I/usr/local/Cellar/xrootd/4.10.1/include/xrootd
-XROOTDLIBS     := -L/usr/local/lib -lXrdClient
+XROOTDINCLUDES := -I/opt/homebrew/Cellar/xrootd/5.4.3/include/xrootd
+XROOTDLIBS     := -L/opt/homebrew/Cellar/xrootd/5.4.3/lib -lXrdClient
 
 CXX       := g++
 CXXFLAGS  += -Wall -fPIC -std=c++11

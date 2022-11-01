@@ -18,6 +18,11 @@ namespace hipo {
   void inputSource::define(const char *bank){
       banks[std::string(bank)] = hipo::bank(factory.getSchema(bank));
   }
+
+  void   inputSource::describe(const char *bank){
+    banks[std::string(bank)].getSchema().show();
+  }
+  
   bool inputSource::next(){
      bool status = reader.next();
      if(status==true){
@@ -55,7 +60,11 @@ double  inputSource::getFloat( const char *bank, const char *entry, int row){
      sources[fid]->define(bank);
   }
 
-   int  fusion::getSize(int fid, const char *bank){
+  void fusion::describe(int fid, const char *bank){
+    sources[fid]->describe(bank);
+  }
+  
+  int  fusion::getSize(int fid, const char *bank){
      return sources[fid]->getSize(bank);
   }
 

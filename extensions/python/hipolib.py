@@ -39,6 +39,13 @@ class hreader:
         """
         self.hipo4lib.fusion_define(self.handle,ctypes.c_char_p(bankname.encode('ascii')))
 
+    def describe(self,bankname):
+        """ define is used to declare a bank that will be read by the fusion wrapper
+        each time next() is called. The banks are stored in the internal map for
+        each opened file handle.
+        """
+        self.hipo4lib.fusion_describe(self.handle,ctypes.c_char_p(bankname.encode('ascii')))
+        
     def getSize(self,bankname):
         """ returns size of the bank that was read for current event.
         """
@@ -50,7 +57,7 @@ class hreader:
             hreader.define(bankname) function call.
         """
         status = self.hipo4lib.fusion_next(self.handle)
-        return status
+        return status==1
 
     def getInt(self,bank,entry,row):
         """ returns an integer value for entry and row from requested bank. call getSize()

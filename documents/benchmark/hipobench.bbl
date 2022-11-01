@@ -1,0 +1,29 @@
+\begin{thebibliography}{1}
+
+\bibitem{HipoLib}
+G.Gavalian, ``{High Performance Output Data Format}.''
+  \url{https://github.com/gavalian/hipo}.
+
+\bibitem{Burkert:2020akg}
+V.~Burkert {\em et~al.}, ``{The CLAS12 Spectrometer at Jefferson Laboratory},''
+  {\em Nucl. Instrum. Meth. A}, vol.~959, p.~163419, 2020.
+
+\bibitem{Brun:1997pa}
+R.~Brun and F.~Rademakers, ``{ROOT: An object oriented data analysis
+  framework},'' {\em Nucl. Instrum. Meth. A}, vol.~389, pp.~81--86, 1997.
+
+\bibitem{Gyurjyan:2011zz}
+V.~Gyurjyan, D.~Abbott, J.~Carbonneau, G.~Gilfoyle, D.~Heddle, G.~Heyes,
+  S.~Paul, C.~Timmer, D.~Weygand, and E.~Wolin, ``{CLARA: A contemporary
+  approach to physics data processing},'' {\em J. Phys. Conf. Ser.}, vol.~331,
+  p.~032013, 2011.
+
+\bibitem{Ziegler:2020gsr}
+V.~Ziegler {\em et~al.}, ``{The CLAS12 software framework and event
+  reconstruction},'' {\em Nucl. Instrum. Meth. A}, vol.~959, p.~163472, 2020.
+
+\bibitem{Blomer:2020usr}
+J.~Blomer, P.~Canal, A.~Naumann, and D.~Piparo, ``{Evolution of the ROOT Tree
+  I/O},'' {\em EPJ Web Conf.}, vol.~245, p.~02030, 2020.
+
+\end{thebibliography}

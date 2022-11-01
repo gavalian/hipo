@@ -7,6 +7,9 @@ reader = hreader('../../slib')
 reader.open(filename)
 # define banks that will be read with each next() call
 reader.define('event::particle')
+# prints the structure of the bank on the screen
+reader.describe('event::particle')
+
 counter = 0
 
 while(reader.next()==True):

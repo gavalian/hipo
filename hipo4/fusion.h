@@ -21,7 +21,7 @@
 #include <vector>
 #include <map>
 #include "reader.h"
-#include<chrono>
+#include <chrono>
 
 namespace hipo {
   
@@ -30,7 +30,7 @@ namespace hipo {
      private:
 
        hipo::reader reader;
-       std::map<std::string,hipo::bank> banks;
+        std::map<std::string,hipo::bank> banks;
        hipo::dictionary  factory;
        hipo::event      event;
 
@@ -42,6 +42,7 @@ namespace hipo {
 
       void open(const char *filename);
       void define(const char *bank);
+      void describe(const char *bank);
       bool next();
       
       hipo::bank  &get(const char *bank){ return banks[bank];}
@@ -64,9 +65,12 @@ namespace hipo {
     
 
      int      open(const char *filename);
-     bool   next(int handle);
+     bool     next(int handle);
+
      void   define(int fid, const char *bank);
-     int   getSize(int fid, const char *bank);
+     void   describe(int fid, const char *bank);
+
+     int    getSize(int fid, const char *bank);
 
       int     getInt(   int handle, const char *bank, const char *entry, int row);
       float   getFloat( int handle, const char *bank, const char *entry, int row);
