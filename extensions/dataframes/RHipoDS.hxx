@@ -99,6 +99,7 @@ protected:
    std::string AsString() override;
 
 public:
+   explicit RHipoDS(){};
    explicit RHipoDS(std::string_view file_pattern, int nevt_inspect=10000, int debug=0);
    explicit RHipoDS(std::vector<std::string> &files, int nevt_inspect=1000, int debug=0);
    ~RHipoDS() override= default;
@@ -123,6 +124,7 @@ public:
 
    int AddFiles(std::string_view file_glob);
    void AddHipoTags(int tag){ fHipoReader.setTags(tag);}
+   int AddHipoBank(std::string name, int nrows=1);
    void Init(int nevt_inspect=100);
    unsigned long GetEntries(bool current_file_only = false);
    const std::vector<std::string> &GetColumnNames() const override;

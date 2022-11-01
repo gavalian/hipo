@@ -39,10 +39,13 @@ std::string RHipoDS::GetTranslatedColumnName(std::string name) const{
 }
 
 /// Initialize the class for reading from the HIPO files.
+/// The nevt_inspect argument will inspect that many events in the file to see what banks the file actually contains.
+/// If nevt_inspect < 0, no banks will be added at all, and you have to do so by hand.
+/// If nevt_inspect = 0, all the banks are added as vectors, whether they are in the file or not (so you get lots of empties).
+/// If nevt_inspect > 0 then that many events are inspected.
 void RHipoDS::Init(int nevt_inspect) {
 
    if(fHipoFiles.empty()) return;
-
    fHipoReader.setTags(0);
    fHipoReader.open(fHipoFiles[0].c_str());
    fHipoCurrentMaxEvent = fHipoReader.getEntries();
@@ -56,52 +59,17 @@ void RHipoDS::Init(int nevt_inspect) {
    fAllBankNames = fHipoDict.getSchemaList();
 
    hipo::event event;
-   if(nevt_inspect < 0) nevt_inspect = 1<<30; // MAX INT
+   if(nevt_inspect < 0) return;
    int counter = 0;
 
    if( nevt_inspect == 0){
       for (int ib = 0; ib < fAllBankNames.size(); ++ib) {
-         auto sch = fHipoDict.getSchema(fAllBankNames[ib].c_str());
-         hipo::bank this_bank(sch);
-         event.getStructure(this_bank);
-         auto bank_it = fBanksToIndex.find(fAllBankNames[ib]);
-         if( bank_it == fBanksToIndex.end()) {
-            int bank_index = fBanks.size();
-            fBanksToIndex[fAllBankNames[ib]] = bank_index;
-            fBanks.emplace_back(this_bank);   // Put the bank in the bank store.
-
-            for (int i = 0; i < sch.getEntries(); ++i) {
-
-               std::string full_name = fAllBankNames[ib] + "." + sch.getEntryName(i);
-
-               fAllColumnsPreTranslated.emplace_back(full_name);
-               if(fColumnNameTranslation) full_name = GetTranslatedColumnName(full_name);
-
-               fColumnNameToIndex[full_name] = fAllColumns.size();
-
-               fAllColumns.emplace_back(full_name);
-               fColumnBank.push_back(bank_index);
-               fColumnItem.push_back(i);
-               int i_type = sch.getEntryType(i);
-               if (i_type < 0 || i_type >= fgCollTypeNumToString.size()) {
-                  std::string err = "RHipoDS::RHipoDS() -- Error -- Type out of range for " + full_name;
-                  err += " type num = " + std::to_string(i_type);
-                  throw std::runtime_error(err);
-               }
-               fColumnType.push_back(i_type);
-               fColumnTypeIsVector.push_back(true);
-
-               if (fDebug > 1) {
-                  printf("%30s  bank id: %3d item: %2d  %s \n", full_name.c_str(), bank_index, i,
-                         fColumnTypeIsVector.back() ? "vector" : "scaler");
-               }
-            }
-         }
+         AddHipoBank(fAllBankNames[ib], 2); // We don't know anything about the banks, so they are all vectors???
       }
    }else {
       std::map<std::string, int> bank_column_depth;
 
-      while (fHipoReader.next() == true && counter < nevt_inspect) { // Only inspect the first 100 events?
+      while (fHipoReader.next() == true && counter < nevt_inspect) { // Only inspect the first N events?
          fHipoReader.read(event);
          for (int ib = 0; ib < fAllBankNames.size(); ++ib) {
             auto sch = fHipoDict.getSchema(fAllBankNames[ib].c_str());
@@ -119,56 +87,7 @@ void RHipoDS::Init(int nevt_inspect) {
 
             if (nrows > 0) {
                // Check if we stored this bank already. If not, store it, and parse it.
-               auto bank_it = fBanksToIndex.find(fAllBankNames[ib]);
-               if( bank_it == fBanksToIndex.end()) {
-                  int bank_index = fBanks.size();
-                  fBanksToIndex[fAllBankNames[ib]] = bank_index;
-                  fBanks.emplace_back(this_bank);   // Put the bank in the bank store.
-
-                  for (int i = 0; i < sch.getEntries(); ++i) {
-                     std::string full_name = fAllBankNames[ib] + "." + sch.getEntryName(i);
-
-                     fAllColumnsPreTranslated.emplace_back(full_name);
-                     if(fColumnNameTranslation) full_name = GetTranslatedColumnName(full_name);
-
-                     fColumnNameToIndex[full_name] = fAllColumns.size();
-                     fAllColumns.emplace_back(full_name);
-                     fColumnBank.push_back(bank_index);
-                     fColumnItem.push_back(i);
-                     int i_type = sch.getEntryType(i);
-                     if(i_type < 0 || i_type >= fgCollTypeNumToString.size()){
-                        std::string err = "RHipoDS::RHipoDS() -- Error -- Type out of range for " + full_name;
-                        err += " type num = " + std::to_string(i_type);
-                        throw std::runtime_error(err);
-                     }
-                     fColumnType.push_back(i_type);
-
-                     if( nrows > 1) fColumnTypeIsVector.push_back(true);
-                     else fColumnTypeIsVector.push_back(false);
-
-                     if(fDebug> 1){
-                        printf("%30s  bank id: %3d item: %2d  %s \n", full_name.c_str(), bank_index, i,
-                               fColumnTypeIsVector.back() ? "vector":"scaler" );
-                     }
-                  }
-               } else if(nrows > 1){ // We have seen this bank before. If it was entered as a scalar, check if it should be a vector
-                  auto bank = fBanks[bank_it->second];
-                  auto sch = bank.getSchema();
-                  std::string full_name = fAllBankNames[ib] + "." + sch.getEntryName(0);  // If one is vector, all are vector.
-                  if(fColumnNameTranslation) full_name = GetTranslatedColumnName(full_name);
-
-                  int idx = fColumnNameToIndex.at(full_name);
-                  if( !fColumnTypeIsVector[idx]){
-                     if(fDebug>1) std::cout << "The column " << full_name << " is actually a vector!\n";
-                     fColumnTypeIsVector[idx] = true;
-                     for(int i=1; i< sch.getEntries(); ++i){  // So flip all the others too.
-                        full_name = fAllBankNames[ib] + "." + sch.getEntryName(i);
-                        if(fColumnNameTranslation) full_name = GetTranslatedColumnName(full_name);
-                        idx = fColumnNameToIndex.at(full_name);
-                        fColumnTypeIsVector[idx] = true;
-                     }
-                  }
-               }
+               AddHipoBank(fAllBankNames[ib], nrows);
             }
          }
          counter++;
@@ -206,6 +125,70 @@ int  RHipoDS::AddFiles(std::string_view file_glob) {
    // cleanup
    globfree(&glob_result);
    return n_files;
+}
+
+int RHipoDS::AddHipoBank(std::string name, int nrows) {
+   // Add a bank name (eg. REC::Track) to the set of banks to take into account.
+   // If nrows == 0, no action is taken.
+   // Set nrows = 1 if it is a scaler bank, nrows > 1 for a vector bank.
+   // If nrows > 1 for a bank previously entered as scaler, then change it to a vector.
+   //
+   if(nrows == 0 ) return(0);
+   auto bank_it = fBanksToIndex.find(name);
+   if( bank_it == fBanksToIndex.end()) {
+      int bank_index = fBanks.size();
+      fBanksToIndex[name] = bank_index;
+
+      auto sch = fHipoDict.getSchema(name.c_str());
+      hipo::bank this_bank(sch);
+
+      fBanks.emplace_back(this_bank);   // Put the bank in the bank store.
+
+      for (int i = 0; i < sch.getEntries(); ++i) {
+         std::string full_name = name + "." + sch.getEntryName(i);
+
+         fAllColumnsPreTranslated.emplace_back(full_name);
+         if(fColumnNameTranslation) full_name = GetTranslatedColumnName(full_name);
+
+         fColumnNameToIndex[full_name] = fAllColumns.size();
+         fAllColumns.emplace_back(full_name);
+         fColumnBank.push_back(bank_index);
+         fColumnItem.push_back(i);
+         int i_type = sch.getEntryType(i);
+         if(i_type < 0 || i_type >= fgCollTypeNumToString.size()){
+            std::string err = "RHipoDS::RHipoDS() -- Error -- Type out of range for " + full_name;
+            err += " type num = " + std::to_string(i_type);
+            throw std::runtime_error(err);
+         }
+         fColumnType.push_back(i_type);
+
+         if( nrows > 1) fColumnTypeIsVector.push_back(true);
+         else fColumnTypeIsVector.push_back(false);
+
+         if(fDebug> 1){
+            printf("%30s  bank id: %3d item: %2d  %s \n", full_name.c_str(), bank_index, i,
+                   fColumnTypeIsVector.back() ? "vector":"scaler" );
+         }
+      }
+   } else if(nrows > 1){ // We have seen this bank before. If it was entered as a scalar, check if it should be a vector
+      auto bank = fBanks[bank_it->second];
+      auto sch = bank.getSchema();
+      std::string full_name = name + "." + sch.getEntryName(0);  // If one is vector, all are vector.
+      if(fColumnNameTranslation) full_name = GetTranslatedColumnName(full_name);
+
+      int idx = fColumnNameToIndex.at(full_name);
+      if( !fColumnTypeIsVector[idx]){
+         if(fDebug>1) std::cout << "The column " << full_name << " is actually a vector!\n";
+         fColumnTypeIsVector[idx] = true;
+         for(int i=1; i< sch.getEntries(); ++i){  // So flip all the others too.
+            full_name = name + "." + sch.getEntryName(i);
+            if(fColumnNameTranslation) full_name = GetTranslatedColumnName(full_name);
+            idx = fColumnNameToIndex.at(full_name);
+            fColumnTypeIsVector[idx] = true;
+         }
+      }
+   }
+   return 1;
 }
 
 std::string RHipoDS::AsString()
