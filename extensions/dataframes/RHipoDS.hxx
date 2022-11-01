@@ -151,8 +151,10 @@ ClassDef(RHipoDS, 0);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-/// \brief Factory method to create a CSV RDataFrame.
+/// \brief Factory method to create a HIPO RDataFrame.
 /// \param[in] fileName Path of the Hipo file.
+/// \param[in] nevt_inspect Number of events to inspect to determine the schema.
+/// This is a function to quickly create an RDataFrame from a Hipo file.
 RDataFrame MakeHipoDataFrame(std::string_view fileName, int n_inpect = 10000);
 
 #endif //HIPODATAFRAME_RHIPODS_HXX
