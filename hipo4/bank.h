@@ -50,7 +50,7 @@ namespace hipo {
   class structure {
 
     private:
-
+      
       std::vector<char> structureBuffer;
       char *structureAddress{};
       void setAddress(const char *address);
@@ -60,8 +60,11 @@ namespace hipo {
       void initStructureBySize(int __group, int __item, int __type, int __size);
       std::vector<char>  &getStructureBuffer(){ return structureBuffer;}
       int                 getStructureBufferSize(){ return 8+getSize();}
+      int                 dataOffset = 8;
+      //std::vector<char> structureBuffer;
       friend class tuple;
-    public:
+
+  public:
 
       structure(){ structureAddress = nullptr;}
       structure(int size){ allocate(size);}
@@ -69,63 +72,78 @@ namespace hipo {
 
       virtual     ~structure()= default;
       bool         allocate(int size);
+      
       int          getSize() const noexcept{
-	         return *reinterpret_cast<uint32_t *>(structureAddress+4);
+        int length = *reinterpret_cast<uint32_t *>(structureAddress+4);
+	       return length&0x00ffffff;
+         //return getHeaderSize()+getDataSize();
       }
+
+      int         getHeaderSize() const noexcept {
+         int length = *reinterpret_cast<uint32_t *>(structureAddress+4);
+         return (length>>24)&0x000000ff;
+      }
+      
+      int         getDataSize() const noexcept {         
+	       return getSize()-getHeaderSize();
+      }
+
       int          getType();
       int          getGroup();
       int          getItem();
       void         init(const char *buffer, int size);
       void         initNoCopy(const char *buffer, int size);
 
-      const char  *getAddress();
-      virtual void  show();
-      void         setSize(int size);
-
+      const char    *getAddress();
+      virtual void   show();
+      void           setSize(int size);
+      void           setHeaderSize(int size);
+      void           setDataSize(int size);
 
       int          getIntAt   ( int index) const noexcept {
-        return *reinterpret_cast<int32_t*>(&structureAddress[index+8]);
+        return *reinterpret_cast<int32_t*>(&structureAddress[index+dataOffset]);
       }
+    
       int16_t      getShortAt ( int index) const noexcept {
-        return *reinterpret_cast<int16_t*>(&structureAddress[index+8]);
+        return *reinterpret_cast<int16_t*>(&structureAddress[index+dataOffset]);
       }
       int8_t       getByteAt  ( int index) const noexcept {
-        return *reinterpret_cast<int8_t*>(&structureAddress[index+8]);
+        return *reinterpret_cast<int8_t*>(&structureAddress[index+dataOffset]);
       }
       float        getFloatAt ( int index) const noexcept {
-        return *reinterpret_cast<float*>(&structureAddress[index+8]);
+        return *reinterpret_cast<float*>(&structureAddress[index+dataOffset]);
       }
       double       getDoubleAt( int index) const noexcept {
-        return *reinterpret_cast<double*>(&structureAddress[index+8]);
+        return *reinterpret_cast<double*>(&structureAddress[index+dataOffset]);
       }
       long         getLongAt  ( int index) const noexcept {
-        return *reinterpret_cast<int64_t*>(&structureAddress[index+8]);
+        return *reinterpret_cast<int64_t*>(&structureAddress[index+dataOffset]);
       }
 
       std::string  getStringAt(int index);
 
       void         putIntAt(int index, int value){
-        *reinterpret_cast<int32_t*>(&structureAddress[index+8]) = value;
+        *reinterpret_cast<int32_t*>(&structureAddress[index+dataOffset]) = value;
       }
 
       void         putShortAt(int index, int16_t value){
-        *reinterpret_cast<int16_t*>(&structureAddress[index+8]) = value;
+        *reinterpret_cast<int16_t*>(&structureAddress[index+dataOffset]) = value;
       }
 
       void         putByteAt(int index, int8_t value){
-        *reinterpret_cast<int8_t*>(&structureAddress[index+8]) = value;
+        *reinterpret_cast<int8_t*>(&structureAddress[index+dataOffset]) = value;
       }
 
       void         putFloatAt(int index, float value){
-        *reinterpret_cast<float*>(&structureAddress[index+8]) = value;
+        *reinterpret_cast<float*>(&structureAddress[index+dataOffset]) = value;
       }
 
       void         putDoubleAt(int index, double value){
-        *reinterpret_cast<double*>(&structureAddress[index+8]) = value;
+        *reinterpret_cast<double*>(&structureAddress[index+dataOffset]) = value;
       }
 
       void         putLongAt(int index, int64_t value){
-        *reinterpret_cast<int64_t*>(&structureAddress[index+8]) = value;
+        *reinterpret_cast<int64_t*>(&structureAddress[index+dataOffset]) = value;
       }
 
       void         putStringAt(int index, std::string &str);
@@ -134,6 +152,39 @@ namespace hipo {
       friend class event;
   };
 
+  class composite : public hipo::structure {
+    private:
+
+      std::vector<char>  typeChars;
+      std::vector<int>   offsets;
+      std::vector<int>   types;
+      int                rowOffset = 0;
+
+     // void parse(std::string format);
+      int  getTypeSize(int type);
+
+    public:
+      composite(){};
+      composite(const char *format){}
+      
+      void parse(std::string format);
+      virtual ~composite(){}
+      
+      int      getRows() const noexcept { return getDataSize()/rowOffset;}
+      int      getEntries() const noexcept { return offsets.size();}
+      int      getEntryType(int index) const noexcept { return types[index];}
+      void     setRows(int rows) { setDataSize(rows*rowOffset);}
+      
+      int      getRowSize() const noexcept { return rowOffset;}
+
+      int      getInt    ( int row, int element) const noexcept;
+      float    getFloat  ( int row, int element) const noexcept;
+      void     putInt    ( int row, int element, int value);
+      void     putFloat  ( int row, int element, float value);
+
+      void     print();
+
+  };
   //typedef std::auto_ptr<hipo::generic_node> node_pointer;
 
     class bank : public hipo::structure {

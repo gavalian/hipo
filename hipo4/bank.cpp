@@ -67,8 +67,26 @@ namespace hipo {
     }
 
     void structure::setSize(int size){
-      *reinterpret_cast<uint32_t *>(structureAddress+4) = size;
+      int sizeWord =  *reinterpret_cast<uint32_t *>(structureAddress+4);
+      int header   =  sizeWord&0xff000000;
+      *reinterpret_cast<uint32_t *>(structureAddress+4) = header|(size&0x00ffffff);
     }
+
+   void  structure::setDataSize(int size){
+      int sizeWord  =  *reinterpret_cast<uint32_t *>(structureAddress+4);
+      int header    =  sizeWord&0xff000000;
+      int headerSize = (sizeWord>>24)&0x000000ff;
+      int totalSize = headerSize + size;
+      //printf(" header size = %d, size = %d, total size = %d\n", (sizeWord>>24)&0x000000ff,size, totalSize);
+      *reinterpret_cast<uint32_t *>(structureAddress+4) = header|(totalSize&0x00ffffff);
+    }
+
+    void structure::setHeaderSize(int size){ 
+      int sizeWord =  *reinterpret_cast<uint32_t *>(structureAddress+4);
+      int dataSize = sizeWord&0x00ffffff;
+      *reinterpret_cast<uint32_t *>(structureAddress+4) = ((size<<24)&0xff000000)|dataSize ;
+    }
+
     // return the type of the structure
     int structure::getType(){
       auto type = (int) (*reinterpret_cast<uint8_t *>(structureAddress+3));
@@ -95,8 +113,8 @@ namespace hipo {
     }
 
     void structure::show(){
-      printf("structure : [%5d,%5d] type = %4d, length = %6d\n",
-         getGroup(),getItem(),getType(),getSize());
+      printf("structure : [%5d,%5d] type = %4d, header = %5d, length = %6d, data size = %5d, offset = %5d, capacity = %5lu\n",
+         getGroup(),getItem(),getType(),getHeaderSize(), getSize(), getDataSize(), dataOffset, structureBuffer.size());
     }
 
     std::string  structure::getStringAt(int index){
@@ -121,6 +139,125 @@ namespace hipo {
     //====================================================================
     // END of structure class
     //====================================================================
+
+
+void  composite::parse(std::string format){
+    types.clear(); offsets.clear();
+    int length = format.length();
+    int offset = 0;
+    for(int i = 0; i < length; i++){
+       char c = format[i];
+       printf("%5d : %c\n",i,c);
+
+       switch(c){
+        case 'b': types.push_back(1); offsets.push_back(offset); offset += getTypeSize(1); break;
+        case 's': types.push_back(2); offsets.push_back(offset); offset += getTypeSize(2); break;
+        case 'i': types.push_back(3); offsets.push_back(offset); offset += getTypeSize(3); break;
+        case 'f': types.push_back(4); offsets.push_back(offset); offset += getTypeSize(4); break;
+        case 'd': types.push_back(5); offsets.push_back(offset); offset += getTypeSize(5); break;
+        case 'l': types.push_back(8); offsets.push_back(offset); offset += getTypeSize(8); break;
+        default: break;
+       }
+    }
+    rowOffset = offset;
+    initStructureBySize(134,1,10,rowOffset*100 + 8 + length);
+    setHeaderSize(length);
+    setSize(length);
+    dataOffset = 8 + length;
+    memcpy(&getStructureBuffer()[8],&format[0],length);
+}
+
+int   composite::getTypeSize(int type){
+    switch(type){
+      case 1: return  1;
+      case 2: return  2;
+      case 3: return  4;
+      case 4: return  4;
+      case 5: return  8;
+      case 8: return  8;
+      default: return 0;
+    }
+}
+
+int      composite::getInt    ( int row, int element) const noexcept{
+   int type = types[element];
+   int rows = getRows();
+   if(row>=rows) {
+     printf(" error : requested row %d out of %d\n", row, rows);
+     return -1;
+   }
+   int offset = getRowSize()*row + offsets[element];
+   switch(type){
+     case 1: return getByteAt(offset); 
+     case 2: return getShortAt(offset); 
+     case 3: return getIntAt(offset);
+     default: printf(" error : type = %d\n",type); break;
+   }
+   return -1;
+}
+float    composite::getFloat  ( int row, int element) const noexcept { 
+  int type = types[element];
+   int rows = getRows();
+   if(row>=rows) {
+     printf(" error : requested row %d out of %d\n", row, rows);
+     return 0.0;
+   }
+   int offset = getRowSize()*row + offsets[element];
+   return getFloatAt(offset);
+}
+
+void     composite::putInt    ( int row, int element, int value){
+   int type = types[element];
+   int rows = getRows();
+   if(row>=rows) setRows(row+1);
+   int offset = getRowSize()*row + offsets[element];
+   //printf("[putInt] offset = %d\n",offset);
+   switch(type){
+     case 1: putByteAt(offset, (uint8_t) value); break;
+     case 2: putShortAt(offset, (uint16_t) value); break;
+     case 3: putIntAt(offset,  value); /*printf(" after put = %d\n",getIntAt(offset));*/ break;
+     default: printf("[putInt] error : type = %d\n",type); break;
+   }
+}
+
+void     composite::putFloat  ( int row, int element, float value){
+   int type = types[element];
+   int rows = getRows();
+   if(row>=rows) setRows(row+1);
+   int offset = getRowSize()*row  + offsets[element];
+   if(type==4) putFloatAt(offset, value); 
+    else printf("[putFloat] error : type = %d\n",type);
+}
+
+void   composite::print(){
+  printf("\n------------- \n");
+  printf("[composite] identifiers : [%5d, %5d]\n",getGroup(),getItem());
+  int headerSize = getHeaderSize();
+  printf("[composite] format      : [");
+  for(int i = 0; i < headerSize; i++) printf("%c",getStructureBuffer()[8+i]); 
+  printf("], row size = %5d , nrows = %5d\n",rowOffset, getRows());
+  printf("[composite] entry       : ");
+  for(int k = 0; k < offsets.size(); k++) printf("%5d ",k); printf("\n");
+  printf("[composite] types       : ");
+  for(int k = 0; k < offsets.size(); k++) printf("%5d ",types[k]);
+  printf("\n");printf("[composite] offsets     : ");
+  for(int k = 0; k < offsets.size(); k++) printf("%5d ",offsets[k]);
+  printf("\n------------\n");
+
+  int nEntries = getEntries();
+  int nRows  = getRows();  
+  for(int e = 0; e < nEntries; e++){
+    printf("%5d : ", e);
+    for(int r = 0 ; r < nRows; r++){
+         int type = getEntryType(e);
+         if(type==1||type==2||type==3) printf("%8d ",getInt(r,e));
+         if(type==4) printf("%8.5f ",getFloat(r,e));
+    }
+    printf("\n");
+  }
+}
+
+
 
 bank::bank()= default;
 

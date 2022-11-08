@@ -14,7 +14,7 @@ LD        := g++
 LDFLAGS   :=
 
 
-all:  writeFile readFile readFileTags showFile schema writeUserHeader tupleFile
+all:  writeFile readFile readFileTags showFile schema writeUserHeader tupleFile readJson
 
 readEvents: readEvents.o
 	$(CXX) -o readEvents.exe $<  $(HIPOLIBS) $(LZ4LIBS)
@@ -30,6 +30,9 @@ showFile: showFile.o
 
 readFileDebug: readFileDebug.o
 	$(CXX) -o readFileDebug.exe $<   $(HIPOLIBS) $(LZ4LIBS)
+
+readJson: readJson.o
+	$(CXX) -o readJson.exe $<   $(HIPOLIBS) $(LZ4LIBS)
 
 readFile: readFile.o
 	$(CXX) -o readFile.exe $<   $(HIPOLIBS) $(LZ4LIBS)
