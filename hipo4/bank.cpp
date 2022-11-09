@@ -195,6 +195,18 @@ int      composite::getInt    ( int row, int element) const noexcept{
    }
    return -1;
 }
+
+int64_t     composite::getLong    ( int row, int element) const noexcept{
+   int type = types[element];
+   int rows = getRows();
+   if(row>=rows) {
+     printf(" error : requested row %d out of %d\n", row, rows);
+     return -1;
+   }
+   int offset = getRowSize()*row + offsets[element];
+   return getLongAt(offset);
+}
+  
 float    composite::getFloat  ( int row, int element) const noexcept { 
   int type = types[element];
    int rows = getRows();
@@ -220,6 +232,15 @@ void     composite::putInt    ( int row, int element, int value){
    }
 }
 
+void     composite::putLong    ( int row, int element, int64_t value){
+   int type = types[element];
+   int rows = getRows();
+   if(row>=rows) setRows(row+1);
+   int offset = getRowSize()*row + offsets[element];
+   putLongAt(offset,  value);
+}
+
+  
 void     composite::putFloat  ( int row, int element, float value){
    int type = types[element];
    int rows = getRows();
@@ -229,6 +250,7 @@ void     composite::putFloat  ( int row, int element, float value){
     else printf("[putFloat] error : type = %d\n",type);
 }
 
+  
 void   composite::print(){
   printf("\n------------- \n");
   printf("[composite] identifiers : [%5d, %5d]\n",getGroup(),getItem());

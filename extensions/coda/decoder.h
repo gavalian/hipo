@@ -40,6 +40,7 @@
 #include <map>
 #include <vector>
 #include "table.h"
+#include "bank.h"
 
 namespace coda {
  
@@ -53,8 +54,8 @@ class decoder {
 
     decoder(){};
     virtual ~decoder(){};
-     
-    void decode(const char *buffer, int offset, coda::table &tbl, std::vector<int> &vec);
+
+    void decode(int crate, const char *buffer, int offset, int length, coda::table &tbl, hipo::composite &bank);
 
 };
 

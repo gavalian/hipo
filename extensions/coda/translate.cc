@@ -19,21 +19,15 @@
 #include "table.h"
 #include "utils.h"
 #include "bank.h"
+#include "decoder.h"
 
-void translation_benchmark(int iter){
-    coda::table table;
-    table.read("dc_tt.txt");
-    coda::descriptor_t desc(41,3,46);
-    int nrows = 108;
-    hipo::benchmark  decode;
-    decode.resume();
-    for(int k = 0; k < iter; k++){
-        for(int i = 0; i < nrows; i++)
-            table.decode(desc);
-    }
-    decode.pause();
-    printf("processed events %d time = %10.5f sec\n", iter, decode.getTimeSec());
-}
+#define MAXBUF 10000000
+unsigned int buf[MAXBUF];
+
+
+void nextEvent(uint32_t  *buffer) { /* read next event into buffer */};
+int  bankLink(uint32_t *buffer, int tag, int leaf, int num, int *length){ /* return the position of the given bank */ return 0;}
+
 /**
 *  Main Program ........
 */
@@ -41,50 +35,23 @@ int main(int argc, char** argv){
 
     printf("--->>> example program for data translation\n");
 
+
     hipo::composite bank;
-    bank.parse(std::string("bsiiifff"));
-    bank.show();
+    bank.parse(std::string("bssbsl"));
+    //bank.show();
     bank.print();
 
-    printf("datasize = %d header = %d, size = %d\n" , 
-         bank.getDataSize(), bank.getHeaderSize(),bank.getSize() );
-    
-    bank.putInt(0,0,4);
-    bank.putInt(0,2,25);
-    bank.putInt(0,4,35);
-    bank.putFloat(1,6,1.2);
-    bank.putFloat(2,7,2.2);
-    printf("datasize = %d header = %d, size = %d\n" , 
-         bank.getDataSize(), bank.getHeaderSize(),bank.getSize() );
-
-         bank.print();
-    //bank.putFloat(1,6,1.2);
-//printf("datasize = %d header = %d, size = %d\n" , 
-  //       bank.getDataSize(), bank.getHeaderSize(),bank.getSize() );
-    /*bank.putInt(0,1,15);
-    bank.putInt(0,2,25);
-    bank.putInt(0,4,35);
-    bank.putFloat(1,6,1.2);
-    bank.putFloat(2,7,2.2);
-    
-    bank.show();
-    bank.print();
-
-    printf("datasize = %d\n" , bank.getDataSize()  );*/
-    //translation_benchmark(1000000);
-    /*
     coda::table table;
     table.read("dc_tt.txt");
-    long value = table.encode(1,1,1,1);
-    printf("%016lX\n",value);
+    
+    coda::decoder decoder;
 
-    coda::descriptor_t desc;
-    desc.crate = 41;
-    desc.slot  =  3;
-    desc.channel = 46;
-
-    table.print(desc);
-    table.decode(desc);
-    table.print(desc);
-    */
+    nextEvent(buf);
+    bank.setSize(0);
+    int length;
+    for(int board = 41; board < 48; board++){
+        int  position = bankLink(buf,board, 0xe166, 0, &length);
+        decoder.decode(board,reinterpret_cast<const char*>(&buf[0]), position, length, table, bank);
+    }
+    bank.print();
 }

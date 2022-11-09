@@ -118,7 +118,7 @@ public class Benchmark {
 			//calculate(p,h);
 			int rows = p.getRows();
 			double value = 0;
-	        for(int row = 0; row < rows; row++){
+			for(int row = 0; row < rows; row++){
 			  value = calculateRow(p,row);
 			  //System.out.println(calculateRow(p,row));
 			  h.fill(value);

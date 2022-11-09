@@ -178,8 +178,10 @@ namespace hipo {
       int      getRowSize() const noexcept { return rowOffset;}
 
       int      getInt    ( int row, int element) const noexcept;
+      int64_t  getLong   ( int row, int element) const noexcept;
       float    getFloat  ( int row, int element) const noexcept;
       void     putInt    ( int row, int element, int value);
+      void     putLong   ( int row, int element, int64_t value);
       void     putFloat  ( int row, int element, float value);
 
       void     print();
