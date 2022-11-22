@@ -46,20 +46,21 @@ namespace coda {
        int  row = bank.getRows();
        descriptor_t desc;
        desc.crate = crate;
-
+       printf(">>>>>>>> decoding\n");
        while(doLoop==true){
           uint8_t        slot = *reinterpret_cast<const uint8_t*>( &buffer[pos]);
           //uint32_t    tnumber = *reinterpret_cast<const uint32_t*>(&buffer[pos + 1]);
           uint64_t  timestamp = *reinterpret_cast<const uint64_t*>(&buffer[pos + 5]);
           uint32_t    nrepeat = *reinterpret_cast<const uint32_t*>(&buffer[pos + 13]);
           pos += 17;
-          
+          printf("\n >>>> slot = %d, N = %d\n",slot, nrepeat);
           for(int n = 0; n < nrepeat; n++){
              uint8_t  channel =  *reinterpret_cast<const uint8_t*>( &buffer[pos]);
              uint16_t     tdc =  *reinterpret_cast<const uint16_t*>( &buffer[pos+1]);
              pos += 3;
              desc.slot = slot;
              desc.channel = channel;
+             printf("\t\t channel = %d tdc = %d\n",channel,tdc);
              if(tbl.contains(desc)==true){
                 tbl.decode(desc);
                 bank.putInt(row,0,desc.sector);

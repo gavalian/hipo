@@ -2,24 +2,23 @@
 # MAKEFILE for BUILDING EXAMPLES FOR HIPO4 LIBRARY
 # AUTHOR: GAVALIAN DATE: 10/24/2018
 #********************************************************
-HIPOCFLAGS  := -I../../hipo4 -Ievio
+HIPOCFLAGS  := -I../../hipo4 -I$(SOFTLOCAL)
 HIPOLIBS    := -L../../lib -lhipo4
 
 LZ4LIBS     := -L../../lz4/lib -llz4
 LZ4INCLUDES := -I../../lz4/lib
 
 CXX       := g++
-CC        := gcc
-CXXFLAGS  += -Wall -fPIC -std=c++11
+CXXFLAGS  += -Wall -fPIC -std=c++14
 LD        := g++
 LDFLAGS   :=
 
-OBJECTS = translate.o table.o decoder.o evioBankUtil.o
+OBJECTS = denoise.o drift.o
 
-all:  translate
+all:  denoise
 
-translate: $(OBJECTS)
-	$(CXX) -o translate.exe $(OBJECTS) $(HIPOLIBS) $(LZ4LIBS)
+denoise: $(OBJECTS)
+	$(CXX) -o denoise.exe $(OBJECTS)  $(HIPOLIBS) $(LZ4LIBS)
 
 #analysis: analysis.o
 #	$(CXX) -o analysis $<   $(HIPOLIBS) $(LZ4LIBS)
@@ -32,6 +31,4 @@ clean:
 	@rm -rf *.o *~ *.exe example*hipo 
 
 %.o: %.cc
-	$(CXX) -c $< -O2 $(CXXFLAGS) $(HIPOCFLAGS) $(LZ4INCLUDES)
-%.o: %.c
-	$(CC) -c $< -O2 $(HIPOCFLAGS) $(LZ4INCLUDES)
+	$(CXX) -c $< -O3 $(CXXFLAGS) $(HIPOCFLAGS) $(LZ4INCLUDES)

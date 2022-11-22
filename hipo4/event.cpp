@@ -98,7 +98,26 @@ namespace hipo {
          //printf("*** error *** : structure (%5d,%5d) does not exist\n", group,item);
        }
     }
-    
+    void   event::override(hipo::structure &str){
+
+    }
+    void   event::remove(hipo::bank &str){
+       remove(str.getSchema().getGroup(),str.getSchema().getItem());
+    }
+
+    void   event::remove(int group, int item){
+       //int str_size = str.getStructureBufferSize();
+       //int data_size = str.getSize();
+       std::pair<int,int> index = getStructurePosition(&dataBuffer[0],group,item);
+       int eventSize = getSize();
+       int    toCopy = eventSize - index.first - (index.second + 8);
+       int   newSize = eventSize - (index.second + 8);
+       std::memcpy(&dataBuffer[index.first],&dataBuffer[index.first+8+index.second],toCopy);
+       *(reinterpret_cast<uint32_t*>(&dataBuffer[4])) = newSize;
+       //printf("size = %d, new size = %d, structure removed size = %d, position = %d, to copy = %d\n",
+       //   eventSize, newSize, index.second +8, index.first, toCopy );
+    }
+
     void    event::addStructure(hipo::structure &str){
 
         int str_size = str.getStructureBufferSize();
