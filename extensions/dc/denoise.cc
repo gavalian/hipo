@@ -24,6 +24,11 @@
    std::vector <hipo::bank> databanks;
    const fdeep::model                *model;
    dc::drift chamber;
+
+
+   int  nThreads = 6;
+   int   nFrames = 16;
+
 /**
  * @brief Create a Frame object
  *  Creates an array of events
@@ -64,17 +69,19 @@ void  loadBanks(std::vector<hipo::event> &dataframe, std::vector<hipo::bank> &da
  * @param bank 
  */
 void function(int order){
-    chamber.process(*model,databanks[order]);
+  int start = order * nFrames;
+  for(int k = 0; k < nFrames; k++){
+     chamber.process(*model,databanks[start+k]);
+  }
 }
 
 void runframe(){//},std::vector<hipo::bank> *banks){//}, fdeep::model &model, std::vector<hipo::bank> &banks){
     std::vector<std::thread*> threads;
-    for(int i = 0; i < databanks.size(); i++){
+    for(int i = 0; i < nThreads; i++){
         threads.push_back(new std::thread(function,i));
     //   std::thread thread(function,chamber,model,banks[i]);
     //   thread.join();
     }
-
     for(int k = 0; k < threads.size(); k++) threads[k]->join();
     for(int k = 0; k < threads.size(); k++) delete threads[k];
     //threads.clear();
@@ -107,11 +114,7 @@ std::cout << std::endl;
   //for(int i = 0; i < 36*112; i++) data.push_back(1.0);
    const auto modelLocal = fdeep::load_model("network/cnn_autoenc_cpp.json");
    model = &modelLocal;
-//const auto model = fdeep::load_model("cnn_autoenc_produced.json");
-  
-
-   int nThreads = 8;
-
+//const auto model = fdeep::load_model("cnn_autoenc_produced.json");     
 
    hipo::reader  reader;
    reader.open(inputFile);
@@ -133,9 +136,9 @@ std::cout << std::endl;
    //std::vector<hipo::event> dataframe;
    //std::vector <hipo::bank> databanks;
 
-   createFrame(dataframe,nThreads);
+   createFrame(dataframe,nThreads*nFrames);
 
-   for(int loop = 0 ; loop < nThreads; loop++) 
+   for(int loop = 0 ; loop < nThreads*nFrames; loop++) 
       databanks.push_back(hipo::bank(factory.getSchema("DC::tdc")));
 
    hipo::writer  writer;
@@ -146,7 +149,7 @@ std::cout << std::endl;
    
    while(reader.hasNext()==true){
 
-    counter++; totalEvents += nThreads;
+    counter++; totalEvents += databanks.size();
     if((counter)%50==0){
       totalBench.pause();
       printf(">>>>> processed events %14d, rate = %12.8f sec/event , %9.3f evt/second\n",totalEvents ,
