@@ -13,12 +13,16 @@ CXXFLAGS  += -Wall -fPIC -std=c++14
 LD        := g++
 LDFLAGS   :=
 
-OBJECTS = denoise.o drift.o
+OBJECTS  = denoise.o drift.o
+OBJECTS2 = denoise2.o drift.o
 
-all:  denoise
+all:  denoise2
 
 denoise: $(OBJECTS)
 	$(CXX) -o denoise.exe $(OBJECTS)  $(HIPOLIBS) $(LZ4LIBS)
+
+denoise2: $(OBJECTS2)
+	$(CXX) -o denoise2.exe $(OBJECTS2)  $(HIPOLIBS) $(LZ4LIBS)
 
 #analysis: analysis.o
 #	$(CXX) -o analysis $<   $(HIPOLIBS) $(LZ4LIBS)
@@ -31,4 +35,4 @@ clean:
 	@rm -rf *.o *~ *.exe example*hipo 
 
 %.o: %.cc
-	$(CXX) -c $< -O3 $(CXXFLAGS) $(HIPOCFLAGS) $(LZ4INCLUDES)
+	$(CXX) -c $< -O2 $(CXXFLAGS) $(HIPOCFLAGS) $(LZ4INCLUDES)

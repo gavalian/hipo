@@ -6,6 +6,9 @@
 #include "event.h"
 #include <vector>
 
+#ifndef __DC_DRIFT__
+#define __DC_DRIFT__
+
 namespace dc {
 
   class drift {
@@ -31,3 +34,4 @@ namespace dc {
       hipo::event &event(){ return hev;}
   };
 }
+#endif
