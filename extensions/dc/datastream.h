@@ -42,7 +42,8 @@ class datastream {
             // reset event and read next in the file if any left
             events[n].reset();
             if(hr.next()==true){ 
-                hr.read(events[n]); nProcessed++;                
+                hr.read(events[n]); nProcessed++;
+                if(nProcessed%100==0) printf("-- counter %9lu events\n",nProcessed);               
                 //printf("read event %d , size = %d\n",n,events[n].getSize());
                 //events[n].show();
             }
