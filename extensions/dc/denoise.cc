@@ -107,40 +107,46 @@ std::cout << std::endl;
      exit(0);
    }
 
+
+   if(argc>2) nThreads = atoi(argv[2]);
+   if(argc>3)  nFrames = atoi(argv[3]);
+
+   std::vector<float> data;
    
-
-  std::vector<float> data;
-
-  //for(int i = 0; i < 36*112; i++) data.push_back(1.0);
+   //for(int i = 0; i < 36*112; i++) data.push_back(1.0);
    const auto modelLocal = fdeep::load_model("network/cnn_autoenc_cpp.json");
    model = &modelLocal;
-//const auto model = fdeep::load_model("cnn_autoenc_produced.json");     
-
+   //const auto model = fdeep::load_model("cnn_autoenc_produced.json");     
+   
    hipo::reader  reader;
    reader.open(inputFile);
    
    hipo::dictionary  factory;
    reader.readDictionary(factory);
-
+   
    //factory.show();
-
+   
    hipo::bank  dcb(factory.getSchema("DC::tdc"));
- 
+   
    hipo::event      event;
-
+   
    hipo::benchmark  processBench;
    hipo::benchmark    totalBench;
-
+   
    int counter = 0;
    int totalEvents = 0;
    //std::vector<hipo::event> dataframe;
    //std::vector <hipo::bank> databanks;
-
+   
    createFrame(dataframe,nThreads*nFrames);
-
+   
    for(int loop = 0 ; loop < nThreads*nFrames; loop++) 
-      databanks.push_back(hipo::bank(factory.getSchema("DC::tdc")));
+     databanks.push_back(hipo::bank(factory.getSchema("DC::tdc")));
 
+   printf("\n\n--\n");
+   printf("-- starting denoising process with %lu frames\n",dataframe.size());
+   printf("-- n threads = %4d, events per thread = %d\n",nThreads, nFrames);
+   printf("--\n--\n");
    hipo::writer  writer;
    writer.addDictionary(factory);
    writer.open("denoiser_output.h5");

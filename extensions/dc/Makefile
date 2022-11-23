@@ -5,7 +5,7 @@
 HIPOCFLAGS  := -I../../hipo4 -I$(SOFTLOCAL)
 HIPOLIBS    := -L../../lib -lhipo4
 
-LZ4LIBS     := -L../../lz4/lib -llz4
+LZ4LIBS     := -L../../lz4/lib -llz4 -lpthread
 LZ4INCLUDES := -I../../lz4/lib
 
 CXX       := g++
