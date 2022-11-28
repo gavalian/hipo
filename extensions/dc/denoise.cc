@@ -191,7 +191,9 @@ std::cout << std::endl;
 
    totalBench.pause();
 
-  printf("\n\n>>>>> finally events %14d, rate = %12.8f sec/event , %9.3f event/sec\n",counter ,
+  printf("\n\n>>>>> finally events %d , %d - %14d, rate = %12.8f sec/event , %9.3f event/sec\n",
+	 nThreads, nFrames,
+	 counter ,
               totalBench.getTimeSec()/totalEvents, totalEvents/totalBench.getTimeSec() );
 
 /*

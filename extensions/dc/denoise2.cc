@@ -154,7 +154,8 @@ std::cout << std::endl;
     stream.close();
     long counter = stream.getProcessed();
 
-  printf("\n\n>>>>> finally events %14lu, time = %9.3f sec, rate = %12.8f sec/event , %9.3f event/sec\n",counter ,processBench.getTimeSec(),
+  printf("\n\n>>>>> finally events finally events %d , %d - %14lu, time = %9.3f sec, rate = %12.8f sec/event , %9.3f event/sec\n",
+	 nThreads, nFrames,counter ,processBench.getTimeSec(),
               processBench.getTimeSec()/counter, counter/processBench.getTimeSec() );
 
 }
