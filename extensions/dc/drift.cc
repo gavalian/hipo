@@ -3,20 +3,24 @@
 namespace dc {
 
     int  drift::getIndex(int layer, int component){
-        int index = (layer-1)*114 + (component);
+        int index = (layer-1)*rowSize + (component);
         return index;
     }
 
-    void drift::initvec(std::vector<float> &tensor){
-        if(tensor.size()!=114*36) tensor.resize(114*36);
-        for(int i = 0; i < 114*36; i++) tensor[i] = 0.0;
+    void  drift::initvec(std::vector<float> &tensor){
+        if(tensor.size()!=rowSize*36) tensor.resize(rowSize*36);
+        for(int i = 0; i < rowSize*36; i++) tensor[i] = 0.0;
     }
+
+    
     
     int  drift::check(std::vector<float> &vec, int layer, int component, double threshold){
         int index = getIndex(layer,component);
         if(vec[index]>threshold) return 1;
         return 0;
     }
+
+    
 
     void  drift::map(std::vector<int> &index, std::vector<float> &output, hipo::bank &bank, int sector){
         int nrows = bank.getRows();
@@ -63,7 +67,7 @@ namespace dc {
            fdeep::tensors result = model.predict(
 				        {fdeep::tensor(
 					  	     fdeep::tensor_shape(static_cast<std::size_t>(36),
-						  			 static_cast<std::size_t>(114),
+						  			 static_cast<std::size_t>(rowSize),
 							  		 static_cast<std::size_t>(1)),
 						         dcmat)}
 				        );

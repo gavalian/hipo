@@ -76,6 +76,8 @@ void function(int order){
   createFrame(events,nFrames);
   stream.getbank("DC::tdc",banks,nFrames);
 
+  
+  
   int isAlive = 1;
   //printf("-- start the thread %d, frames = %d\n", order, nFrames);
   while(isAlive==1){
@@ -134,13 +136,15 @@ std::cout << std::endl;
      exit(0);
    }
 
-
+   chamber.setRows(112);
+   
    if(argc>2) nThreads = atoi(argv[2]);
    if(argc>3)  nFrames = atoi(argv[3]);
 
     stream.open(inputFile,"output.h5");
     printf("--\n-- opening the neural network file\n--\n");
-    const auto modelLocal = fdeep::load_model("network/cnn_autoenc_cpp.json");
+    const auto modelLocal = fdeep::load_model("network/cnn_autoenc_0f_112.json");
+    //const auto modelLocal = fdeep::load_model("network/cnn_autoenc_cpp.json");
     model = &modelLocal;
     
     hipo::benchmark  processBench;

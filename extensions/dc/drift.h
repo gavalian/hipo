@@ -14,11 +14,13 @@ namespace dc {
   class drift {
 
     private:
+        int rowSize = 114;
 
         hipo::event hev;
         hipo::bank  bank;
 
         int  getIndex(int layer, int component);
+        //int  getIndex112(int layer, int component);
         int  check(std::vector<float> &vec, int layer, int component,double threshold);
 
     public:
@@ -26,6 +28,7 @@ namespace dc {
       drift(){}
 
       virtual ~drift(){}
+      void setRows(int rows) { rowSize = rows;}
       void  map(std::vector<int> &index, std::vector<float> &output, hipo::bank &bank, int sector);
       void  initvec(std::vector<float> &tensor);
       void  create(std::vector<float> &tensor, hipo::bank &bank, int sector);
