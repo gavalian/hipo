@@ -88,8 +88,8 @@ void function(int order){
            nNonEmpty++;
            events[k].getStructure(banks[k]);
            chamber.process(*model,banks[k]);
-           events[k].remove(banks[k]);
-           events[k].addStructure(banks[k]);
+           //events[k].remove(banks[k]);
+           //events[k].addStructure(banks[k]);
         }
       }           
       //printf("non empty = %d\n",nNonEmpty);
