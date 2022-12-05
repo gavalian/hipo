@@ -80,6 +80,7 @@ namespace hipo {
         void   override(hipo::structure &str);
         void   remove(hipo::bank &str);
         void   remove(int group, int item);
+        void   replace(hipo::bank  &bank);
         std::pair<int,int>  getStructurePosition(int group, int item);
         
         std::vector<char>  &getEventBuffer();

@@ -35,7 +35,7 @@ class datastream {
 
     void pull(std::vector<hipo::event> &events){
         //printf("pull events %lu %d\n", events.size(), hr.hasNext());
-        std::unique_lock<std::mutex> lock(obj);        
+        std::unique_lock<std::mutex> lock(obj);
         for(int n = 0; n < events.size(); n++){
             // write the event in the output if it's not empty
             if(events[n].getSize()>16){ hw.addEvent(events[n]);}

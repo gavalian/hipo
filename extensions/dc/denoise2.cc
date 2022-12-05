@@ -25,7 +25,7 @@
    std::vector <hipo::bank> databanks;
    const fdeep::model                *model;
    dc::drift chamber;
-hipo::datastream stream;
+   hipo::datastream stream;
 
    int  nThreads = 8;
    int   nFrames = 16;
@@ -87,11 +87,23 @@ void function(int order){
         if(events[k].getSize()>16){
            nNonEmpty++;
            events[k].getStructure(banks[k]);
-           chamber.process(*model,banks[k]);
-           events[k].remove(banks[k]);
-           events[k].addStructure(banks[k]);
+           if(banks[k].getRows()>0){
+             chamber.process(*model,banks[k]);
+             //printf("calling remove\n");
+             //printf("bfore remove ---\n");
+             //events[k].show();
+             // -previous implementation
+             // events[k].remove(banks[k]);
+             events[k].replace(banks[k]);
+             
+             //printf("after remove --\n");
+             //events[k].show();
+             //events[k].addStructure(banks[k]);
+           } else {
+              printf("bank dc has size=0\n");
+           }
         }
-      }           
+      }
       //printf("non empty = %d\n",nNonEmpty);
      if(nNonEmpty==0) isAlive = 0;
   }

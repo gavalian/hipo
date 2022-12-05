@@ -50,12 +50,12 @@ namespace hipo {
     putStringAt(0,str);
   }
 
-    bool structure::allocate(int size){
+  bool structure::allocate(int size){
       if(structureBuffer.size()<size){
         structureBuffer.resize(size+32);
       }
       return true;
-    }
+  }
 
     void structure::initStructureBySize(int __group, int __item, int __type, int __size){
       allocate(__size+8);

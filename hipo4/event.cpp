@@ -101,6 +101,20 @@ namespace hipo {
     void   event::override(hipo::structure &str){
 
     }
+
+    void   event::replace(hipo::bank &bank){
+      std::pair<int,int> index = getStructurePosition(&dataBuffer[0],
+            bank.getSchema().getGroup(),bank.getSchema().getItem());
+      if(index.first>0){
+          int oSize =   index.second + 8;
+          int sSize = bank.getSize() + 8;
+          if(oSize==sSize){
+             std::memcpy(&dataBuffer[index.first],&(bank.getStructureBuffer()[0]),sSize);
+          } else {
+            printf("[event::replace] error in replacing the bank %s\n",bank.getSchema().getName().c_str());
+          }
+      }       
+    }
     void   event::remove(hipo::bank &str){
        remove(str.getSchema().getGroup(),str.getSchema().getItem());
     }
@@ -109,12 +123,17 @@ namespace hipo {
        //int str_size = str.getStructureBufferSize();
        //int data_size = str.getSize();
        std::pair<int,int> index = getStructurePosition(&dataBuffer[0],group,item);
+       printf("-removing %d, %d\n",index.first,index.second);
        if(index.first>0){
-	 int eventSize = getSize();
-	 int    toCopy = eventSize - index.first - (index.second + 8);
-	 int   newSize = eventSize - (index.second + 8);
-	 std::memcpy(&dataBuffer[index.first],&dataBuffer[index.first+8+index.second],toCopy);
-	 *(reinterpret_cast<uint32_t*>(&dataBuffer[4])) = newSize;
+	        int eventSize = getSize();
+	        int    toCopy = eventSize - index.first - (index.second + 8);
+	        int   newSize = eventSize - (index.second + 8);
+	        std::memcpy(&dataBuffer[index.first],&dataBuffer[index.first+8+index.second],toCopy);
+          printf(" first = %d, second = %d\n",index.first,index.second);
+          printf(" \t memcopy = %d, %d, ncopy %d , size = %d , new size = %d\n", 
+          index.first, index.first+8+index.second, toCopy, eventSize, newSize
+          );
+	          *(reinterpret_cast<uint32_t*>(&dataBuffer[4])) = newSize;
        }
        //printf("size = %d, new size = %d, structure removed size = %d, position = %d, to copy = %d\n",
        //   eventSize, newSize, index.second +8, index.first, toCopy );
