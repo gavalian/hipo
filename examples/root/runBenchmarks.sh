@@ -5,5 +5,5 @@ make
 #---- Running C++ read/write benchmarks
 ./benchmark.exe $1_w.hipo $1_w.root
 #---- Running Java Benchmarks
-javac --class-path $J4NP/lib/core/j4np-1.0.5.jar Benchmark.java
-java -Xmx512m -Xms128m  -cp $J4NP/lib/core/j4np-1.0.5.jar:. Benchmark $1_w.hipo
+#javac --class-path $J4NP/lib/core/j4np-1.0.5.jar Benchmark.java
+#java -Xmx512m -Xms128m  -cp $J4NP/lib/core/j4np-1.0.5.jar:. Benchmark $1_w.hipo

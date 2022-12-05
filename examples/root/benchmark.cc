@@ -151,7 +151,7 @@ double benchmark_root(const char *pathInput){
       br_chi2pid->GetEntry(entryId);
       br_status->GetEntry(entryId);
 
-  counter++;
+      counter++;
       for (int i = 0; i < count; ++i) {	
 	      h->Fill(
 		      sqrt(px[i]*px[i] + py[i]*py[i] + pz[i]*pz[i])*sqrt(vx[i]*vx[i]+vy[i]*vy[i]+vz[i]*vz[i])
@@ -198,17 +198,17 @@ float px,py,pz,vx,vy,vz,vt,beta,chi2pid;
     int nevt = record.getEventCount();
     //printf("event size = %d\n", nevt);
     for(int r = 0; r < nevt; r++){
-      copyBenchmark.resume();
+      //copyBenchmark.resume();
       // the particle column 0 - is PID
       // the call will return the address and the length
       // of the 0-th column from particle bank in the prt data class.
      record.read(particles,r);
 
-   copyBenchmark.pause();
+     //copyBenchmark.pause();
 
       //int col_size = pid.getDataSize();
       //printf("-> rows %8d \n",col_size);
-      operationBenchmark.resume();
+      //operationBenchmark.resume();
       int nrows = particles.getRows();
      for(int row = 0; row < nrows; row++){
        px = particles.getFloat(1,row);
@@ -225,7 +225,7 @@ float px,py,pz,vx,vy,vz,vt,beta,chi2pid;
                        - particles.getInt(8,row);
        hbench->Fill(value);
      }
-      operationBenchmark.pause();
+     //operationBenchmark.pause();
     }
   }
    readerBenchmark.pause();
