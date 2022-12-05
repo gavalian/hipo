@@ -188,7 +188,8 @@ public class Benchmark {
 	int iter = 5;
 	String filename = args[0];
 	Benchmark b = new Benchmark();
-	//b.writerBenchmark(filename);
+	b.writerBenchmark(filename);
+
 	String rfile = filename + "_java.h5";
 
 	double realTime = b.readBenchmark(rfile);
