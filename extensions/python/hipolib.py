@@ -75,7 +75,7 @@ class hreader:
         """
         a1 = ctypes.c_char_p(bank.encode('ascii'))
         a2 = ctypes.c_char_p(entry.encode('ascii'))
-        self.hipo4lib.fusion_get_float.restype = ctypes.c_longlong
+        self.hipo4lib.fusion_get_long.restype = ctypes.c_ulonglong
         value = self.hipo4lib.fusion_get_long(self.handle,a1,a2,row)
         return value
     

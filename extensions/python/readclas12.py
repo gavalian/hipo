@@ -23,9 +23,11 @@ while(reader.next()==True):
     if size>0:
         nevent    = reader.getEntry('RUN::config','event')
         trigger   = reader.getEntry('RUN::config','trigger')
+        unixtime  = reader.getEntry('RUN::config','unixtime')
         timestamp = reader.getEntry('RUN::config','timestamp')
         print('event      = ',nevent)
         print('trigger    = ',trigger)
+        print('unixtime   = ',unixtime)
         print('timestamp  = ',timestamp)
     counter = counter + 1
 
