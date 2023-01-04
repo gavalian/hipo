@@ -153,6 +153,11 @@ namespace hipo {
   };
 
   class composite : public hipo::structure {
+    /**
+     * @brief This is composite bank with type = 10, who knows why
+     * Class is used to store formated data structures without dictionary.
+     * Can be passed around in events and parsed on the other side.
+     */
     private:
 
       std::vector<char>  typeChars;
@@ -164,11 +169,15 @@ namespace hipo {
       int  getTypeSize(int type);
 
     public:
+
       composite(){};
+      composite(int size){ allocate(size);};
+      composite(int group, int item, int size){ initStructureBySize(group, item, 10, size);};
       composite(const char *format){}
       
-      void parse(std::string format);
-      virtual ~composite(){}
+      void       parse(std::string format);
+      void       parse(int group, int item, std::string format, int maxrows);
+      virtual   ~composite(){}
       
       int      getRows() const noexcept { return getDataSize()/rowOffset;}
       int      getEntries() const noexcept { return offsets.size();}
@@ -183,9 +192,9 @@ namespace hipo {
       void     putInt    ( int row, int element, int value);
       void     putLong   ( int row, int element, int64_t value);
       void     putFloat  ( int row, int element, float value);
-
+      virtual void notify();
       void     print();
-
+      void     reset();
   };
   //typedef std::auto_ptr<hipo::generic_node> node_pointer;
 

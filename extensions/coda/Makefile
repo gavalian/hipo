@@ -32,6 +32,6 @@ clean:
 	@rm -rf *.o *~ *.exe example*hipo 
 
 %.o: %.cc
-	$(CXX) -c $< -O2 $(CXXFLAGS) $(HIPOCFLAGS) $(LZ4INCLUDES)
+	$(CXX) -c $< -O3 $(CXXFLAGS) $(HIPOCFLAGS) $(LZ4INCLUDES)
 %.o: %.c
-	$(CC) -c $< -O2 $(HIPOCFLAGS) $(LZ4INCLUDES)
+	$(CC) -c $< -O3 $(HIPOCFLAGS) $(LZ4INCLUDES)

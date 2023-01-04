@@ -543,4 +543,61 @@ void record::getEventsMap(std::vector<std::pair<int,int>> &emap){
     }
 
 
+
+dataframe::dataframe(int max_events, int max_size){
+   maxEvents = max_events; maxSize = max_size;
+   dataBuffer.resize(56+maxSize);
+   reset();
+}
+
+void dataframe::reset(){
+   *(reinterpret_cast<int *>(&dataBuffer[0]))  = 56; // record length 1
+   *(reinterpret_cast<int *>(&dataBuffer[4]))  = 1; // record number 2
+   *(reinterpret_cast<int *>(&dataBuffer[8]))  = 14; // header length words 3
+   *(reinterpret_cast<int *>(&dataBuffer[12])) = 0; // event count 4
+   *(reinterpret_cast<int *>(&dataBuffer[16])) = 0; // index array length 5
+   *(reinterpret_cast<int *>(&dataBuffer[20])) = 5; // verion + bitinfo 6 
+   *(reinterpret_cast<int *>(&dataBuffer[24])) = 0; // user header length
+   *(reinterpret_cast<int *>(&dataBuffer[28])) = 0xc0da0100;
+   *(reinterpret_cast<int *>(&dataBuffer[32])) = 0; // uncompressed data length
+   *(reinterpret_cast<int *>(&dataBuffer[36])) = 0; // compressed data length
+}
+
+bool         dataframe::addEvent(hipo::event &event){ 
+  int fsize = size();
+  if( (event.getSize() + fsize + 56 ) > maxSize) return false;
+  int evCount = count();
+  if(evCount>=maxEvents) return false;
+  memcpy(&dataBuffer[fsize],&(event.getEventBuffer()[0]), event.getSize());
+  int datasize = *(reinterpret_cast<int *>(&dataBuffer[32]));
+  *(reinterpret_cast<int *>(&dataBuffer[12])) = evCount + 1;
+  *(reinterpret_cast<int *>(&dataBuffer[32])) = datasize + event.getSize();
+  *(reinterpret_cast<int *>(&dataBuffer[36])) = datasize + event.getSize();
+  *(reinterpret_cast<int *>(&dataBuffer[0]))  = fsize + event.getSize();
+  return true;
+}
+
+int          dataframe::getEventAt(int pos, hipo::event &event){ 
+    int eventsize = *(reinterpret_cast<int *>(&dataBuffer[pos+4]));
+    event.init(&dataBuffer[pos],eventsize);
+    return pos+eventsize;
+}
+
+void          dataframe::init(const char *ptr){
+    int size = *(reinterpret_cast<const int *>(ptr));
+    if(size>dataBuffer.size()) dataBuffer.resize(size+56);
+    memcpy(&dataBuffer[0],ptr,size);
+}
+
+int          dataframe::count(){ return *(reinterpret_cast<int *>(&dataBuffer[12]));}
+int          dataframe::size(){ return  (*(reinterpret_cast<int *>(&dataBuffer[0])));}
+
+void         dataframe::summary(){
+  printf("## data frame summary:\n");
+  printf("frame size       : %d\n",*(reinterpret_cast<int *>(&dataBuffer[0])));
+  printf("magic word       : %X\n",*(reinterpret_cast<int *>(&dataBuffer[28])));
+  printf("number of events : %d\n",*(reinterpret_cast<int *>(&dataBuffer[12])));
+  printf("data length      : %d\n",*(reinterpret_cast<int *>(&dataBuffer[32]))); 
+}
+
 }

@@ -98,7 +98,9 @@ namespace coda {
         descriptor_t desc;
         int counter = 0;
          while (!tt.eof()){
-            tt >> desc.crate >> desc.slot >> desc.channel >> desc.sector >> desc.layer >> desc.component >> desc.order;
+            tt >> desc.crate  >> desc.slot  >> desc.channel 
+               >> desc.sector >> desc.layer >> desc.component 
+               >> desc.order;
             insert(desc);
             counter++;
          }

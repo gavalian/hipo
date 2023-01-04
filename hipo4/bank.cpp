@@ -136,18 +136,27 @@ namespace hipo {
       return structureAddress;
     }
 
-    //====================================================================
-    // END of structure class
-    //====================================================================
+//====================================================================
+//-=-     END of structure class - starting composite class        -=-
+//====================================================================
 
+void     composite::reset(){
+    int length = getHeaderSize();
+    setHeaderSize(length);
+    setSize(length);
+}
 
 void  composite::parse(std::string format){
+  parse(134,1,format,256);
+}
+
+void  composite::parse(int group, int item, std::string format, int maxrows){
     types.clear(); offsets.clear();
     int length = format.length();
     int offset = 0;
     for(int i = 0; i < length; i++){
        char c = format[i];
-       printf("%5d : %c\n",i,c);
+       //printf("%5d : %c\n",i,c);
 
        switch(c){
         case 'b': types.push_back(1); offsets.push_back(offset); offset += getTypeSize(1); break;
@@ -160,7 +169,7 @@ void  composite::parse(std::string format){
        }
     }
     rowOffset = offset;
-    initStructureBySize(134,1,10,rowOffset*100 + 8 + length);
+    initStructureBySize(group,item,10,rowOffset*maxrows + 8 + length);
     setHeaderSize(length);
     setSize(length);
     dataOffset = 8 + length;
@@ -250,7 +259,30 @@ void     composite::putFloat  ( int row, int element, float value){
     else printf("[putFloat] error : type = %d\n",type);
 }
 
-  
+void composite::notify(){
+   //printf("-----> composite::notify method is called:\n");
+    types.clear(); offsets.clear();
+    int sword  =  *reinterpret_cast<int*>(&getStructureBuffer()[4]);
+    int fsize  = (sword>>24)&(0x000000FF);
+    int dsize  = (sword)&0x00FFFFFF;
+    printf("-----> composite::notify method is called: fsize = %d, dsize = %d\n",fsize,dsize);
+    int offset = 0;
+    for(int i = 0; i < fsize; i++){
+       char c = getStructureBuffer()[8+i];
+       switch(c){
+        case 'b': types.push_back(1); offsets.push_back(offset); offset += getTypeSize(1); break;
+        case 's': types.push_back(2); offsets.push_back(offset); offset += getTypeSize(2); break;
+        case 'i': types.push_back(3); offsets.push_back(offset); offset += getTypeSize(3); break;
+        case 'f': types.push_back(4); offsets.push_back(offset); offset += getTypeSize(4); break;
+        case 'd': types.push_back(5); offsets.push_back(offset); offset += getTypeSize(5); break;
+        case 'l': types.push_back(8); offsets.push_back(offset); offset += getTypeSize(8); break;
+        default: break;
+       }
+    }
+    rowOffset = offset;
+    dataOffset = 8 + fsize;
+}
+
 void   composite::print(){
   printf("\n------------- \n");
   printf("[composite] identifiers : [%5d, %5d]\n",getGroup(),getItem());
@@ -274,6 +306,7 @@ void   composite::print(){
          int type = getEntryType(e);
          if(type==1||type==2||type==3) printf("%8d ",getInt(r,e));
          if(type==4) printf("%8.5f ",getFloat(r,e));
+         if(type==8) printf("%lld ",getLong(r,e));
     }
     printf("\n");
   }

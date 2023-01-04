@@ -38,6 +38,7 @@
 #define HIPO_TABLE_H
 
 #include <map>
+#include <unordered_map>
 
 namespace coda {
  
@@ -66,7 +67,7 @@ class table {
     private:
 
      std::map<long,long>  translation;
-     
+     //std::unordered_map<long,long>  translation;
     public:
 
      table(){};

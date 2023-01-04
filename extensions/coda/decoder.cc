@@ -43,24 +43,27 @@ namespace coda {
    void decoder::decode(int crate, const char *buffer, int offset, int length, coda::table &tbl, hipo::composite &bank){
        int   pos = offset;
        bool  doLoop = true;
-       int  row = bank.getRows();
+       int   row = bank.getRows();
        descriptor_t desc;
        desc.crate = crate;
-       printf(">>>>>>>> decoding\n");
+       //printf(">>>>>>>> decoding\n");
        while(doLoop==true){
           uint8_t        slot = *reinterpret_cast<const uint8_t*>( &buffer[pos]);
           //uint32_t    tnumber = *reinterpret_cast<const uint32_t*>(&buffer[pos + 1]);
           uint64_t  timestamp = *reinterpret_cast<const uint64_t*>(&buffer[pos + 5]);
           uint32_t    nrepeat = *reinterpret_cast<const uint32_t*>(&buffer[pos + 13]);
           pos += 17;
-          printf("\n >>>> slot = %d, N = %d\n",slot, nrepeat);
-          for(int n = 0; n < nrepeat; n++){
+          //printf("--- n-repeat : %d\n", nrepeat);
+         if(nrepeat>1000) break;
+          
+          //printf  ("\n >>>> slot = %d, N = %d\n",slot, nrepeat);
+          for(int n =  0; n < nrepeat; n++){
              uint8_t  channel =  *reinterpret_cast<const uint8_t*>( &buffer[pos]);
              uint16_t     tdc =  *reinterpret_cast<const uint16_t*>( &buffer[pos+1]);
              pos += 3;
              desc.slot = slot;
              desc.channel = channel;
-             printf("\t\t channel = %d tdc = %d\n",channel,tdc);
+             //printf("\t\t channel = %d tdc = %d\n",channel,tdc);
              if(tbl.contains(desc)==true){
                 tbl.decode(desc);
                 bank.putInt(row,0,desc.sector);
@@ -72,9 +75,11 @@ namespace coda {
                 row++;
              } else {
                 printf(" error in decoder : "); tbl.print(desc);
-             }
-          }
+             }             
+           } 
           if((pos+17 - offset ) < length) doLoop = false;
+          
+          //if((pos+17 - offset ) < length) doLoop = false;
        }
    }
 }
