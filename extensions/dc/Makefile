@@ -9,7 +9,7 @@ LZ4LIBS     := -L../../lz4/lib -llz4 -lpthread
 LZ4INCLUDES := -I../../lz4/lib
 
 CXX       := g++
-CXXFLAGS  += -Wall -fPIC -std=c++14
+CXXFLAGS  += -Wall -fPIC -std=c++14 -Wunknown-pragmas
 LD        := g++
 LDFLAGS   :=
 

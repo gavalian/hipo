@@ -34,7 +34,7 @@ namespace dc {
             int    comp = bank.getInt(2,i);
 
             if(sector==sec){
-                if(check(output,layer,comp, 0.05)>0) index.push_back(i);
+                if(check(output,layer,comp, threshold)>0) index.push_back(i);
             }
         }
     }

@@ -19,7 +19,7 @@
 #include "utils.h"
 #include "datastream.h"
 #include <thread>
-
+#include "cmdparser.hpp"
 
    std::vector<hipo::event> dataframe;
    std::vector <hipo::bank> databanks;
@@ -30,6 +30,7 @@
    int  nThreads = 8;
    int   nFrames = 16;
 
+   double threshold = 0.05;
 /**
  * @brief Create a Frame object
  *  Creates an array of events
@@ -76,8 +77,7 @@ void function(int order){
   createFrame(events,nFrames);
   stream.getbank("DC::tdc",banks,nFrames);
 
-  
-  
+    
   int isAlive = 1;
   //printf("-- start the thread %d, frames = %d\n", order, nFrames);
   while(isAlive==1){
@@ -100,7 +100,7 @@ void function(int order){
              //events[k].show();
              //events[k].addStructure(banks[k]);
            } else {
-              printf("bank dc has size=0\n");
+	     //printf("bank dc has size=0\n");
            }
         }
       }
@@ -129,6 +129,13 @@ void runstream(){//},std::vector<hipo::bank> *banks){//}, fdeep::model &model, s
     //printf("---- done with %ld threads \n", databanks.size());
 }
 
+void configure_parser(cli::Parser& parser){
+  parser.set_optional<std::string>("o", "output", "output.h5", "output denoised file name");
+  parser.set_required<std::string>("i", "input", "input file name");
+  parser.set_optional<int>("t", "threads",  8,"number of threads to run");
+  parser.set_optional<int>("f",  "frames", 16,"number of events in each frame");
+  parser.set_optional<double>("l", "level", 0.05,"cut off level for background hits");
+}
 
 int main(int argc, char** argv){
 
@@ -138,40 +145,58 @@ std::cout << __cplusplus << "-- AI denoising program  -- "  << __cplusplus << st
 std::cout << __cplusplus << "--------------------------- "  << __cplusplus << std::endl;
 std::cout << std::endl;
 
-   char inputFile[256];
-
-   if(argc>1) {
-      sprintf(inputFile,"%s",argv[1]);
-      //sprintf(outputFile,"%s",argv[2]);
-   } else {
-      std::cout << " *** please provide a file name..." << std::endl;
-     exit(0);
-   }
+   cli::Parser parser(argc, argv);
+   configure_parser(parser);
+   parser.run_and_exit_if_error();
+ 
+   /*char inputFile[256];
+   if(argc>1) { sprintf(inputFile,"%s",argv[1]);} else {
+      std::cout << " *** please provide a file name..." << std::endl;exit(0);
+      }*/
 
    chamber.setRows(112);
+
+   std::string  inputFile = parser.get<std::string>("i");
+   std::string outputFile = parser.get<std::string>("o");
+   double threshold = parser.get<double>("l");
+   nThreads = parser.get<int>("t");
+   nFrames  = parser.get<int>("f");
+   chamber.setThreshold(threshold);
+   printf("\n--\n");
+   printf("\n*********************************************************\n");
+   printf("::  input file : %s \n",inputFile.c_str());
+   printf(":: output file : %s \n",outputFile.c_str());
+   printf(":: num threads : %d \n",nThreads);
+   printf("::  frame size : %d \n",nFrames);
+   printf("::   threshold : %.9f \n",threshold);
+   printf("*********************************************************\n");
+   printf("\n--\n");
    
-   if(argc>2) nThreads = atoi(argv[2]);
-   if(argc>3)  nFrames = atoi(argv[3]);
-
-    stream.open(inputFile,"output.h5");
-    printf("--\n-- opening the neural network file\n--\n");
-    const auto modelLocal = fdeep::load_model("network/cnn_autoenc_0f_112.json");
-    //const auto modelLocal = fdeep::load_model("network/cnn_autoenc_cpp.json");
-    model = &modelLocal;
-    
-    hipo::benchmark  processBench;
-
-    //hipo::benchmark    totalBench;
-    processBench.resume();
-    std::thread progress(runstream);
-    progress.join();
-    processBench.pause();
-
-    stream.close();
-    long counter = stream.getProcessed();
-
-  printf("\n\n>>>>> finally events finally events %d , %d - %14lu, time = %9.3f sec, rate = %12.8f sec/event , %9.3f event/sec\n",
-	 nThreads, nFrames,counter ,processBench.getTimeSec(),
-              processBench.getTimeSec()/counter, counter/processBench.getTimeSec() );
-
+   /*if(argc>2) nThreads = atoi(argv[2]);
+   if(argc>3) nFrames = atoi(argv[3]);
+   if(argc>4) chamber.setThreshold(atof(argv[4]));
+   */
+   
+   stream.open(inputFile.c_str(),outputFile.c_str());
+   
+   printf("--\n-- opening the neural network file\n--\n");
+   const auto modelLocal = fdeep::load_model("network/cnn_autoenc_0f_112.json");
+   //const auto modelLocal = fdeep::load_model("network/cnn_autoenc_cpp.json");
+   model = &modelLocal;
+   
+   hipo::benchmark  processBench;
+   
+   //hipo::benchmark    totalBench;
+   processBench.resume();
+   std::thread progress(runstream);
+   progress.join();
+   processBench.pause();
+   
+   stream.close();
+   long counter = stream.getProcessed();
+   
+   printf("\n\n>>>>> finally events finally events %d , %d - %14lu, time = %9.3f sec, rate = %12.8f sec/event , %9.3f event/sec\n",
+	  nThreads, nFrames,counter ,processBench.getTimeSec(),
+	  processBench.getTimeSec()/counter, counter/processBench.getTimeSec() );
+   
 }

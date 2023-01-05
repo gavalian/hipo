@@ -78,7 +78,6 @@ namespace coda {
              }             
            } 
           if((pos+17 - offset ) < length) doLoop = false;
-          
           //if((pos+17 - offset ) < length) doLoop = false;
        }
    }
