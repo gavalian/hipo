@@ -33,7 +33,7 @@ namespace dc {
       void  map(std::vector<int> &index, std::vector<float> &output, hipo::bank &bank, int sector);
       void  initvec(std::vector<float> &tensor);
       void  create(std::vector<float> &tensor, hipo::bank &bank, int sector);
-      void  process(const fdeep::model &model, hipo::bank &bank);
+      int   process(const fdeep::model &model, hipo::bank &bank);
       void  setThreshold(double __th){threshold = __th;}
       hipo::event &event(){ return hev;}
   };

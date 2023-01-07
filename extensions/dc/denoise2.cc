@@ -21,6 +21,8 @@
 #include <thread>
 #include "cmdparser.hpp"
 
+
+
    std::vector<hipo::event> dataframe;
    std::vector <hipo::bank> databanks;
    const fdeep::model                *model;
@@ -31,6 +33,9 @@
    int   nFrames = 16;
 
    double threshold = 0.05;
+
+   std::string network_file = "network/cnn_autoenc_0f_112.json";
+
 /**
  * @brief Create a Frame object
  *  Creates an array of events
@@ -76,9 +81,10 @@ void function(int order){
   std::vector<hipo::bank>  banks;
   createFrame(events,nFrames);
   stream.getbank("DC::tdc",banks,nFrames);
-
-    
+ 
   int isAlive = 1;
+  int totRows = 0;
+  int sigRows = 0;
   //printf("-- start the thread %d, frames = %d\n", order, nFrames);
   while(isAlive==1){
       stream.pull(events);
@@ -88,17 +94,9 @@ void function(int order){
            nNonEmpty++;
            events[k].getStructure(banks[k]);
            if(banks[k].getRows()>0){
-             chamber.process(*model,banks[k]);
-             //printf("calling remove\n");
-             //printf("bfore remove ---\n");
-             //events[k].show();
-             // -previous implementation
-             // events[k].remove(banks[k]);
+             sigRows += chamber.process(*model,banks[k]);
+	     totRows += banks[k].getRows();
              events[k].replace(banks[k]);
-             
-             //printf("after remove --\n");
-             //events[k].show();
-             //events[k].addStructure(banks[k]);
            } else {
 	     //printf("bank dc has size=0\n");
            }
@@ -107,11 +105,8 @@ void function(int order){
       //printf("non empty = %d\n",nNonEmpty);
      if(nNonEmpty==0) isAlive = 0;
   }
-  //printf("-- info : thread %d finished\n",order);
-  /*int start = order * nFrames;
-  for(int k = 0; k < nFrames; k++){
-     chamber.process(*model,databanks[start+k]);
-  }*/
+
+  printf(">>> thread #%3d : %12d/%12d , reduction %8.5f\n", order, totRows, sigRows, ((double) sigRows)/totRows);
 }
 
 void runstream(){//},std::vector<hipo::bank> *banks){//}, fdeep::model &model, std::vector<hipo::bank> &banks){
@@ -128,15 +123,24 @@ void runstream(){//},std::vector<hipo::bank> *banks){//}, fdeep::model &model, s
     //threads.clear();
     //printf("---- done with %ld threads \n", databanks.size());
 }
-
+/**
+ * @brief configure command line parser with input arguments
+ */
 void configure_parser(cli::Parser& parser){
-  parser.set_optional<std::string>("o", "output", "output.h5", "output denoised file name");
   parser.set_required<std::string>("i", "input", "input file name");
+  parser.set_optional<std::string>("o", "output", "output.h5", "output denoised file name");
+  parser.set_optional<std::string>("n","network","network/cnn_autoenc_0f_112.json", "neural network file name");
+  
   parser.set_optional<int>("t", "threads",  8,"number of threads to run");
   parser.set_optional<int>("f",  "frames", 16,"number of events in each frame");
   parser.set_optional<double>("l", "level", 0.05,"cut off level for background hits");
 }
 
+/*
+===============================================================================================
+==  MAIN program to run de-noising on CLAS 12 Drift Chamber Data..
+================================================================================================
+*/
 int main(int argc, char** argv){
 
 std::cout << std::endl;
@@ -158,17 +162,21 @@ std::cout << std::endl;
 
    std::string  inputFile = parser.get<std::string>("i");
    std::string outputFile = parser.get<std::string>("o");
+   std::string network_file = parser.get<std::string>("n");
+   
    double threshold = parser.get<double>("l");
    nThreads = parser.get<int>("t");
    nFrames  = parser.get<int>("f");
    chamber.setThreshold(threshold);
+   
    printf("\n--\n");
    printf("\n*********************************************************\n");
-   printf("::  input file : %s \n",inputFile.c_str());
-   printf(":: output file : %s \n",outputFile.c_str());
-   printf(":: num threads : %d \n",nThreads);
-   printf("::  frame size : %d \n",nFrames);
-   printf("::   threshold : %.9f \n",threshold);
+   printf("::   input file : %s \n",inputFile.c_str());
+   printf("::  output file : %s \n",outputFile.c_str());
+   printf(":: network file : %s \n",network_file.c_str());
+   printf("::  num threads : %d \n",nThreads);
+   printf("::   frame size : %d \n",nFrames);
+   printf("::    threshold : %.9f \n",threshold);
    printf("*********************************************************\n");
    printf("\n--\n");
    
@@ -180,7 +188,8 @@ std::cout << std::endl;
    stream.open(inputFile.c_str(),outputFile.c_str());
    
    printf("--\n-- opening the neural network file\n--\n");
-   const auto modelLocal = fdeep::load_model("network/cnn_autoenc_0f_112.json");
+   //const auto modelLocal = fdeep::load_model("network/cnn_autoenc_0f_112.json");
+   const auto modelLocal = fdeep::load_model(network_file.c_str());
    //const auto modelLocal = fdeep::load_model("network/cnn_autoenc_cpp.json");
    model = &modelLocal;
    

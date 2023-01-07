@@ -10,6 +10,8 @@ namespace hipo {
 
 class datastream {
     private:
+
+
       
       hipo::reader hr;
       hipo::writer hw;
@@ -18,8 +20,12 @@ class datastream {
       long  nProcessed = 0;
       hipo::benchmark  bench;
 
+  
    public:
-    datastream(){}
+
+  //static int eof_printout;
+  
+  datastream(){ /*datastream::eof_printout = 0;*/}
     virtual ~datastream(){} 
     void open(const char *input, const char *output){        
            hr.open(input);           
@@ -36,14 +42,19 @@ class datastream {
     void pull(std::vector<hipo::event> &events){
         //printf("pull events %lu %d\n", events.size(), hr.hasNext());
         std::unique_lock<std::mutex> lock(obj);
-        for(int n = 0; n < events.size(); n++){
+	if(hr.hasNext()==false){//&&datastream::eof_printout==0){
+	  //datastream::eof_printout = 1;
+	  printf("\n");
+	}
+	for(int n = 0; n < events.size(); n++){
             // write the event in the output if it's not empty
             if(events[n].getSize()>16){ hw.addEvent(events[n]);}
             // reset event and read next in the file if any left
             events[n].reset();
             if(hr.next()==true){ 
                 hr.read(events[n]); nProcessed++;
-                if(nProcessed%100==0) printf("-- counter %9lu events\n",nProcessed);               
+                if(nProcessed%250==0) { printf("."); fflush(stdout);}
+		if(nProcessed%10000==0) printf(" : %9lu \n",nProcessed);               
                 //printf("read event %d , size = %d\n",n,events[n].getSize());
                 //events[n].show();
             }
@@ -53,9 +64,8 @@ class datastream {
         //      bench.getTimeSec()/nProcessed, nProcessed/bench.getTimeSec() );
         //bench.resume();
     }
-
     long getProcessed(){return nProcessed; }
     void close(){hw.close();}
-};
+   };
 }
 #endif

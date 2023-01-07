@@ -334,11 +334,11 @@ namespace cli {
 		void enable_help() {
 			set_callback("h", "help", std::function<bool(CallbackArgs&)>([this](CallbackArgs& args){
 				args.output << this->usage();
-				#pragma warning(push)
-				#pragma warning(disable: 4702)
+				//#pragma warning(push)
+				//#pragma warning(disable: 4702)
 				exit(0);
 				return false;
-				#pragma warning(pop)
+				//#pragma warning(pop)
 			}), "", true);
 		}
 

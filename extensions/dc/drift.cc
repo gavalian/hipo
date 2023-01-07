@@ -56,11 +56,11 @@ namespace dc {
         }
     }
 
-    void drift::process(const fdeep::model &model, hipo::bank &bank){
+    int drift::process(const fdeep::model &model, hipo::bank &bank){
 
         std::vector<float>  dcmat;
         std::vector<int>    bank_iter;
-
+	//int counter = 0;
         for(int s = 1; s <= 6; s++){
            initvec(dcmat);
            create(dcmat,bank,s);
@@ -73,15 +73,15 @@ namespace dc {
 				        );
            auto output = result[0].as_vector();
            std::vector<float>  buffer;
-           for(int jj=0; jj< output->size(); jj++) buffer.push_back( (*output)[jj]);
+           for(int jj=0; jj< output->size(); jj++){ buffer.push_back( (*output)[jj]);}
            map(bank_iter,buffer,bank,s);
         }
 
         for(int nn = 0; nn < bank.getRows(); nn++) bank.putByte(3,nn,(int8_t) 10);
-        int nindex = bank_iter.size();      
+        int nindex = bank_iter.size();
         for(int nn = 0; nn < nindex; nn++){
             bank.putByte(3,bank_iter[nn],(int8_t) 0);
         }
+	return nindex;
     }
-
 }
