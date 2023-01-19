@@ -9,7 +9,7 @@ To Build the software some dependencies have to be installed. The package
 depends on the project:
 
 ```
-https://github.com/Dobiasd/frugally-deep
+[https://github.com/Dobiasd/frugally-deep](https://github.com/Dobiasd/frugally-deep)
 ```
 
 The frugally-deep is a header only library allowing to run Keras Models
