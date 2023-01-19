@@ -17,7 +17,7 @@ in C++. The Keras models, usually saved as h5 file, have to be run through
 provided converter first, then can be used in C++ code.
 
 The frugally-deep also denpends on few packaged, needed to be installed.
-The instructions on what to install can be found here:
+The instructions on what to install can be found [here](https://github.com/Dobiasd/frugally-deep/blob/master/INSTALL.md):
 
 For convenience here are the instructions:
 
