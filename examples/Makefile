@@ -49,6 +49,9 @@ tupleFile: tupleFile.o
 writeFile: writeFile.o
 	$(CXX) -o writeFile.exe $<   $(HIPOLIBS) $(LZ4LIBS)
 
+writeFileComposite: writeFileComposite.o
+	$(CXX) -o writeFileComposite.exe $<   $(HIPOLIBS) $(LZ4LIBS)
+
 schema: schema.o
 	$(CXX) -o schema.exe $<   $(HIPOLIBS) $(LZ4LIBS)
 

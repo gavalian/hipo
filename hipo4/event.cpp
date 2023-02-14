@@ -144,12 +144,13 @@ namespace hipo {
         int str_size = str.getStructureBufferSize();
         int data_size = str.getSize();
         int evt_size = getSize();
-	      int evt_capacity = dataBuffer.size();
+	int evt_capacity = dataBuffer.size();
 
         //if(dataBuffer.size()<= () ){
         //  dataBuffer.resize(size+1024);
         //}
         if(data_size>0){
+          //printf(" writing structure %d/%d - size %d, data size %d\n",str.getGroup(),str.getItem(),str_size,data_size);
 	        if((evt_size + str_size)<evt_capacity){
 	           memcpy(&dataBuffer[evt_size], &str.getStructureBuffer()[0],str_size);
 	            //*(reinterpret_cast<uint32_t*>(&dataBuffer[4])) = (evt_size + str_size + 24);
@@ -254,10 +255,12 @@ namespace hipo {
             uint16_t   gid = *(reinterpret_cast<uint16_t*>(&dataBuffer[position]));
             uint8_t    iid = *(reinterpret_cast<uint8_t*>(&dataBuffer[position+2]));
             uint8_t   type = *(reinterpret_cast<uint8_t*>(&dataBuffer[position+3]));
-            int     length = *(reinterpret_cast<int*>(&dataBuffer[position+4]));
+	    int     sizeWord = *(reinterpret_cast<int*>(&dataBuffer[position+4]));
+            int     length = sizeWord&0x00FFFFFF;
+	    int     format = (sizeWord>>24)&0x000000FF;
             //printf("group = %4d , item = %4d\n",(unsigned int) gid, (unsigned int) iid);
             //if(gid==group&&iid==item) return std::make_pair(position,length);
-            printf("%12s %9d %4d %12d %12d\n"," ",gid,iid,type,length);
+            printf("%12s node [%9d %4d] type = %12d, fotmat size = %3d , length = %12d\n"," ",gid,iid,type,format,length);
             position += (length + 8);
         }
     }
