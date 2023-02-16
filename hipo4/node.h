@@ -63,7 +63,8 @@ namespace hipo {
       //int                 getStructureBufferSize(){ return 8+getSize();}
       //int                 dataOffset = 8;
       //std::vector<char> structureBuffer;
-      
+      void init(const char *b, int length){ allocate(length); memcpy(const_cast<char *>(nodePointer),b,length);}
+      void initEmpty();
 
   public:
 
@@ -77,13 +78,13 @@ namespace hipo {
       virtual     ~node()= default;
       
       //void         assign(std::tuple<int,int,int,int> params );
-
+      
       bool         allocate(int size){
         if(nodeBuffer.size()<size){ 
           nodeBuffer.resize(size+8); nodePointer = &nodeBuffer[0];
         } return true;
       }
-      
+      virtual void         reset(){ setDataLength(0);}
       int          size() const noexcept{
         int length = *reinterpret_cast<const uint32_t *>(nodePointer+4);
 	       return length&0x00ffffff;
@@ -100,13 +101,22 @@ namespace hipo {
          return (length>>24)&0x000000ff;
       }
       
+      
+      void        setDataLength(int length){
+         int word = *reinterpret_cast<const uint32_t *>(nodePointer+4);
+         int flength = (word>>24)&0x000000FF;
+         int totalLength = length + flength;
+         char *dest = const_cast<char *>(nodePointer);
+         *reinterpret_cast<uint32_t *>(dest+4) = (word&0xFF000000)|(totalLength&0x00FFFFFF);
+      }
+
       int         dataLength() const noexcept {         
         int  size = (*reinterpret_cast<const uint32_t *>(nodePointer+4))&0x00FFFFFF;
         int fsize = ((*reinterpret_cast<const uint32_t *>(nodePointer+4))>>24)&0x000000FF;
 	       return size-fsize;
       }
 
-      int         dataOffset() const noexcept;
+      int          dataOffset() const noexcept;
 
       int          group(){return (int) (*reinterpret_cast<const uint16_t *>(nodePointer));}
       int          item(){return (int) (*reinterpret_cast<const uint8_t *>(nodePointer+2));}

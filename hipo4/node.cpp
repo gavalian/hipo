@@ -52,6 +52,13 @@ namespace hipo {
         *reinterpret_cast<uint8_t *>(__a+3) = (uint8_t) type;
         *reinterpret_cast<uint8_t *>(__a+4) = 0x00000000;
     }
+    void node::initEmpty(){
+      char *__a = const_cast<char*> (nodePointer);
+        *reinterpret_cast<uint16_t *>(__a) = (uint16_t) 0;
+        *reinterpret_cast<uint8_t *>(__a+2) = (uint8_t) 0;
+        *reinterpret_cast<uint8_t *>(__a+3) = (uint8_t) 0;
+        *reinterpret_cast<uint8_t *>(__a+4) = 0x00000000;
+    }
 
     void node::show(){
       printf("hipo::node : [%5d,%5d] type = %4d, node length = %5d, format length = %6d, data length = %8d, offset = %5d, capacity = %8d\n",

@@ -94,7 +94,7 @@ void function(int order){
            nNonEmpty++;
            events[k].getStructure(banks[k]);
            if(banks[k].getRows()>0){
-             sigRows += chamber.process(*model,banks[k]);
+             sigRows += chamber.processRange(*model,banks[k]);
 	     totRows += banks[k].getRows();
              events[k].replace(banks[k]);
            } else {
