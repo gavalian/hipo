@@ -27,7 +27,7 @@
 #include "Compression.h"
 
 
-TH1D   *convert(TFile *file, hipo::event &event);
+void convert(TFile *file, hipo::event &event);
 
 
 int main(int argc, char** argv) {
@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
    hf->Write();
 }
 
-TH1D *convert(TFile *file, hipo::event &event){
+void convert(TFile *file, hipo::event &event){
   
   hipo::structure name;
   hipo::structure bins;
