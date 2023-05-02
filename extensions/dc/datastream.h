@@ -19,7 +19,7 @@ class datastream {
       std::mutex obj;
       long  nProcessed = 0;
       hipo::benchmark  bench;
-
+      long  nDataLimit = -1;
   
    public:
 
@@ -39,19 +39,27 @@ class datastream {
         for(int i = 0; i < count; i++) banks.push_back(hipo::bank(factory.getSchema(name))); 
     }
 
-    void pull(std::vector<hipo::event> &events){
+  void setLimit(long limit){
+    nDataLimit = limit;
+  }
+  
+  void pull(std::vector<hipo::event> &events){
         //printf("pull events %lu %d\n", events.size(), hr.hasNext());
         std::unique_lock<std::mutex> lock(obj);
+	bool finished = false;
+	if(nDataLimit>0){ if(nProcessed>nDataLimit) finished = true;}
+	
 	if(hr.hasNext()==false){//&&datastream::eof_printout==0){
 	  //datastream::eof_printout = 1;
 	  printf("\n");
 	}
+	
 	for(int n = 0; n < events.size(); n++){
             // write the event in the output if it's not empty
             if(events[n].getSize()>16){ hw.addEvent(events[n]);}
             // reset event and read next in the file if any left
             events[n].reset();
-            if(hr.next()==true){ 
+            if(hr.next()==true&&finished==false){ 
                 hr.read(events[n]); nProcessed++;
                 if(nProcessed%250==0) { printf("."); fflush(stdout);}
 		if(nProcessed%10000==0) printf(" : %9lu \n",nProcessed);               

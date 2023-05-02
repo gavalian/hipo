@@ -73,6 +73,8 @@ namespace hipo {
         void   init(std::vector<char> &buffer);
         void   init(const char *buffer, int size);
         void   getStructure(hipo::structure &str, int group, int item);
+        void   getStructure4(hipo::structure &str, int group, int item);
+        
         int    getTag();
         void   setTag(int tag);
         void   getStructure(hipo::bank &b);
@@ -87,7 +89,8 @@ namespace hipo {
         void   get(hipo::node &_n, int group, int item);
 
         std::pair<int,int>  getStructurePosition(int group, int item);
-        
+        std::pair<int,int>  getStructurePosition4(int group, int item);
+
         std::vector<char>  &getEventBuffer();
         int                 getSize();
         void                reset();
