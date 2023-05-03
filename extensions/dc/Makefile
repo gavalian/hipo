@@ -2,7 +2,7 @@
 # MAKEFILE for BUILDING EXAMPLES FOR HIPO4 LIBRARY
 # AUTHOR: GAVALIAN DATE: 10/24/2018
 #********************************************************
-HIPOCFLAGS  := -I../../hipo4 -I$(SOFTLOCAL)
+HIPOCFLAGS  := -I../../hipo4 -I./submodules/install/include
 HIPOLIBS    := -L../../lib -lhipo4
 
 LZ4LIBS     := -L../../lz4/lib -llz4 -lpthread
@@ -16,7 +16,7 @@ LDFLAGS   :=
 OBJECTS  = denoise.o drift.o
 OBJECTS2 = denoise2.o drift.o
 
-all:  denoise2
+all:  submodules denoise2
 
 denoise: $(OBJECTS)
 	$(CXX) -o denoise.exe $(OBJECTS)  $(HIPOLIBS) $(LZ4LIBS)
@@ -33,6 +33,12 @@ denoise2: $(OBJECTS2)
 clean:
 	@echo 'Removing all build files'
 	@rm -rf *.o *~ *.exe example*hipo 
+	$(MAKE) -C submodules clean
+
+.PHONY: submodules
+submodules:
+	$(MAKE) -C submodules all
 
 %.o: %.cc
 	$(CXX) -c $< -O3 $(CXXFLAGS) $(HIPOCFLAGS) $(LZ4INCLUDES)
+
