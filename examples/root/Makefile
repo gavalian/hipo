@@ -21,6 +21,9 @@ LDFLAGS   := $(ROOTLDFLAGS)
 
 all: converter benchmark
 
+hist2root: hist2root.o
+	$(CXX) -o hist2root.exe $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
+
 converter: converter.o
 	$(CXX) -o converter.exe $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
 

@@ -57,14 +57,14 @@ namespace hipo {
       return true;
   }
 
-    void structure::initStructureBySize(int __group, int __item, int __type, int __size){
+  void structure::initStructureBySize(int __group, int __item, int __type, int __size){
       allocate(__size+8);
       structureAddress = &structureBuffer[0];
       *reinterpret_cast<uint16_t *>(structureAddress) = (uint16_t) __group;
       *reinterpret_cast<uint8_t *>(&structureAddress[2]) = (uint8_t) __item;
       *reinterpret_cast<uint8_t *>(&structureAddress[3]) = (uint8_t) __type;
       *reinterpret_cast<uint32_t *>(&structureAddress[4]) = __size;
-    }
+  }
 
     void structure::setSize(int size){
       int sizeWord =  *reinterpret_cast<uint32_t *>(structureAddress+4);

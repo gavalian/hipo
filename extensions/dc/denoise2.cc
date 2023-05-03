@@ -94,7 +94,8 @@ void function(int order){
            nNonEmpty++;
            events[k].getStructure(banks[k]);
            if(banks[k].getRows()>0){
-             sigRows += chamber.process(*model,banks[k]);
+             sigRows += chamber.processRange(*model,banks[k]);
+	     // -- old processorsigRows += chamber.process(*model,banks[k]);
 	     totRows += banks[k].getRows();
              events[k].replace(banks[k]);
            } else {
@@ -105,7 +106,6 @@ void function(int order){
       //printf("non empty = %d\n",nNonEmpty);
      if(nNonEmpty==0) isAlive = 0;
   }
-
   printf(">>> thread #%3d : %12d/%12d , reduction %8.5f\n", order, totRows, sigRows, ((double) sigRows)/totRows);
 }
 
@@ -134,6 +134,7 @@ void configure_parser(cli::Parser& parser){
   parser.set_optional<int>("t", "threads",  8,"number of threads to run");
   parser.set_optional<int>("f",  "frames", 16,"number of events in each frame");
   parser.set_optional<double>("l", "level", 0.05,"cut off level for background hits");
+  parser.set_optional<int>("e", "events", -1,"maximum number of events to process");
 }
 
 /*
@@ -186,6 +187,7 @@ std::cout << std::endl;
    */
    
    stream.open(inputFile.c_str(),outputFile.c_str());
+   stream.setLimit(parser.get<int>("e"));
    
    printf("--\n-- opening the neural network file\n--\n");
    //const auto modelLocal = fdeep::load_model("network/cnn_autoenc_0f_112.json");

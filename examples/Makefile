@@ -19,6 +19,9 @@ all:  writeFile readFile readFileTags showFile schema writeUserHeader tupleFile 
 readEvents: readEvents.o
 	$(CXX) -o readEvents.exe $<  $(HIPOLIBS) $(LZ4LIBS)
 
+readHist: readHist.o
+	$(CXX) -o readHist.exe $<  $(HIPOLIBS) $(LZ4LIBS)
+
 writeEvents: writeEvents.o
 	$(CXX) -o writeEvents.exe $<   $(HIPOLIBS) $(LZ4LIBS)
 
@@ -48,6 +51,9 @@ tupleFile: tupleFile.o
 
 writeFile: writeFile.o
 	$(CXX) -o writeFile.exe $<   $(HIPOLIBS) $(LZ4LIBS)
+
+writeFileComposite: writeFileComposite.o
+	$(CXX) -o writeFileComposite.exe $<   $(HIPOLIBS) $(LZ4LIBS)
 
 schema: schema.o
 	$(CXX) -o schema.exe $<   $(HIPOLIBS) $(LZ4LIBS)

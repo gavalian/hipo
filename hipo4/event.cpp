@@ -76,6 +76,19 @@ namespace hipo {
        }
     }
 
+    void event::getStructure4(hipo::structure &str, int group, int item){
+       std::pair<int,int> index = getStructurePosition4(group,item);
+       //printf("\n\n>>> GET STRUCTURE %d %d -> %d %d \n",group,item, index.first, index.second);
+       if(index.first>0){
+         str.init(&dataBuffer[index.first], index.second + 8);
+         str.notify();
+       } else {
+         str.initStructureBySize(group,item,1,0);
+         str.notify();
+         //printf("*** error *** : structure (%5d,%5d) does not exist\n", group,item);
+       }
+    }
+
     void     event::getStructureNoCopy(const char *buffer, hipo::structure &str, int group, int item){
        std::pair<int,int> index = getStructurePosition(buffer,group,item);
        if(index.first>0){
@@ -150,6 +163,7 @@ namespace hipo {
         //  dataBuffer.resize(size+1024);
         //}
         if(data_size>0){
+          //printf(" writing structure %d/%d - size %d, data size %d\n",str.getGroup(),str.getItem(),str_size,data_size);
 	        if((evt_size + str_size)<evt_capacity){
 	           memcpy(&dataBuffer[evt_size], &str.getStructureBuffer()[0],str_size);
 	            //*(reinterpret_cast<uint32_t*>(&dataBuffer[4])) = (evt_size + str_size + 24);
@@ -159,6 +173,34 @@ namespace hipo {
 		              str_size,evt_capacity, evt_size);
 	          }
         }
+    }
+
+  void   event::add(hipo::node &_n){
+      int _n_data_length = _n.dataLength();
+      if(_n_data_length==0) return;
+
+      int ev_size = getSize();
+      int _n_size = _n.size() + 8;
+      int ev_capacity = dataBuffer.size();
+      if((ev_size + _n_size)<ev_capacity){
+        memcpy(&dataBuffer[ev_size], _n.pointer(),_n_size);
+        *(reinterpret_cast<uint32_t*>(&dataBuffer[4])) = (ev_size + _n_size);
+      } else {
+        printf("event::add : error adding structure with size = %5d (capacity = %5d, size = %5d)\n",
+          _n_size,ev_capacity, ev_size);
+      }
+  }
+
+void event::get(hipo::node &_n, int group, int item){
+       std::pair<int,int> index = getStructurePosition(group,item);
+       if(index.first>0){
+         _n.init(&dataBuffer[index.first], index.second + 8);
+         _n.notify();
+       } else {
+         _n.initEmpty();
+         _n.notify();
+         //printf("*** error *** : structure (%5d,%5d) does not exist\n", group,item);
+       }
     }
 
     int  event::getTag(){
@@ -191,6 +233,21 @@ namespace hipo {
     }
 
     std::pair<int,int>  event::getStructurePosition(int group, int item){
+      int position = 16;
+      int eventSize = *(reinterpret_cast<uint32_t*>(&dataBuffer[4]));
+      while(position+8<eventSize){
+          uint16_t   gid = *(reinterpret_cast<uint16_t*>(&dataBuffer[position]));
+          uint8_t    iid = *(reinterpret_cast<uint8_t*>(&dataBuffer[position+2]));
+          uint8_t   type = *(reinterpret_cast<uint8_t*>(&dataBuffer[position+3]));
+          int     length = *(reinterpret_cast<int*>(&dataBuffer[position+4]));
+          //printf("group = %4d , item = %4d\n",(unsigned int) gid, (unsigned int) iid);
+          if(gid==group&&iid==item) return std::make_pair(position,length);
+          position += (length + 8);
+      }
+      return std::make_pair(-1,0);
+    }
+
+    std::pair<int,int>  event::getStructurePosition4(int group, int item){
       int position = 16;
       int eventSize = *(reinterpret_cast<uint32_t*>(&dataBuffer[4]));
       while(position+8<eventSize){
@@ -254,11 +311,27 @@ namespace hipo {
             uint16_t   gid = *(reinterpret_cast<uint16_t*>(&dataBuffer[position]));
             uint8_t    iid = *(reinterpret_cast<uint8_t*>(&dataBuffer[position+2]));
             uint8_t   type = *(reinterpret_cast<uint8_t*>(&dataBuffer[position+3]));
-            int     length = *(reinterpret_cast<int*>(&dataBuffer[position+4]));
+	    int     sizeWord = *(reinterpret_cast<int*>(&dataBuffer[position+4]));
+            int     length = sizeWord&0x00FFFFFF;
+	    int     format = (sizeWord>>24)&0x000000FF;
             //printf("group = %4d , item = %4d\n",(unsigned int) gid, (unsigned int) iid);
             //if(gid==group&&iid==item) return std::make_pair(position,length);
-            printf("%12s %9d %4d %12d %12d\n"," ",gid,iid,type,length);
+            printf("%12s node [%9d %4d] type = %12d, fotmat size = %3d , length = %12d\n"," ",gid,iid,type,format,length);
             position += (length + 8);
         }
+    }
+
+
+
+    void     event::get(const char *buffer, hipo::node &_n, int group, int item){
+       std::pair<int,int> index = getStructurePosition(buffer,group,item);
+       if(index.first>0){
+         _n.init(&buffer[index.first], index.second + 8);
+         _n.notify();
+       } else {
+         _n.initEmpty();
+         _n.notify();
+         //printf("*** error *** : structure (%5d,%5d) does not exist\n", group,item);
+       }
     }
 }
