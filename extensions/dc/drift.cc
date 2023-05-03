@@ -14,6 +14,7 @@ namespace dc {
   
   int  drift::check(std::vector<float> &vec, int layer, int component, double threshold){
     int index = getIndex(layer,component);
+    //if(component==112&&layer==36) printf("ooooops got (%d,%d)  %f\n",layer,component,vec[index]);
     if(vec[index]>=threshold&&vec[index]<=1.0) return 1;
     return 0;
   }
@@ -154,8 +155,7 @@ namespace dc {
   //      (int) bank_iter50.size() 
   //      );
     
-    int nindex = bank_iter00.size();
-    
+    int nindex = bank_iter00.size();    
     
     for(int nn = 0; nn < bank.getRows(); nn++) {
       int order = bank.getInt(3,nn);
