@@ -89,12 +89,15 @@ set(HIPO_SOURCE_FILES
         hipo4/dictionary.cpp
         hipo4/event.cpp
         hipo4/fusion.cpp
+        hipo4/node.cpp
         hipo4/reader.cpp
         hipo4/record.cpp
         hipo4/recordbuilder.cpp
+        hipo4/tuple.cpp
         hipo4/utils.cpp
         hipo4/wrapper.cpp
-        hipo4/writer.cpp)
+        hipo4/writer.cpp
+        )
 
 set(HIPO_HEADERS
         hipo4/bank.h
@@ -103,6 +106,7 @@ set(HIPO_HEADERS
         hipo4/event.h
         hipo4/fusion.h
         hipo4/hipoexceptions.h
+        hipo4/node.h
         hipo4/reader.h
         hipo4/record.h
         hipo4/recordbuilder.h
