@@ -93,6 +93,29 @@ namespace hipo {
         int         getDataOffset(){ return data_offset;}
     };
 
+    class dataframe {
+       private:
+         std::vector<char>  dataBuffer;
+         recordHeader_t     recordHeader{};
+         int                maxEvents = 50;
+         int                maxSize   = 512*1024;
+
+       public:
+         dataframe(){};
+         dataframe(int max_events, int max_size);
+         ~dataframe(){};
+         
+         void         init(const char *ptr);
+         bool         addEvent(hipo::event &event);
+         int          getEventAt(int pos, hipo::event &event);
+         int          count();
+         int          size();
+         void         reset();
+         const char  *buffer(){ return &dataBuffer[0];}
+         
+         void summary();
+    };
+
     class record {
 
       private:

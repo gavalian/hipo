@@ -248,13 +248,21 @@ extern "C" {
     int    fusion_get_int(int handle, const char *bank, const char *entry, int row){ 
       return hFusion.getInt(handle,bank,entry,row);
     }
-
+  int64_t    fusion_get_long(int handle, const char *bank, const char *entry, int row){
+      return hFusion.getLong(handle,bank,entry,row);
+    }
     float    fusion_get_float(int handle, const char *bank, const char *entry, int row){ 
       float value = hFusion.getFloat(handle,bank,entry,row);
       //printf(" result from wrapper = %f\n",value);
       return value;
     }
 
+  float    fusion_get_double(int handle, const char *bank, const char *entry, int row){
+    float value = (float) hFusion.getDouble(handle,bank,entry,row);
+      //printf(" result from wrapper = %f\n",value);                                                                                                              
+      return value;
+    }
+  
     int fusion_entry_type(int handle, const char *bank, const char *entry){
           return hFusion.getType(handle,bank,entry);
     }

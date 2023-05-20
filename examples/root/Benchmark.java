@@ -114,17 +114,17 @@ public class Benchmark {
 			//r.next();
 			r.nextEvent(e);
 			e.read(p);
-			op.resume();
+			//op.resume();
 			//calculate(p,h);
 			int rows = p.getRows();
 			double value = 0;
-	        for(int row = 0; row < rows; row++){
+			for(int row = 0; row < rows; row++){
 			  value = calculateRow(p,row);
 			  //System.out.println(calculateRow(p,row));
 			  h.fill(value);
 			}
 			//h.fill(value);
-			op.pause();
+			//op.pause();
 		}
 		t.pause();
 	
@@ -153,7 +153,7 @@ public class Benchmark {
 	    //r.next();
 	    r.nextEvent(e);
 	    e.read(p);
-	    op.resume();
+	    //op.resume();
 	    int rows = p.getRows();
 	        for(int row = 0; row < rows; row++){
 	    px = p.getFloat(1,row);
@@ -168,7 +168,7 @@ public class Benchmark {
 		     + vt + p.getInt(0,row)*p.getFloat(9,row)*p.getFloat(10,row)+p.getInt(11,row) - p.getInt(8,row);
 		h.fill(value);
 		}
-	    op.pause();
+		//op.pause();
 	}
 	t.pause();
 	
@@ -188,7 +188,8 @@ public class Benchmark {
 	int iter = 5;
 	String filename = args[0];
 	Benchmark b = new Benchmark();
-	//b.writerBenchmark(filename);
+	b.writerBenchmark(filename);
+
 	String rfile = filename + "_java.h5";
 
 	double realTime = b.readBenchmark(rfile);

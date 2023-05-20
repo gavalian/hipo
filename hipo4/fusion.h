@@ -48,8 +48,11 @@ namespace hipo {
       hipo::bank  &get(const char *bank){ return banks[bank];}
       int getSize(const char *bank);
 
-      int     getInt(   const char *bank, const char *entry, int row);
-      double  getFloat( const char *bank, const char *entry, int row);
+    int     getInt(   const char *bank, const char *entry, int row);
+    int64_t     getLong(   const char *bank, const char *entry, int row);
+    
+    float   getFloat( const char *bank, const char *entry, int row);
+    double  getDouble( const char *bank, const char *entry, int row);
 
   };
 
@@ -73,7 +76,9 @@ namespace hipo {
      int    getSize(int fid, const char *bank);
 
       int     getInt(   int handle, const char *bank, const char *entry, int row);
+    int64_t     getLong(   int handle, const char *bank, const char *entry, int row);
       float   getFloat( int handle, const char *bank, const char *entry, int row);
+    double   getDouble( int handle, const char *bank, const char *entry, int row);
       int     getType( int handle, const char *bank, const char *entry);
   };
 }

@@ -68,6 +68,16 @@ class hreader:
         self.hipo4lib.fusion_get_float.restype = ctypes.c_int
         value = self.hipo4lib.fusion_get_int(self.handle,a1,a2,row)
         return value
+
+    def getLong(self,bank,entry,row):
+        """ returns an integer value for entry and row from requested bank. call getSize()
+            first to make sure that the row is within the allowable range to avoid hard crashes.
+        """
+        a1 = ctypes.c_char_p(bank.encode('ascii'))
+        a2 = ctypes.c_char_p(entry.encode('ascii'))
+        self.hipo4lib.fusion_get_long.restype = ctypes.c_ulonglong
+        value = self.hipo4lib.fusion_get_long(self.handle,a1,a2,row)
+        return value
     
     def getFloat(self,bank,entry,row):
         """ returns an float value for entry and row from requested bank. call getSize()
@@ -76,6 +86,15 @@ class hreader:
         a2 = ctypes.c_char_p(entry.encode('ascii'))
         self.hipo4lib.fusion_get_float.restype = ctypes.c_float
         value = ctypes.c_float(self.hipo4lib.fusion_get_float(self.handle,a1,a2,row)).value
+        return value
+
+    def getDouble(self,bank,entry,row):
+        """ returns an float value for entry and row from requested bank. call getSize()
+        """
+        a1 = ctypes.c_char_p(bank.encode('ascii'))
+        a2 = ctypes.c_char_p(entry.encode('ascii'))
+        self.hipo4lib.fusion_get_float.restype = ctypes.c_double
+        value = ctypes.c_double(self.hipo4lib.fusion_get_float(self.handle,a1,a2,row)).value
         return value
 
     def getType(self,bank,entry):
@@ -99,7 +118,14 @@ class hreader:
                 array.append(self.getInt(bank,entry,row))
         if(type==4):
             for row in range(rows):
-                array.append(self.getFloat(bank,entry,row))
+                array.append(self.getFloat(bank,entry,row))        
+        if(type==5):
+            for row in range(rows):
+                array.append(self.getDouble(bank,entry,row))
+        if(type==8):
+            for row in range(rows):
+                array.append(self.getLong(bank,entry,row))
+
         return array
     
     def show(self,bank,entry):
