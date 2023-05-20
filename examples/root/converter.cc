@@ -58,9 +58,10 @@ void convert(const char *hipoFile){
    char outputFileHipo[512];
    sprintf(outputFile,"%s_w.root",hipoFile);
    sprintf(outputFileHipo,"%s_w.hipo",hipoFile);
-   
+
    auto fileOutput = new TFile(outputFile, "RECREATE");
    fileOutput->SetCompressionSettings(compression);
+   //fileOutput->SetCompressionLevel(ROOT::RCompressionSetting::ELevel::kDefaultLZ4);
    ROOT::TIOFeatures features;
    features.Set(ROOT::Experimental::EIOFeatures::kGenerateOffsetMap);
    auto treeOutput = new TTree("clas12", "");

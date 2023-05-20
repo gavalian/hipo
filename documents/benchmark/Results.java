@@ -4,7 +4,7 @@ import java.awt.Font;
 public class Results{
 
     public static int X_SIZE = 900;
-    public static int Y_SIZE = 450;
+    public static int Y_SIZE = 550;
     
 	public static void readBench(){
 	    TStyle.getInstance().getPalette().setColorScheme("gold10");
@@ -13,18 +13,24 @@ public class Results{
 			TStyle.getInstance().setDefaultAxisTitleFont(new Font("Paletino",Font.PLAIN,20));
 	
 		BarChartBuilder b = new BarChartBuilder();
-		DataGroup group = b.addEntry("ROOT TTree read, C++",4.0650,5.2855,5.5584)
-		                   .addEntry("ROOT RNTuple read, C++",0,9.31,10.8)
-						   .addEntry("HIPO clas12 read, C++", 0,6.14,5.37)
-						   .addEntry("HIPO Lib read, C++", 2.5788,4.0313,3.7532)
-			               .addEntry("HIPO Lib read, Java",3.8582,6.4356,6.9700)
+		DataGroup group =
+		    b.addEntry("ROOT TTree read, C++",3.9121,5.17,5.17)
+		    .addEntry("ROOT RNTuple read, C++",8.92,9.31,10.8)
+		    .addEntry("HIPO Lib read, C++", 2.33,3.15,3.23)
+		    .addEntry("HIPO Read, Java", 3.75,5.59,5.10)
+		    
+		    //b.addEntry("ROOT TTree read, C++",4.0650,5.2855,5.5584)
+		    //               .addEntry("ROOT RNTuple read, C++",0,9.31,10.8)
+		    //.addEntry("HIPO clas12 read, C++", 0,6.14,5.37)
+		    //.addEntry("HIPO Lib read, C++", 2.5788,4.0313,3.7532)
+		    //.addEntry("HIPO Lib read, Java",3.8582,6.4356,6.9700)
 			//.addEntry("ROOT RNTuple, C++", 3.2,1.2,2.45)
 			//.addEntry("HIPO Read, C++", 3.2,1.2,2.45)
 			//.addEntry("HIPO Read, Java", 3.7,6.2,1.6,2)
 				
 			.setTitleY("Time (sec)")
 			.setColors(new int[]{52,72,29,49,79})
-			.setLabels(new String[]{"Apple M1","AMD","Intel"})
+			.setLabels(new String[]{"Apple M1","Intel","AMD"})
 			.build();
 			
 			System.out.println("size = " + group.getData().size());
@@ -35,27 +41,67 @@ public class Results{
 			c.view().export("bench_root_vs_hipo_read.pdf","pdf");
 		}
 
+		public static void readBenchPartial(){
+			TStyle.getInstance().getPalette().setColorScheme("gold10");
+			TStyle.getInstance().setDefaultPaveTextFont( new Font("Paletino",Font.PLAIN,18));
+				TStyle.getInstance().setDefaultAxisLabelFont(new Font("Paletino",Font.PLAIN,18));
+				TStyle.getInstance().setDefaultAxisTitleFont(new Font("Paletino",Font.PLAIN,20));
+		
+			BarChartBuilder b = new BarChartBuilder();
+			DataGroup group =
+				b.addEntry("ROOT TTree read, C++",1.17363,1.584,1.6027)
+				//.addEntry("ROOT RNTuple read, C++",8.92,9.31,10.8)
+				.addEntry("HIPO Lib read, C++", 0.6757,0.9764,0.9683)
+				.addEntry("HIPO Read, Java", 1.0875,1.6769,1.581)
+				
+				//b.addEntry("ROOT TTree read, C++",4.0650,5.2855,5.5584)
+				//               .addEntry("ROOT RNTuple read, C++",0,9.31,10.8)
+				//.addEntry("HIPO clas12 read, C++", 0,6.14,5.37)
+				//.addEntry("HIPO Lib read, C++", 2.5788,4.0313,3.7532)
+				//.addEntry("HIPO Lib read, Java",3.8582,6.4356,6.9700)
+				//.addEntry("ROOT RNTuple, C++", 3.2,1.2,2.45)
+				//.addEntry("HIPO Read, C++", 3.2,1.2,2.45)
+				//.addEntry("HIPO Read, Java", 3.7,6.2,1.6,2)
+					
+				.setTitleY("Time (sec)")
+			    .setColors(new int[]{52,49,79})
+				.setLabels(new String[]{"Apple M1","Intel","AMD"})
+				.build();
+				
+				System.out.println("size = " + group.getData().size());
+				TGCanvas c = new TGCanvas(Results.X_SIZE, Results.Y_SIZE);
+				//for(DataSet ds : group.getData()) c.draw(ds, "same");
+				c.view().region().draw(group);//.showLegend(0.05, 0.95);
+				c.view().region().showLegend(0.05, 0.95);
+				c.view().export("bench_root_vs_hipo_read_partial.pdf","pdf");
+			}
 
     public static void writeBench(){
+
 	TStyle.getInstance().getPalette().setColorScheme("gold10");
 	TStyle.getInstance().setDefaultPaveTextFont( new Font("Paletino",Font.PLAIN,18));
         TStyle.getInstance().setDefaultAxisLabelFont(new Font("Paletino",Font.PLAIN,18));
         TStyle.getInstance().setDefaultAxisTitleFont(new Font("Paletino",Font.PLAIN,20));
 
 	BarChartBuilder b = new BarChartBuilder();
-	DataGroup group = b.addEntry("ROOT TTree write, C++",47.28,65.57,79.75)
+	DataGroup group =
+	    b.addEntry("ROOT TTree write, C++",47.714,71.40,64.52)
+	     .addEntry("ROOT RNtuple write, C++",58.12,64.00,57.0)
+	     .addEntry("HIPO Lib write (c++)",6.1,7.641,7.33)
+	    .addEntry("HIPO Lib write, Java",5.0097,7.8681, 7.2520)
+	    //b.addEntry("ROOT TTree write, C++",47.28,65.57,79.75)
 	                  
-	.addEntry("ROOT RNtuple write, C++",0.0,64.00,57.0)
-             .addEntry("HIPO clas12 write, C++", 0.0,16.63,16.58)
-	                   .addEntry("HIPO Lib write, C++", 6.01,7.74,8.74)
-	    .addEntry("HIPO Lib write, Java",5.06,7.39,9.47)
+	    //.addEntry("ROOT RNtuple write, C++",0.0,64.00,57.0)
+            // .addEntry("HIPO clas12 write, C++", 0.0,16.63,16.58)
+	    //               .addEntry("HIPO Lib write, C++", 6.01,7.74,8.74)
+	    //.addEntry("HIPO Lib write, Java",5.06,7.39,9.47)
 	    //.addEntry("ROOT RNTuple, C++", 3.2,1.2,2.45)
 	    //.addEntry("HIPO Read, C++", 3.2,1.2,2.45)
 	    //.addEntry("HIPO Read, Java", 3.7,6.2,1.6,2)
             
 	    .setTitleY("Time (sec)")
 	    .setColors(new int[]{52,72,29,49,79})
-	    .setLabels(new String[]{"Apple M1","AMD","Intel"})
+	    .setLabels(new String[]{"Apple M1","Intel","AMD"})
 	    .build();
         
         System.out.println("size = " + group.getData().size());

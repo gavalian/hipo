@@ -67,21 +67,21 @@ format able to read and write a large amount of data fast.
 \section{High Performance Output Data Format}
 
 In Nuclear Physics experiments data is stored in "event" representing one interaction of the beam with the target particle. 
-Each event is a record containing variable length collections of data structures (called banks) each representing processed 
+Each event is a record containing variable-length collections of data structures (called banks) each representing processed 
 data from different detector components. 
-In CLAS12 the reconstructed particles stored in such structures are used for final physics analysis. The event from the data 
+In CLAS12 the reconstructed particles stored in such structures are used for the final physics analysis. The event from the data 
 processing stage is processed by data classifying algorithm to produce reduced outputs for each physics group containing 
 different physics event topologies. In CLAS12 experiments the data selection and reduction process (called data trains) is
 run on a regular basis to provide users with updated data samples to analyze. The data reduction process is primarily reading
-data, categorizing a writing several data streams, and data both data reading and writing performance are important.
-The High Performance Output (HIPO) data format was developed at Jefferson Lab for CLAS12 detector data processing 
+data, categorizing a writing several data streams, and data both data reading and writing performance is important.
+The High-Performance Output (HIPO) data format was developed at Jefferson Lab for CLAS12 detector data processing 
 applications. It is an event-based data container with an indexed entry map that allows fast random access to any event in the file
 with low latency. Two methods of compression are implemented by default for HIPO files: LZ4 and GZIP, for all the tests in this 
 paper we used LZ4 compression due to its high rate of compression and decompression. 
 The HIPO format is used to store raw data information from experimental data acquisition, then processed with a data processing 
 application to produce final physics data for analysis in the same file format. 
 CLAS12 data processing program is using Service Oriented Architecture (SOA)~\cite{Gyurjyan:2011zz} implemented in Java~\cite{Ziegler:2020gsr}. 
-The reconstructed data is analyzed using ROOT-based analysis framework (clas12root) in C++. HIPO supports C++ and Java (native) for reading files
+The reconstructed data is analyzed using a ROOT-based analysis framework (clas12root) in C++. HIPO supports C++ and Java (native) for reading files
 and Python. In this paper, we test the performance of HIPO for both libraries (C++ and Java) and compare them to the performance of
 ROOT Trees, which is the most commonly used data format in High Energy and Nuclear Physics community for storing and analyzing
 experimental physics data.
@@ -95,7 +95,8 @@ particle id, charge, beta, status, and particle id $\chi^2$. Each entry contains
 rows. The test consists of reading each entry in the tree then looping through a number of particles
 in each entry and calculating some quantity which involves all the columns in the bank and filling a histogram.
 The size of the file in each format (HIPO and ROOT) is approximately 2GB, produced using the LZ4 
-compression algorithm. The code used in benchmarks:
+compression algorithm. 
+%The code used in benchmarks:
 
 %\begin{lstlisting}
 %   auto file = TFile::Open(inputFile);
@@ -144,8 +145,8 @@ then an average of 10 tests was taken to produce comparative plots.
 
 To benchmark file reading performance we used a file from production data that was filtered to contain
 only one structure (bank) that contains information on reconstructed particles in the CLAS12 detector
-containing 7,000,000 events and a size of 2.4 Gb. The HIPO file was converted to a ROOT file using 
-code provided by the ROOT team and analyses is run using the code described in the "Benchmark Code" section.
+containing $ 7 M$ events and a size of 2.1 Gb. The HIPO file was converted to a ROOT file using code 
+provided by the ROOT team and analyses are run using the code described in the "Benchmark Code" section. 
 The benchmark is run on different platforms and different environments to emulate standard everyday data 
 processing scenarios. The platforms used are:
 
@@ -153,7 +154,7 @@ processing scenarios. The platforms used are:
 \item MacBook Pro 16, Apple M1 Max (reading from SSD)
 \item AMD EPYC 7502 32-Core Processor (NFS mounted luster)
 \item Intel(R) Xeon(R) CPU E5-2697A v4 @ 2.60GHz (NFS mounted luster)
-\item Macbook Intel i9 2018 (reading from SSD)
+%\item Macbook Intel i9 2018 (reading from SSD)
 \end{itemize}
 
 On MacBook computers, the data is read from a local SSD drive.
@@ -199,6 +200,7 @@ seen in Figure~\ref{benchmark:write}.
 The results show that the MacBook M1 has the best writing speeds due to its very fast SSD. However, in all of the tests
 HIPO C++ and HIPO Java writers outperform ROOT writers significantly. The surprise of this benchmark is that the writing 
 speeds of ROOT files on AMD and Intel Xeon architectures are not very different, as it was for reading speeds.
+Both data formats use same LZ4 compression algorithms, and in general writing speed will depend on level of compression requested from the  library. For both samples we used highest level of compression and we end up similar file size for both data formats, ROOT file being slightly lagrger 2,119 MB vs 2,033 MB in HiPO data format. 
 
 %\section{CLAS12 ROOT Tree Implementation}
 %In the previous sections, the performance of the ROOT data format is shown for the new ROOT tree reader. The legacy code used in 

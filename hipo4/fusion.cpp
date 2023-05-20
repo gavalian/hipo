@@ -45,9 +45,19 @@ int inputSource::getSize(const char *bank){
 int     inputSource::getInt(   const char *bank, const char *entry, int row){
    return banks[bank].getInt(entry,row);
 }
-double  inputSource::getFloat( const char *bank, const char *entry, int row){
+
+int64_t     inputSource::getLong(   const char *bank, const char *entry, int row){
+   return banks[bank].getLong(entry,row);
+}
+  
+  float  inputSource::getFloat( const char *bank, const char *entry, int row){
    return banks[bank].getFloat(entry,row);
 }
+
+double  inputSource::getDouble( const char *bank, const char *entry, int row){
+   return banks[bank].getDouble(entry,row);
+}
+  
 
 
    int  fusion::open(const char *filename){
@@ -76,11 +86,19 @@ int     fusion::getInt(   int handle, const char *bank, const char *entry, int r
    return sources[handle]->getInt(bank,entry,row);
 }
 
-float  fusion::getFloat( int handle, const char *bank, const char *entry, int row){
+  int64_t     fusion::getLong(   int handle, const char *bank, const char *entry, int row){
+   return sources[handle]->getLong(bank,entry,row);
+}
+
+  float  fusion::getFloat( int handle, const char *bank, const char *entry, int row){
    //double result = sources[handle]->getFloat(bank,entry,row);
    //printf("reuslt = %f\n",result);
-   return sources[handle]->getFloat(bank,entry,row);
+  return sources[handle]->getFloat(bank,entry,row);
 }
+  
+  double  fusion::getDouble( int handle, const char *bank, const char *entry, int row){
+    return sources[handle]->getDouble(bank,entry,row);
+  }
 
 int     fusion::getType( int handle, const char *bank, const char *entry){
   hipo::bank b = sources[handle]->get(bank);

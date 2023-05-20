@@ -9,7 +9,7 @@ BINDIR   = ../bin
 LZ4INCLUDES := -I../lz4/lib/
 LZ4INCLUDES := -I../lz4/lib/
 
-CXXFLAGS = -std=c++11
+CXXFLAGS = -std=c++14
 
 libhipo: checkdirs $(OBJECTS)
 	ar cr ../lib/libhipo4.a $(OBJECTS)
@@ -33,4 +33,4 @@ clean:
 	@rm -rf *~ *.o
 
 %.o: %.cpp
-	$(CXX) -fPIC -c $< -O2 -D__LZ4__ $(CXXFLAGS) $(LZ4INCLUDES)
+	$(CXX) -fPIC -c $< -O3 -D__LZ4__ $(CXXFLAGS) $(LZ4INCLUDES)
