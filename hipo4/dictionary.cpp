@@ -82,10 +82,10 @@ namespace hipo {
   std::string  schema::getSchemaString(){
     char parts[256];
     std::string result;
-    sprintf(parts,"{%s/%d/%d}{",schemaName.c_str(),groupid,itemid);
+    snprintf(parts,256,"{%s/%d/%d}{",schemaName.c_str(),groupid,itemid);
     result.append(parts);
     for(int loop = 0; loop < schemaEntries.size(); loop++){
-      sprintf(parts,"%s/%s",schemaEntries[loop].name.c_str(), schemaEntries[loop].type.c_str());
+      snprintf(parts,256,"%s/%s",schemaEntries[loop].name.c_str(), schemaEntries[loop].type.c_str());
       if(loop!=0) result.append(",");
       result.append(parts);
     }
@@ -96,12 +96,12 @@ namespace hipo {
   std::string  schema::getSchemaStringJson(){
      char parts[256];
     std::string result;
-    sprintf(parts,"{ \"name\": \"%s\", \"group\": %d, \"item\": %d, \"info\": \" \",",
+    snprintf(parts,256,"{ \"name\": \"%s\", \"group\": %d, \"item\": %d, \"info\": \" \",",
                schemaName.c_str(),groupid,itemid);
     result.append(parts);
     result.append("\"entries\": [ ");
     for(int loop = 0; loop < schemaEntries.size(); loop++){
-      sprintf(parts,"{\"name\":\"%s\", \"type\":\"%s\", \"info\":\" \"}",
+      snprintf(parts,256,"{\"name\":\"%s\", \"type\":\"%s\", \"info\":\" \"}",
        schemaEntries[loop].name.c_str(), schemaEntries[loop].type.c_str());
       if(loop!=0) result.append(",");
       result.append(parts);
