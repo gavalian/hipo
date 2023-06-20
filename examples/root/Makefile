@@ -27,6 +27,9 @@ hist2root: hist2root.o
 converter: converter.o
 	$(CXX) -o converter.exe $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
 
+simulation2hipo: simulation2hipo.o
+	$(CXX) -o simulation2hipo.exe $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
+
 #benchmark_root: benchmark_root.o
 #	$(CXX) -o benchmark_root.exe $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS) $(ROOTLIBS)
 #
