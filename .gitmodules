@@ -1,15 +1,3 @@
 [submodule "lz4"]
 	path = lz4
 	url = https://github.com/lz4/lz4
-[submodule "extensions/dc/submodules/FunctionalPlus"]
-	path = extensions/dc/submodules/FunctionalPlus
-	url = https://github.com/Dobiasd/FunctionalPlus
-[submodule "extensions/dc/submodules/eigen"]
-	path = extensions/dc/submodules/eigen
-	url = https://gitlab.com/libeigen/eigen.git
-[submodule "extensions/dc/submodules/json"]
-	path = extensions/dc/submodules/json
-	url = https://github.com/nlohmann/json
-[submodule "extensions/dc/submodules/frugally-deep"]
-	path = extensions/dc/submodules/frugally-deep
-	url = https://github.com/Dobiasd/frugally-deep
