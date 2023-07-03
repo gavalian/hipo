@@ -11,6 +11,7 @@
 
 #include "reader.h"
 
+#include <glob.h>
 #include <typeinfo>
 #include <vector>
 #include <string>
@@ -31,16 +32,23 @@ public:
 //      {'D', "double"},// 4
 //      {'L', "long"}   // 5
 //   };
+
+   bool fHipoReadOnlyPhysicsEvents = true;
+
    const std::vector<std::string> fgCollTypeNumToString{ // ORDER is important here. C++ so go +1
-      "zero", "char", "short", "int", "float", "double", "long", "None1", "long"};
+      "zero", "short", "short", "int", "float", "double", "long", "None1", "long"};
    std::vector<std::string> fHeaders;
    std::map<std::string, ColType_t> fColTypes;
 
    unsigned int fNSlots = 0U;
    unsigned int fNColumnDepth = 25;
-   std::string  fHipoFile;
+
+   std::vector<std::string>  fHipoFiles;
+   int fHipoFiles_index=0;
+
    hipo::reader fHipoReader;
    hipo::record fHipoRecord;
+
    int fHipoCurrentRecord=0;
    int fHipoCurrentMaxRecord=0;
    // int fHipoCurrentEvent=0;
@@ -54,7 +62,9 @@ public:
    std::vector<hipo::bank>  fBanks;          // [bank_index] - Index to bank. Found banks.
 
    // Use map to rapidly find the column [col_index]
+   bool fColumnNameTranslation=true;   // If true, translate :: and . symbols in the name to _ for C++/Python compatibility.
    std::vector<std::string> fAllColumns;   // [col_index] All possible columns
+   std::vector<std::string> fAllColumnsPreTranslated;  // [col_index] All possible columns with translation applied.
    std::map<std::string, int> fColumnNameToIndex; // Name -> [col_index]
    std::vector<int>  fColumnBank; // [col_index] Store the bank_index for this column.
    std::vector<int>  fColumnItem; // [col_index] Store the item number for this column.
@@ -79,13 +89,6 @@ public:
    std::vector< std::vector< std::vector<float> > > fVecFloatData;
    std::vector< std::vector< std::vector<double> > > fVecDoubleData;
 
-   hipo::bank RunConfig;
-   int stupid_event_number;
-   int *stupid_event_number_ptr;
-   std::vector<float> stupid_pz;
-   std::vector<float> *stupid_pz_ptr;
-
-
 public:
    int fDebug;
 // private:
@@ -96,13 +99,36 @@ protected:
    std::string AsString() override;
 
 public:
-   explicit RHipoDS(std::string_view fileName, int nevt_inspect=100, int debug=0);
+   explicit RHipoDS(){};
+   explicit RHipoDS(std::string_view file_pattern, int nevt_inspect=10000, int debug=0);
+   explicit RHipoDS(std::vector<std::string> &files, int nevt_inspect=1000, int debug=0);
    ~RHipoDS() override= default;
 
-   void Finalize();
+   void Finalize()
+#if ROOT_VERSION_CODE > ROOT_VERSION(6,27,0)
+   override
+#endif
+   {
+      // Reset the Hipo event pointer back to the first event.
+      fHipoFiles_index=0;
+      fHipoReader.open(fHipoFiles[fHipoFiles_index].c_str());
+      fHipoCurrentRecord=0;
+   };
 
-   unsigned long GetEntries();
+#if ROOT_VERSION_CODE <= ROOT_VERSION(6,27,0)
+   void Finalise() override{
+      // Reset the Hipo event pointer back to the first event.
+      Finalize();
+   };
+#endif
+
+   int AddFiles(std::string_view file_glob);
+   void AddHipoTags(int tag){ fHipoReader.setTags(tag);}
+   int AddHipoBank(std::string name, int nrows=1);
+   void Init(int nevt_inspect=100);
+   unsigned long GetEntries(bool current_file_only = false);
    const std::vector<std::string> &GetColumnNames() const override;
+   std::string GetTranslatedColumnName(std::string name) const;
    std::vector<std::pair<ULong64_t, ULong64_t>> GetEntryRanges() override;
    int GetColNum(std::string_view colName) const;
    int GetTypeNum(std::string_view colName) const;
@@ -117,8 +143,6 @@ public:
    // Not required utility methods.
    int getEntries(){ return fHipoReader.getEntries(); }
 
-
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Winconsistent-missing-override"
 ClassDef(RHipoDS, 0);
@@ -127,8 +151,10 @@ ClassDef(RHipoDS, 0);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-/// \brief Factory method to create a CSV RDataFrame.
+/// \brief Factory method to create a HIPO RDataFrame.
 /// \param[in] fileName Path of the Hipo file.
-RDataFrame MakeHipoDataFrame(std::string_view fileName);
+/// \param[in] nevt_inspect Number of events to inspect to determine the schema.
+/// This is a function to quickly create an RDataFrame from a Hipo file.
+RDataFrame MakeHipoDataFrame(std::string_view fileName, int n_inpect = 10000);
 
 #endif //HIPODATAFRAME_RHIPODS_HXX
