@@ -72,26 +72,27 @@ namespace hipo {
       node(std::tuple<int,int,int,int> params){ create(std::get<0>(params),std::get<1>(params), std::get<2>(params), std::get<3>(params));}
       node(int size){ allocate(8+size); nodePointer = &nodeBuffer[0];}
 
-
       //structure(int __group, int __item, std::string &str);
 
       virtual     ~node()= default;
       
-      //void         assign(std::tuple<int,int,int,int> params );
-      
+      void         assign(std::tuple<int,int,int,int> params );
+
       bool         allocate(int size){
-        if(nodeBuffer.size()<size){ 
+        if(((int) nodeBuffer.size()) <size){
           nodeBuffer.resize(size+8); nodePointer = &nodeBuffer[0];
         } return true;
       }
+    
       virtual void         reset(){ setDataLength(0);}
+
       int          size() const noexcept{
         int length = *reinterpret_cast<const uint32_t *>(nodePointer+4);
 	       return length&0x00ffffff;
          //return getHeaderSize()+getDataSize();
       }
       
-      int          capacity() const noexcept{        
+      int          capacity() const noexcept{
 	       return (int) nodeBuffer.size();
          //return getHeaderSize()+getDataSize();
       }
@@ -100,20 +101,43 @@ namespace hipo {
          int length = *reinterpret_cast<const uint32_t *>(nodePointer+4);
          return (length>>24)&0x000000ff;
       }
-      
-      
+
+      void setFormatLength(int length){
+          if(length<128){
+            char *dest = const_cast<char *>(nodePointer);
+            *reinterpret_cast<uint32_t *>(dest+4) = ((length<<24)&0xFF000000)|(length&0x00FFFFFF);
+          } else { printf("node::setFormatLength: error >>> the format length can not exceed 128, you tried to set it to %d\n",length);}
+      }
+
       void        setDataLength(int length){
-         int word = *reinterpret_cast<const uint32_t *>(nodePointer+4);
+        int word = *reinterpret_cast<const uint32_t *>(nodePointer+4);
+        int flength = (word>>24)&0x000000FF;
+        setNodeLength(flength+length);
+         /*int word = *reinterpret_cast<const uint32_t *>(nodePointer+4);
          int flength = (word>>24)&0x000000FF;
          int totalLength = length + flength;
          char *dest = const_cast<char *>(nodePointer);
-         *reinterpret_cast<uint32_t *>(dest+4) = (word&0xFF000000)|(totalLength&0x00FFFFFF);
+         *reinterpret_cast<uint32_t *>(dest+4) = (word&0xFF000000)|(totalLength&0x00FFFFFF);*/
       }
 
       int         dataLength() const noexcept {         
         int  size = (*reinterpret_cast<const uint32_t *>(nodePointer+4))&0x00FFFFFF;
         int fsize = ((*reinterpret_cast<const uint32_t *>(nodePointer+4))>>24)&0x000000FF;
-	       return size-fsize;
+	      return size-fsize;
+      }
+
+      int          nodeLength(){          
+          int  size = (*reinterpret_cast<const uint32_t *>(nodePointer+4))&0x00FFFFFF;
+          return size;
+      }
+
+      void        setNodeLength(int size){
+          if(size<16777215){
+             uint32_t    word = *reinterpret_cast<const uint32_t *>(nodePointer+4);
+             uint32_t     nodeSize = (word&0xFF000000)|(size&0x00FFFFFF);
+             char *dest = const_cast<char *>(nodePointer);
+             *reinterpret_cast<uint32_t *>(dest+4) = nodeSize;
+          } else { printf("node::setNodeLength:: error: the total size of the node exceeds 16777215\n");}
       }
 
       int          dataOffset() const noexcept;
@@ -129,7 +153,7 @@ namespace hipo {
 
       virtual void   show();
       
-      //void           setSize(int size);
+      void           setSize(int size);
       //void           setHeaderSize(int size);
       //void           setDataSize(int size);
 

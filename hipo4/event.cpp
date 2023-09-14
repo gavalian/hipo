@@ -176,6 +176,7 @@ namespace hipo {
     }
 
   void   event::add(hipo::node &_n){
+
       int _n_data_length = _n.dataLength();
       if(_n_data_length==0) return;
 
@@ -190,11 +191,20 @@ namespace hipo {
           _n_size,ev_capacity, ev_size);
       }
   }
+  void   event::write(hipo::node &node){
+      add(node);
+  }
+
+  void   event::read(hipo::node  &node, int group, int item){
+
+  }
 
 void event::get(hipo::node &_n, int group, int item){
        std::pair<int,int> index = getStructurePosition(group,item);
+       printf(" found the structure : %d/%d - properties = %d, %d\n",group,item,index.first,index.second);
        if(index.first>0){
          _n.init(&dataBuffer[index.first], index.second + 8);
+         printf("calling notify.....\n");
          _n.notify();
        } else {
          _n.initEmpty();
@@ -239,8 +249,9 @@ void event::get(hipo::node &_n, int group, int item){
           uint16_t   gid = *(reinterpret_cast<uint16_t*>(&dataBuffer[position]));
           uint8_t    iid = *(reinterpret_cast<uint8_t*>(&dataBuffer[position+2]));
           uint8_t   type = *(reinterpret_cast<uint8_t*>(&dataBuffer[position+3]));
-          int     length = *(reinterpret_cast<int*>(&dataBuffer[position+4]));
+          int       word = *(reinterpret_cast<int*>(&dataBuffer[position+4]));
           //printf("group = %4d , item = %4d\n",(unsigned int) gid, (unsigned int) iid);
+          int length = word&0x00FFFFFF;
           if(gid==group&&iid==item) return std::make_pair(position,length);
           position += (length + 8);
       }
@@ -327,7 +338,7 @@ void event::get(hipo::node &_n, int group, int item){
        std::pair<int,int> index = getStructurePosition(buffer,group,item);
        if(index.first>0){
          _n.init(&buffer[index.first], index.second + 8);
-         _n.notify();
+         //_n.notify();
        } else {
          _n.initEmpty();
          _n.notify();

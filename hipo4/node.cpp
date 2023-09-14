@@ -50,9 +50,29 @@ namespace hipo {
         *reinterpret_cast<uint16_t *>(__a) = (uint16_t) group;
         *reinterpret_cast<uint8_t *>(__a+2) = (uint8_t) item;
         *reinterpret_cast<uint8_t *>(__a+3) = (uint8_t) type;
-        *reinterpret_cast<uint8_t *>(__a+4) = 0x00000000;
+        *reinterpret_cast<uint32_t *>(__a+4) = 0x00000000;
     }
-    void node::initEmpty(){
+  
+  void    node::setSize(int size){
+    char *__a = const_cast<char*> (nodePointer);
+    *reinterpret_cast<uint32_t *>(__a+4) = size;
+  }
+  
+  void     node::assign(std::tuple<int,int,int,int> params ){
+    int  size = std::get<3>(params);
+    int group = std::get<0>(params);
+    int  item = std::get<1>(params);
+    int  type = std::get<2>(params);
+    //std::get<0>(params),std::get<1>(params), std::get<2>(params), std::get<3>(params)
+    allocate(size);
+    char *__a = const_cast<char*> (nodePointer);
+    *reinterpret_cast<uint16_t *>(__a) = (uint16_t) group;
+    *reinterpret_cast<uint8_t *>(__a+2) = (uint8_t) item;
+    *reinterpret_cast<uint8_t *>(__a+3) = (uint8_t) type;
+    *reinterpret_cast<uint32_t *>(__a+4) = 0x00000000;
+    
+  }
+  void node::initEmpty(){
       char *__a = const_cast<char*> (nodePointer);
         *reinterpret_cast<uint16_t *>(__a) = (uint16_t) 0;
         *reinterpret_cast<uint8_t *>(__a+2) = (uint8_t) 0;

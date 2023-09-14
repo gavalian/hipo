@@ -94,6 +94,8 @@ namespace hipo {
         std::vector<char>  &getEventBuffer();
         int                 getSize();
         void                reset();
+        void                write(hipo::node &node);
+        void                read(hipo::node  &node, int group, int item);
 
         //*******************************************************************
         //** static methods for reading structures from event structure
@@ -102,6 +104,8 @@ namespace hipo {
         //*******************************************************************
         static std::pair<int,int>
               getStructurePosition(const char *buffer, int group, int item);
+        //static std::pair<int,int>
+        //      getStructurePosition5(const char *buffer, int group, int item);
         //static std::pair<int,int>  getStructurePosition(const char *buffer, int group, int item);
         static void
               getStructure(const char *buffer, hipo::structure &str, int group, int item);

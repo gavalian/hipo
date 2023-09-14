@@ -44,6 +44,7 @@
 #include <cstdlib>
 #include <map>
 #include "dictionary.h"
+#include "node.h"
 
 namespace hipo {
 
@@ -152,7 +153,7 @@ namespace hipo {
       friend class event;
   };
 
-  class composite : public hipo::structure {
+  class composite : public hipo::node {
     /**
      * @brief This is composite bank with type = 10, who knows why
      * Class is used to store formated data structures without dictionary.
@@ -172,26 +173,27 @@ namespace hipo {
 
       composite(){};
       composite(int size){ allocate(size);};
-      composite(int group, int item, int size){ initStructureBySize(group, item, 10, size);};
+      composite(int group, int item, int size){ /*initStructureBySize(group, item, 10, size);*/};
       composite(const char *format){}
+      composite(int group, int item, const char *format, int capacity);
       
       void       parse(std::string format);
       void       parse(int group, int item, std::string format, int maxrows);
       virtual   ~composite(){}
       
-      int      getRows() const noexcept { return getDataSize()/rowOffset;}
+      int      getRows() const noexcept { return dataLength()/rowOffset;}
       int      getEntries() const noexcept { return offsets.size();}
       int      getEntryType(int index) const noexcept { return types[index];}
-      void     setRows(int rows) { setDataSize(rows*rowOffset);}
+      void     setRows(int rows) { setDataLength(rows*rowOffset);}
       
       int      getRowSize() const noexcept { return rowOffset;}
 
-      int      getInt    ( int row, int element) const noexcept;
-      int64_t  getLong   ( int row, int element) const noexcept;
-      float    getFloat  ( int row, int element) const noexcept;
-      void     putInt    ( int row, int element, int value);
-      void     putLong   ( int row, int element, int64_t value);
-      void     putFloat  ( int row, int element, float value);
+      int      getInt    ( int element, int row) const noexcept;
+      int64_t  getLong   ( int element, int row) const noexcept;
+      float    getFloat  ( int element, int row) const noexcept;
+      void     putInt    ( int element, int row, int value);
+      void     putLong   ( int element, int row, int64_t value);
+      void     putFloat  ( int element, int row, float value);
       virtual void notify();
       void     print();
       void     reset();

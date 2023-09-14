@@ -141,9 +141,15 @@ namespace hipo {
 //====================================================================
 
 void     composite::reset(){
-    int length = getHeaderSize();
-    setHeaderSize(length);
-    setSize(length);
+    //int length = getHeaderSize();
+    //setHeaderSize(length);
+    //setSize(length);
+    setDataLength(0);
+}
+
+composite::composite(int group, int item, const char *format, int capacity){
+  parse(group,item,format,capacity);
+  //create(group,item,10,capacity);  
 }
 
 void  composite::parse(std::string format){
@@ -169,11 +175,14 @@ void  composite::parse(int group, int item, std::string format, int maxrows){
        }
     }
     rowOffset = offset;
-    initStructureBySize(group,item,10,rowOffset*maxrows + 8 + length);
-    setHeaderSize(length);
-    setSize(length);
-    dataOffset = 8 + length;
-    memcpy(&getStructureBuffer()[8],&format[0],length);
+    create(group,item,10,rowOffset*maxrows + 8 + length);
+    setFormatLength(length);
+    memcpy(const_cast<char *>(&pointer()[8]),&format[0],length);
+    //initStructureBySize(group,item,10,rowOffset*maxrows + 8 + length);
+    //setHeaderSize(length);
+    //setSize(length);
+    //dataOffset = 8 + length;
+    //memcpy(&getStructureBuffer()[8],&format[0],length);
 }
 
 int   composite::getTypeSize(int type){
@@ -188,7 +197,7 @@ int   composite::getTypeSize(int type){
     }
 }
 
-int      composite::getInt    ( int row, int element) const noexcept{
+int      composite::getInt    ( int element, int row) const noexcept{
    int type = types[element];
    int rows = getRows();
    if(row>=rows) {
@@ -205,7 +214,7 @@ int      composite::getInt    ( int row, int element) const noexcept{
    return -1;
 }
 
-int64_t     composite::getLong    ( int row, int element) const noexcept{
+int64_t     composite::getLong    ( int element ,int row) const noexcept{
    int type = types[element];
    int rows = getRows();
    if(row>=rows) {
@@ -216,7 +225,7 @@ int64_t     composite::getLong    ( int row, int element) const noexcept{
    return getLongAt(offset);
 }
   
-float    composite::getFloat  ( int row, int element) const noexcept { 
+float    composite::getFloat  ( int element, int row) const noexcept { 
   int type = types[element];
    int rows = getRows();
    if(row>=rows) {
@@ -227,7 +236,7 @@ float    composite::getFloat  ( int row, int element) const noexcept {
    return getFloatAt(offset);
 }
 
-void     composite::putInt    ( int row, int element, int value){
+void     composite::putInt    ( int element, int row, int value){
    int type = types[element];
    int rows = getRows();
    if(row>=rows) setRows(row+1);
@@ -241,7 +250,7 @@ void     composite::putInt    ( int row, int element, int value){
    }
 }
 
-void     composite::putLong    ( int row, int element, int64_t value){
+void     composite::putLong    ( int element, int row, int64_t value){
    int type = types[element];
    int rows = getRows();
    if(row>=rows) setRows(row+1);
@@ -250,7 +259,7 @@ void     composite::putLong    ( int row, int element, int64_t value){
 }
 
   
-void     composite::putFloat  ( int row, int element, float value){
+void     composite::putFloat  ( int element, int row, float value){
    int type = types[element];
    int rows = getRows();
    if(row>=rows) setRows(row+1);
@@ -260,15 +269,18 @@ void     composite::putFloat  ( int row, int element, float value){
 }
 
 void composite::notify(){
-   //printf("-----> composite::notify method is called:\n");
+    //printf("-----> composite::notify method is called:\n");
     types.clear(); offsets.clear();
-    int sword  =  *reinterpret_cast<int*>(&getStructureBuffer()[4]);
+    char *destination = const_cast<char*> (&pointer()[4]);
+    int sword  =  *reinterpret_cast<int*>(destination);
+    //printf("sword = %X ---- %d\n",sword,sword);
     int fsize  = (sword>>24)&(0x000000FF);
     int dsize  = (sword)&0x00FFFFFF;
-    printf("-----> composite::notify method is called: fsize = %d, dsize = %d\n",fsize,dsize);
+    //printf("-----> composite::notify method is called: fsize = %d, dsize = %d\n",fsize,dsize);
     int offset = 0;
     for(int i = 0; i < fsize; i++){
-       char c = getStructureBuffer()[8+i];
+       char c = pointer()[8+i];
+       //printf("charachter at %d = %c\n",i,c);
        switch(c){
         case 'b': types.push_back(1); offsets.push_back(offset); offset += getTypeSize(1); break;
         case 's': types.push_back(2); offsets.push_back(offset); offset += getTypeSize(2); break;
@@ -279,16 +291,16 @@ void composite::notify(){
         default: break;
        }
     }
-    rowOffset = offset;
-    dataOffset = 8 + fsize;
+    rowOffset  = offset;
+    //dataOffset = 8 + fsize;
 }
 
 void   composite::print(){
   printf("\n------------- \n");
-  printf("[composite] identifiers : [%5d, %5d]\n",getGroup(),getItem());
-  int headerSize = getHeaderSize();
+  printf("[composite] identifiers : [%5d, %5d]\n",group(),item());
+  int headerSize = formatLength();
   printf("[composite] format      : [");
-  for(int i = 0; i < headerSize; i++) printf("%c",getStructureBuffer()[8+i]); 
+  for(int i = 0; i < headerSize; i++) printf("%c",pointer()[8+i]); 
   printf("], row size = %5d , nrows = %5d\n",rowOffset, getRows());
   printf("[composite] entry       : ");
   for(int k = 0; k < offsets.size(); k++) printf("%5d ",k); printf("\n");
@@ -304,9 +316,9 @@ void   composite::print(){
     printf("%5d : ", e);
     for(int r = 0 ; r < nRows; r++){
          int type = getEntryType(e);
-         if(type==1||type==2||type==3) printf("%8d ",getInt(r,e));
-         if(type==4) printf("%8.5f ",getFloat(r,e));
-         if(type==8) printf("%lld ",getLong(r,e));
+         if(type==1||type==2||type==3) printf("%8d ",getInt(e,r));
+         if(type==4) printf("%8.5f ",getFloat(e,r));
+         if(type==8) printf("%lld ",getLong(e,r));
     }
     printf("\n");
   }
