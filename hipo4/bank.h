@@ -184,7 +184,7 @@ namespace hipo {
       int      getRows() const noexcept { return dataLength()/rowOffset;}
       int      getEntries() const noexcept { return offsets.size();}
       int      getEntryType(int index) const noexcept { return types[index];}
-      void     setRows(int rows) { setDataLength(rows*rowOffset);}
+      void     setRows(int rows);// { setDataLength(rows*rowOffset);}
       
       int      getRowSize() const noexcept { return rowOffset;}
 

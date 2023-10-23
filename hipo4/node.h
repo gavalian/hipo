@@ -69,7 +69,9 @@ namespace hipo {
   public:
 
       node(){ allocate(8); nodePointer = &nodeBuffer[0];}
-      node(std::tuple<int,int,int,int> params){ create(std::get<0>(params),std::get<1>(params), std::get<2>(params), std::get<3>(params));}
+      node(std::tuple<int,int,int,int> params){
+	create(std::get<0>(params),std::get<1>(params), std::get<2>(params), std::get<3>(params));
+      }
       node(int size){ allocate(8+size); nodePointer = &nodeBuffer[0];}
 
       //structure(int __group, int __item, std::string &str);

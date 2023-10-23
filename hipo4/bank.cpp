@@ -156,6 +156,15 @@ void  composite::parse(std::string format){
   parse(134,1,format,256);
 }
 
+void     composite::setRows(int rows) {
+  if(((formatLength()+8)+getRowSize()*(rows+1))<capacity()){
+    printf("composite::setRows:: error, the requested row %d exceeds the bank capacity of %d\n",
+	   rows,capacity());
+  } else {
+    setDataLength(rows*rowOffset);
+  }
+}
+  
 void  composite::parse(int group, int item, std::string format, int maxrows){
     types.clear(); offsets.clear();
     int length = format.length();
