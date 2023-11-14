@@ -242,6 +242,20 @@ namespace hipo {
         float  getFloat(  int item, int index) const noexcept;
         double getDouble( int item, int index) const noexcept;
         long   getLong(   int item, int index) const noexcept;
+        template<typename T = double> T get(int item, int index) const noexcept {
+          auto type = bankSchema.getEntryType(item);
+          switch(type) {
+            case kByte:   return getByte(item, index);
+            case kShort:  return getShort(item, index);
+            case kInt:    return getInt(item, index);
+            case kFloat:  return getFloat(item, index);
+            case kDouble: return getDouble(item, index);
+            case kLong:   return getLong(item, index);
+            default:
+              printf("---> error(get) : unknown type for [%s] type = %d\n", bankSchema.getEntryName(item).c_str(), type);
+          }
+          return 0;
+        }
 
         int    getInt(    const char *name, int index) const noexcept;
         int    getShort(  const char *name, int index) const noexcept;
@@ -249,6 +263,9 @@ namespace hipo {
         float  getFloat(  const char *name, int index) const noexcept;
         double getDouble( const char *name, int index) const noexcept;
         long   getLong(   const char *name, int index) const noexcept;
+        template<typename T = double> T get(const char *name, int index) const noexcept {
+          return get<T>(bankSchema.getEntryOrder(name), index);
+        }
 
         void    putInt(    const char *name, int index, int32_t value);
         void    putShort(  const char *name, int index, int16_t value);
@@ -256,6 +273,9 @@ namespace hipo {
         void    putFloat(  const char *name, int index, float value);
         void    putDouble( const char *name, int index, double value);
         void    putLong(   const char *name, int index, int64_t value);
+        template<typename T> void put(const char *name, int index, T value) {
+          put(bankSchema.getEntryOrder(name), index, value);
+        }
 
  	void    putInt(int item, int index, int32_t value);
         void    putShort(int item, int index, int16_t value);
@@ -263,6 +283,19 @@ namespace hipo {
         void    putFloat(int item, int index, float value);
         void    putDouble(int item, int index, double value);
         void    putLong(int item, int index, int64_t value);
+        template<typename T> void put(int item, int index, T value) {
+          auto type = bankSchema.getEntryType(item);
+          switch(type) {
+            case kByte:   putByte(item,   index, static_cast<int8_t>(value));  break;
+            case kShort:  putShort(item,  index, static_cast<int16_t>(value)); break;
+            case kInt:    putInt(item,    index, static_cast<int32_t>(value)); break;
+            case kFloat:  putFloat(item,  index, static_cast<float>(value));   break;
+            case kDouble: putDouble(item, index, static_cast<double>(value));  break;
+            case kLong:   putLong(item,   index, static_cast<int64_t>(value)); break;
+            default:
+              printf("---> error(put) : unknown type for [%s] type = %d\n", bankSchema.getEntryName(item).c_str(), type);
+          }
+        }
      
         void    show() override;
         void    reset();
