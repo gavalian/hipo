@@ -33,6 +33,16 @@ namespace hipo {
     int          offset{};
   } schemaEntry_t;
 
+  enum Type {
+    kByte   = 1,
+    kShort  = 2,
+    kInt    = 3,
+    kFloat  = 4,
+    kDouble = 5,
+    kLong   = 8
+  };
+
+
 class schema {
   private:
 
@@ -99,6 +109,14 @@ class schema {
     int   getEntryType(int item) const noexcept {
       return schemaEntries[item].typeId;
     }
+    int   getEntryType(const char *name) const noexcept {
+      auto item = getEntryOrder(name);
+      if(item >= 0)
+        return schemaEntries[item].typeId;
+      else
+        return -1;
+    }
+
     std::string getEntryName(int item)  const noexcept { return schemaEntries[item].name;}
     int   getEntries() const noexcept { return schemaEntries.size();}
     void  show();
@@ -121,7 +139,7 @@ class schema {
    
    if(warningCount>0 ) { warningCount--; std::cout<<"Warning , hipo::schema getEntryOrder(const char *name) item :" <<name<<" not found, for bank "<<schemaName<<" data for this item is not valid "<<std::endl;
    }
-   return 0;
+   return -1;
  }
  
  
