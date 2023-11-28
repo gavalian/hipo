@@ -2,19 +2,22 @@
 # MAKEFILE for BUILDING EXAMPLES FOR HIPO4 LIBRARY
 # AUTHOR: GAVALIAN DATE: 10/24/2018
 #********************************************************
-HIPOCFLAGS  := -I../hipo4
+HIPOCFLAGS  := -I../hipo4 -I../hipo4/chart
 HIPOLIBS    := -L../lib -lhipo4
 
 LZ4LIBS     := -L../lz4/lib -llz4
 LZ4INCLUDES := -I../lz4/lib
 
 CXX       := g++
-CXXFLAGS  += -Wall -fPIC -std=c++11
+CXXFLAGS  += -Wall -fPIC -std=c++17
 LD        := g++
 LDFLAGS   :=
 
 
-all:  writeFile readFile readFileTags showFile schema writeUserHeader tupleFile readJson
+all:  writeFile readFile readFileTags showFile schema writeUserHeader tupleFile readJson histograms
+
+histograms: histograms.o
+	$(CXX) -o histograms.exe $<  $(HIPOLIBS) $(LZ4LIBS)
 
 readEvents: readEvents.o
 	$(CXX) -o readEvents.exe $<  $(HIPOLIBS) $(LZ4LIBS)
