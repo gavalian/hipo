@@ -37,6 +37,33 @@ int main(){
 }
 ```
 
+Looking into large amount of data frequently require data histogramming for
+numerical data quantitive representation. The hipo package includes a simple
+(to be improved and extended) histogramming package and a very simple
+visualization tool (ascii only) for debugging and exploratory purposes.
+Here is an example code to create a histogram and fill it with data from
+a bank and display it on the excreen.
+
+```c++
+#include "reader.h"
+#include "twig.h"
+int main(){
+   std::string file = "mydatafile.hipo";
+   twig::h1d hz(120,-15,5);
+   hipo::reader   r(file);
+   hipo::banklist list = r.getBanks({"REC::Particle"});
+   while( r.next(list)){
+      for(int r = 0; r < list[0].getRows(); r++){
+         if(list[0].getInt("charge",r)!=0) hz.fill(list[0].getFloat("vz",r));
+      }
+   }
+   hz.print();
+}
+```
+
+Output:
+
+<img src="https://github.com/gavalian/hipo/blob/master/documents/screenshots/histogram_vz.png" width="800">
 
 
 ## Package Structure
