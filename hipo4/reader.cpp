@@ -265,6 +265,28 @@ void  reader::getStructureNoCopy(hipo::structure &structure,int group, int item)
   event::getStructureNoCopy(data.getDataPtr(),structure,group,item);
 }
 
+bool  reader::next(std::vector<hipo::bank> &list){
+  bool status = next();
+  if(status==false) return false;
+  read(event);
+  //printf("---------- reader::next() event with next()\n");
+  //event.show();
+  for(int k = 0; k < list.size(); k++){
+    event.read(list[k]);
+  }
+  return true;
+}
+
+std::vector<hipo::bank> reader::getBanks(std::vector<std::string> names){
+  std::vector<hipo::bank> list;
+  readDictionary(factory);
+  for(int k = 0; k < names.size(); k++){
+    hipo::bank b(factory.getSchema(names[k].c_str()),48);
+     list.push_back(b);
+  }
+  return list;
+}
+
   void reader::readUserConfig(std::map<std::string,std::string> &mapConfig){
   
   if(inputStream.is_open()==false){

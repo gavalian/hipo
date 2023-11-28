@@ -128,8 +128,8 @@ int main(int argc, char** argv) {
   //example3(inputFile);
 
   example1(inputFile);
-  example2(inputFile);
+  //example2(inputFile);
 
-  example4(inputFile);
+  //example4(inputFile);
 }
 //### END OF GENERATED CODE

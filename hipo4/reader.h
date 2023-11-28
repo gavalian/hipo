@@ -118,6 +118,7 @@
 
 namespace hipo {
 
+
    //  typedef struct fileHeader_t {
    struct fileHeader_t {
       int  uniqueid{};
@@ -156,7 +157,8 @@ namespace hipo {
    class readerIndex {
 
    private:
-      std::vector<int>  recordEvents;
+
+     std::vector<int>  recordEvents;
       std::vector<long> recordPosition;
 
       int              currentRecord{};
@@ -211,16 +213,29 @@ namespace hipo {
       hipo::record       inputRecord;
       hipo::readerIndex  readerEventIndex;
       std::vector<long>  tagsToRead;
-      short _verbose = {0} ;
+
+     short _verbose = {0} ;
 
       std::map<std::string,std::string>  userConfig;
+
+
+      hipo::event event;
+      hipo::dictionary  factory;
 
       void  readHeader();
       void  readIndex();
 
+      
    public:
 
       reader();
+      reader(const char *file){ open(file);}
+      
+      reader(const char *file, std::vector<int> tags){
+          for(int t = 0; t < tags.size(); t++) setTags(tags[t]);
+         open(file);
+      }
+
       reader(const reader &r){}
 
       ~reader();
@@ -244,6 +259,10 @@ namespace hipo {
       bool  gotoEvent(int eventNumber);
       bool  gotoRecord(int irec);
       bool  next(hipo::event &dataevent);
+      
+      bool  next(std::vector<hipo::bank> &list);
+      std::vector<hipo::bank> getBanks(std::vector<std::string> names);
+
       void  read(hipo::event &dataevent);
       void  printWarning();
       //void  showUserConfig();

@@ -17,8 +17,14 @@
 namespace ascii {
 class Asciichart {
 public:
-  explicit Asciichart(std::vector<double> series)
-      : height_(kDoubleNotANumber), min_(kDoubleInfinity),
+  enum Type {
+    LINE = 0, // line
+    CIRCLE    // circle
+  };
+
+public:
+  explicit Asciichart(const std::vector<double> &series)
+      : type_(LINE), height_(kDoubleNotANumber), min_(kDoubleInfinity),
         max_(kDoubleNegInfinity), offset_(3), legend_padding_(10),
         basic_width_of_label_(0), show_legend_(false) {
     InitSeries(series);
@@ -26,8 +32,8 @@ public:
     InitSymbols();
   }
 
-  explicit Asciichart(std::vector<std::vector<double>> series)
-      : height_(kDoubleNotANumber), min_(kDoubleInfinity),
+  explicit Asciichart(const std::vector<std::vector<double>> &series)
+      : type_(LINE), height_(kDoubleNotANumber), min_(kDoubleInfinity),
         max_(kDoubleNegInfinity), offset_(3), legend_padding_(10),
         basic_width_of_label_(0), show_legend_(false) {
     InitSeries(series);
@@ -38,12 +44,18 @@ public:
   // For associating a text label with each series
   explicit Asciichart(
       const std::unordered_map<std::string, std::vector<double>> &series)
-      : height_(kDoubleNotANumber), min_(kDoubleInfinity),
+      : type_(LINE), height_(kDoubleNotANumber), min_(kDoubleInfinity),
         max_(kDoubleNegInfinity), offset_(3), legend_padding_(10),
         basic_width_of_label_(0), show_legend_(false) {
     InitSeries(series);
     InitStyles();
     InitSymbols();
+  }
+
+  /// Set type of chart.
+  Asciichart &type(Type type) {
+    type_ = type;
+    return *this;
   }
 
   /// Set height of chart.
@@ -53,7 +65,7 @@ public:
   }
 
   /// Set colors of chart.
-  Asciichart &styles(std::vector<Style> styles) {
+  Asciichart &styles(const std::vector<Style> &styles) {
     styles_ = styles;
     return *this;
   }
@@ -91,13 +103,115 @@ public:
   }
 
   /// Set symbols used to plot.
-  Asciichart &symbols(std::map<std::string, std::string> symbols) {
+  Asciichart &symbols(const std::map<std::string, std::string> &symbols) {
     symbols_ = symbols;
     return *this;
   }
 
   /// Generate this chart.
   std::string Plot() {
+    switch (type_) {
+    case LINE:
+      return PlotLineChart();
+      break;
+    case CIRCLE:
+      return PlotCircleChart();
+      break;
+    default:
+      return "";
+    }
+  }
+
+private:
+  std::map<std::string, std::string> symbols_;
+  std::unordered_map<std::string, std::vector<double>> series_;
+  std::vector<Style> styles_;
+
+  Type type_;
+  double height_;
+  double min_;
+  double max_;
+  double offset_;
+  size_t legend_padding_;
+  size_t basic_width_of_label_;
+
+  bool show_legend_;
+
+  void InitSeries(const std::vector<double> &series) {
+    series_["series 0"] = series;
+  }
+
+  void InitSeries(const std::vector<std::vector<double>> &series) {
+    unsigned n = 0;
+    for (const auto &s : series) {
+      series_["series " + std::to_string(n++)] = s;
+    }
+  }
+
+  void InitSeries(
+      const std::unordered_map<std::string, std::vector<double>> &series) {
+    series_ = series;
+  }
+
+  void InitStyles() {
+    styles_ = {
+        Style().fg(Foreground::From(Color::RED)),
+        Style().fg(Foreground::From(Color::CYAN)),
+        Style().fg(Foreground::From(Color::MAGENTA)),
+        Style().fg(Foreground::From(Color::YELLOW)),
+        Style().fg(Foreground::From(Color::WHITE)),
+        Style().fg(Foreground::From(Color::BRIGHT_WHITE)),
+    };
+  }
+
+  void InitSymbols() {
+    switch (type_) {
+    case LINE:
+      symbols_ = {{"empty", " "}, {"center", "┼"},  {"axis", "┤"},
+                  {"c1", "╶"},    {"c2", "╴"},      {"parellel", "─"},
+                  {"down", "╰"},  {"up", "╭"},      {"ldown", "╮"},
+                  {"lup", "╯"},   {"vertical", "│"}};
+    case CIRCLE:
+      break;
+    default:
+      break;
+    }
+  }
+
+  /// Writes each character of a string into its respective cell in the
+  /// `screen` array, starting from the upper left, `row` and `col`.
+  void PutString(std::vector<std::vector<Text>> &screen, const std::string &str,
+                 const Style &style, unsigned row, unsigned col) {
+    for (unsigned i = 0; i < str.length(); i++) {
+      if (str[i] == '\n') {
+        row += 1;
+      } else {
+        screen[row][col + i] = Text(str.substr(i, 1), style);
+      }
+    }
+  }
+
+  std::string FormatLabel(int x) {
+    std::stringstream ss;
+    ss << std::setw(show_legend_ ? legend_padding_ + basic_width_of_label_
+                                 : basic_width_of_label_)
+       << std::setfill(' ') << std::setprecision(2);
+    ss << x;
+    return ss.str();
+  }
+
+  std::string Print(const std::vector<std::vector<Text>> &screen) {
+    std::stringstream os;
+    for (auto &line : screen) {
+      for (auto &item : line) {
+        os << item;
+      }
+      os << "\n";
+    }
+    return os.str();
+  }
+
+  std::string PlotLineChart() {
     // 1. calculate min and max
     for (auto &label_trace_pair : series_) {
       for (auto &item : label_trace_pair.second) {
@@ -108,6 +222,7 @@ public:
 
     // 2. calaculate range
     auto range = max_ - min_;
+    if (range == 0) range = 1;
 
     // make basic padding as size of str(max)
     basic_width_of_label_ = std::max(std::to_string((int)max_).length(),
@@ -151,6 +266,8 @@ public:
     auto rows = max2 - min2;
     auto cols = width;
 
+    if (rows == 0) rows = 1;
+
     // 5. initialize chart using empty str
     std::vector<std::vector<Text>> screen(
         rows + 1, std::vector<Text>(cols, symbols_["empty"]));
@@ -160,7 +277,8 @@ public:
       auto label = FormatLabel(std::round(min_ + (y - min2) * range / rows));
       // vertical reverse
       screen[rows - (y - min2)][legend_cols] =
-          Text(label, Style().fg(Foreground::From(Color::BLUE)));
+	// -commented out by Gagik Text(label, Style().fg(Foreground::From(Color::BLUE)));
+	Text(label, Style().fg(Foreground::From(Color::CYAN)));
       screen[rows - (y - min2)][offset - 1] =
           Text((y == 0) ? symbols_["center"] : symbols_["axis"],
                Style().fg(Foreground::From(Color::CYAN)));
@@ -211,84 +329,7 @@ public:
     return Print(screen);
   }
 
-private:
-  std::map<std::string, std::string> symbols_;
-  std::unordered_map<std::string, std::vector<double>> series_;
-  std::vector<Style> styles_;
-
-  double min_;
-  double max_;
-  double height_;
-  double offset_;
-  size_t legend_padding_;
-  size_t basic_width_of_label_;
-
-  bool show_legend_;
-
-  void InitSeries(std::vector<double> &series) { series_["series 0"] = series; }
-
-  void InitSeries(std::vector<std::vector<double>> &series) {
-    unsigned n = 0;
-    for (const auto &s : series) {
-      series_["series " + std::to_string(n++)] = s;
-    }
-  }
-
-  void InitSeries(
-      const std::unordered_map<std::string, std::vector<double>> &series) {
-    series_ = series;
-  }
-
-  void InitStyles() {
-    styles_ = {
-        Style().fg(Foreground::From(Color::RED)),
-        Style().fg(Foreground::From(Color::CYAN)),
-        Style().fg(Foreground::From(Color::MAGENTA)),
-        Style().fg(Foreground::From(Color::YELLOW)),
-        Style().fg(Foreground::From(Color::WHITE)),
-        Style().fg(Foreground::From(Color::BRIGHT_WHITE)),
-    };
-  }
-
-  void InitSymbols() {
-    symbols_ = {{"empty", " "}, {"center", "┼"},  {"axis", "┤"},
-                {"c1", "╶"},    {"c2", "╴"},      {"parellel", "─"},
-                {"down", "╰"},  {"up", "╭"},      {"ldown", "╮"},
-                {"lup", "╯"},   {"vertical", "│"}};
-  }
-
-  /// Writes each character of a string into its respective cell in the
-  /// `screen` array, starting from the upper left, `row` and `col`.
-  void PutString(std::vector<std::vector<Text>> &screen, const std::string &str,
-                 const Style &style, unsigned row, unsigned col) {
-    for (unsigned i = 0; i < str.length(); i++) {
-      if (str[i] == '\n') {
-        row += 1;
-      } else {
-        screen[row][col + i] = Text(str.substr(i, 1), style);
-      }
-    }
-  }
-
-  std::string FormatLabel(double x) {
-    std::stringstream ss;
-    ss << std::setw(show_legend_ ? legend_padding_ + basic_width_of_label_
-                                 : basic_width_of_label_)
-       << std::setfill(' ') << std::setprecision(2);
-    ss << x;
-    return ss.str();
-  }
-
-  std::string Print(std::vector<std::vector<Text>> &screen) {
-    std::stringstream os;
-    for (auto &line : screen) {
-      for (auto &item : line) {
-        os << item;
-      }
-      os << "\n";
-    }
-    return os.str();
-  }
+  std::string PlotCircleChart() { return ""; }
 };
 } // namespace ascii
 #endif

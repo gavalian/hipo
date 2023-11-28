@@ -21,14 +21,14 @@ public:
 
   std::string text() { return text_; }
 
-  friend std::ostream &operator<<(std::ostream &os, Text &val) {
+  friend std::ostream &operator<<(std::ostream &os, const Text &val) {
     os << val.style_ << val.text_ << Decoration::From(Decoration::RESET);
     return os;
   }
 
 private:
-  Style style_;
   std::string text_;
+  Style style_;
 };
 } // namespace ascii
 #endif // !INCLUDE_ASCII_TEXT_H_
