@@ -7,7 +7,8 @@ software using service oriented architecture (SOA), now has C++ implementaion
 with wrappers to interface FORTRAN and PTYHON. The wrapper does not provide full 
 functionality that exists in C++ and Java libraries.
 
-## Clone the package
+
+## Installing the Package
 
 Package has a dependency on LZ4 compression library, which is a submodule.
 Use command:
@@ -16,7 +17,26 @@ Use command:
  git clone --recurse-submodules git@github.com:gavalian/hipo.git
 ```
 
-to clone the distribution.
+to clone the distribution. Then compile using 'make', or 'cmake', and start using.
+
+## Usage
+
+The package contains example with code to write and read hipo files. Here are
+a few quick examples:
+
+read two banks from a file, and print the content on the screen:
+
+```c++
+#include "reader.h"
+int main(){
+   std::string file = "mydatafile.hipo";
+   hipo::reader   r(file);
+   hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
+   int counter = 0;
+   while( r.next(list)&&counter<350){ counter++; list[0].show(); list[1].show();}
+}
+```
+
 
 
 ## Package Structure
