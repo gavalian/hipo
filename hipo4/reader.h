@@ -232,7 +232,8 @@ namespace hipo {
       reader(const char *file){ open(file);}
       
       reader(const char *file, std::vector<int> tags){
-          for(int t = 0; t < tags.size(); t++) setTags(tags[t]);
+	//for(int t = 0; t < tags.size(); t++) setTags(tags[t]);
+	for(auto tag : tags) setTags(tag);
          open(file);
       }
 
