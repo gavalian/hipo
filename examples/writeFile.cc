@@ -29,7 +29,7 @@ int main(int argc, char** argv){
 
     printf("--->>> example program to produce a HIPO file.");
     char outputFile[256];
-    sprintf(outputFile,"%s","example_output.hipo");
+    snprintf(outputFile,256,"%s","example_output.hipo");
     //---------------------------------------------------------
     // Define a Schema for particle bank and detector bank
     // Schema constructor takes:

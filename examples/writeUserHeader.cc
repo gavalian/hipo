@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
    std::cout << " writing file example : write user headers ::: "  << __cplusplus << std::endl;
 
    char outputFile[256];
-   sprintf(outputFile,"%s","userHeaderFile.hipo");
+   snprintf(outputFile,256,"%s","userHeaderFile.hipo");
 
    // define one bank schema
    hipo::schema  sch("rec::event",30,1);

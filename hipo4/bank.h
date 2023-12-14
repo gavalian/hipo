@@ -257,7 +257,7 @@ namespace hipo {
         void    putDouble( const char *name, int index, double value);
         void    putLong(   const char *name, int index, int64_t value);
 
- 	void    putInt(int item, int index, int32_t value);
+ 	      void    putInt(int item, int index, int32_t value);
         void    putShort(int item, int index, int16_t value);
         void    putByte(int item, int index, int8_t value);
         void    putFloat(int item, int index, float value);
@@ -270,8 +270,38 @@ namespace hipo {
 
         void notify() override;
 
+  };
 
+  class iterator {
+    private:
+      hipo::bank  &ib;
+      std::vector<int> rows;
+      int current_index;
+    public:
+      iterator();
+      iterator(hipo::bank &b, std::vector<int> index) : ib(b) {
+        ib = b; for(auto id : index) rows.push_back(id);
+        current_index = 0;
+      }
+      iterator(bank &b) : ib(b) {ib=b; current_index = 0;}
+      virtual ~iterator(){}
 
+      
+      void    reset(){ rows.clear();}
+      void    add(int index){rows.push_back(index);}
+      void    begin(){current_index=0;}
+      bool    next(){
+        current_index++; if(current_index>rows.size()) { 
+          current_index = rows.size(); return false;
+        }
+        return true;
+      }
+      bool end(){return current_index>=rows.size();}
+      int  index(){ return rows[current_index];}
+      void show(){ for(int i = 0; i < rows.size(); i++) printf("%5d ",rows[i]); printf("\n");}
+      
+      static hipo::iterator link(hipo::bank &b, int row, int column);
+      static hipo::iterator reduce(hipo::bank &bank, const char *expression);
   };
     /////////////////////////////////////
     //inlined getters

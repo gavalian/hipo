@@ -36,6 +36,7 @@
 
 #include "bank.h"
 #include "utils.h"
+#include "parser.h"
 
 namespace hipo {
 
@@ -396,6 +397,33 @@ void    bank::putLong(const char *name, int index, int64_t value){
   int type = bankSchema.getEntryType(item);
   int offset = bankSchema.getOffset(item, index, bankRows);
   putLongAt(offset,value);
+}
+
+hipo::iterator iterator::link(hipo::bank &bank, int row, int column){
+    hipo::iterator blink(bank);
+    int nrows = bank.getRows();
+    for(int r = 0; r < nrows; r++) { 
+      if(bank.getInt(column,r)==row) blink.add(r);
+    }
+    return blink;
+}
+
+hipo::iterator iterator::reduce(hipo::bank &bank, const char *expression){
+  hipo::Parser p(expression);
+
+  int nrows = bank.getRows();
+  int nitems = bank.getSchema().getEntries();
+  hipo::schema &schema = bank.getSchema();
+  hipo::iterator it(bank);
+  for(int k = 0; k < nrows; k++){
+     for(int i = 0; i < nitems; i++){
+        p[schema.getEntryName(i)] = bank.getInt(i,k);
+     }
+     double value = p.Evaluate();
+     printf(" row = %d - value %f\n",k,value);
+      if(value>0.5) it.add(k);
+  }
+  return it;
 }
 
 void bank::show(){

@@ -103,10 +103,66 @@ void example4(const char *file){
    hipo::banklist list = r.getBanks({"REC::Particle"});
    while( r.next(list)){ 
       for(int r = 0; r < list[0].getRows(); r++){
-         if(list[0].getInt("charge",r)!=0) hz.fill(list[0].getFloat("vz",r));
+	if(list[0].getInt("charge",r)!=0&&list[0].getInt("pid",r)==211) hz.fill(list[0].getFloat("vz",r));
       }
    }
    hz.print();
+}
+
+
+void example5(const char *file){
+  hipo::reader   r(file);
+  hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
+  int counter = 0;
+  while( r.next(list)&&counter<350){ 
+    counter++; 
+    int nrows = list[0].getRows();
+    printf(" rows = %d\n",nrows);
+
+    if(nrows>6){
+      hipo::iterator it(list[0],{0,1,4});
+      for(it.begin(); !it.end(); it.next()){
+        printf("\t pid [%d] = %d\n",it.index(), list[0].getInt(0,it.index()));
+      }
+    }
+  }
+}
+
+void example6(const char *file){
+  hipo::reader   r(file);
+  hipo::banklist list = r.getBanks({"REC::Particle","REC::Calorimeter"});
+  int counter = 0;
+
+  while( r.next(list)&&counter<350){
+    counter++; 
+    int status = list[0].getInt("status",0);
+    if(list[0].getInt(0,0)==11&&abs(status)>=2000&&abs(status)<3000){
+      printf("found electron\n");
+      hipo::iterator it = hipo::iterator::link(list[1],0,1);
+      double energy = 0.0;
+      for(it.begin(); !it.end(); it.next()){
+        energy += list[1].getFloat("energy",it.index());
+      }
+
+      it.show();
+      printf("energy = %f\n",energy);
+    }
+  }
+}
+
+void example7(const char *file){
+  hipo::reader   r(file);
+  hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
+  int counter = 0;
+  while( r.next(list)&&counter<350){ 
+    counter++; 
+      hipo::iterator it = hipo::iterator::reduce(list[0],"charge!=0");
+      list[0].show();
+      it.show();
+      //for(it.begin(); !it.end(); it.next()){
+      //  printf("\t pid [%d] = %d\n",it.index(), list[0].getInt(0,it.index()));
+      //}
+  }
 }
 
 int main(int argc, char** argv) {
@@ -118,7 +174,7 @@ int main(int argc, char** argv) {
   char inputFile[256];
   
   if(argc>1) {
-    sprintf(inputFile,"%s",argv[1]);
+    snprintf(inputFile,256,"%s",argv[1]);
     //sprintf(outputFile,"%s",argv[2]);
   } else {
     std::cout << " *** please provide a file name..." << std::endl;
@@ -126,10 +182,12 @@ int main(int argc, char** argv) {
   }
 
   //example3(inputFile);
-
-  example1(inputFile);
+  //example1(inputFile);
   //example2(inputFile);
 
-  //example4(inputFile);
+  example4(inputFile);
+  //example5(inputFile);
+  //example6(inputFile);
+  //example7(inputFile);
 }
 //### END OF GENERATED CODE
