@@ -242,6 +242,21 @@ namespace hipo {
         float  getFloat(  int item, int index) const noexcept;
         double getDouble( int item, int index) const noexcept;
         long   getLong(   int item, int index) const noexcept;
+        template<typename T = double> T get(int item, int index) const noexcept {
+          auto type   = bankSchema.getEntryType(item);
+          auto offset = bankSchema.getOffset(item, index, bankRows);
+          switch(type) {
+            case kByte:   return (int) getByteAt(offset);
+            case kShort:  return (int) getShortAt(offset);
+            case kInt:    return getIntAt(offset);
+            case kFloat:  return getFloatAt(offset);
+            case kDouble: return getDoubleAt(offset);
+            case kLong:   return getLongAt(offset);
+            default:
+              printf("---> error(get) : unknown type for [%s] type = %d\n", bankSchema.getEntryName(item).c_str(), type);
+          }
+          return 0;
+        }
 
         int    getInt(    const char *name, int index) const noexcept;
         int    getShort(  const char *name, int index) const noexcept;
@@ -249,6 +264,9 @@ namespace hipo {
         float  getFloat(  const char *name, int index) const noexcept;
         double getDouble( const char *name, int index) const noexcept;
         long   getLong(   const char *name, int index) const noexcept;
+        template<typename T = double> T get(const char *name, int index) const noexcept {
+          return get<T>(bankSchema.getEntryOrder(name), index);
+        }
 
         void    putInt(    const char *name, int index, int32_t value);
         void    putShort(  const char *name, int index, int16_t value);
@@ -256,13 +274,29 @@ namespace hipo {
         void    putFloat(  const char *name, int index, float value);
         void    putDouble( const char *name, int index, double value);
         void    putLong(   const char *name, int index, int64_t value);
+        template<typename T> void put(const char *name, int index, T value) {
+          put(bankSchema.getEntryOrder(name), index, value);
+        }
 
- 	      void    putInt(int item, int index, int32_t value);
+        void    putInt(int item, int index, int32_t value);
         void    putShort(int item, int index, int16_t value);
         void    putByte(int item, int index, int8_t value);
         void    putFloat(int item, int index, float value);
         void    putDouble(int item, int index, double value);
         void    putLong(int item, int index, int64_t value);
+        template<typename T> void put(int item, int index, T value) {
+          auto type = bankSchema.getEntryType(item);
+          switch(type) {
+            case kByte:   putByte(item,   index, static_cast<int8_t>(value));  break;
+            case kShort:  putShort(item,  index, static_cast<int16_t>(value)); break;
+            case kInt:    putInt(item,    index, static_cast<int32_t>(value)); break;
+            case kFloat:  putFloat(item,  index, static_cast<float>(value));   break;
+            case kDouble: putDouble(item, index, static_cast<double>(value));  break;
+            case kLong:   putLong(item,   index, static_cast<int64_t>(value)); break;
+            default:
+              printf("---> error(put) : unknown type for [%s] type = %d\n", bankSchema.getEntryName(item).c_str(), type);
+          }
+        }
      
         void    show() override;
         void    reset();
@@ -307,29 +341,29 @@ namespace hipo {
     //inlined getters
 
     inline float  bank::getFloat(int item, int index) const noexcept{
-      if(bankSchema.getEntryType(item)==4){
-	       int offset = bankSchema.getOffset(item, index, bankRows);
-         return getFloatAt(offset);
+      if(bankSchema.getEntryType(item)==kFloat){
+        int offset = bankSchema.getOffset(item, index, bankRows);
+        return getFloatAt(offset);
       }
       return 0.0;
     }
 
     inline double  bank::getDouble(int item, int index) const noexcept{
-        if(bankSchema.getEntryType(item)==5){
-	         int offset = bankSchema.getOffset(item, index, bankRows);
-	         return getDoubleAt(offset);
+      if(bankSchema.getEntryType(item)==kDouble){
+        int offset = bankSchema.getOffset(item, index, bankRows);
+        return getDoubleAt(offset);
       }
-      if(bankSchema.getEntryType(item)==4){
-	         int offset = bankSchema.getOffset(item, index, bankRows);
-	         return getFloatAt(offset);
+      if(bankSchema.getEntryType(item)==kFloat){
+        int offset = bankSchema.getOffset(item, index, bankRows);
+        return getFloatAt(offset);
       }
       return 0.0;
     }
 
     inline long bank::getLong(int item, int index) const noexcept{
-      if(bankSchema.getEntryType(item)==8){
-	       int offset = bankSchema.getOffset(item, index, bankRows);
-	        return getLongAt(offset);
+      if(bankSchema.getEntryType(item)==kLong){
+        int offset = bankSchema.getOffset(item, index, bankRows);
+        return getLongAt(offset);
       }
       return 0;
     }
@@ -338,9 +372,9 @@ namespace hipo {
       int type = bankSchema.getEntryType(item);
       int offset = bankSchema.getOffset(item, index, bankRows);
       switch(type){
-      case 1: return (int) getByteAt(offset);
-      case 2: return (int) getShortAt(offset);
-      case 3: return getIntAt(offset);
+      case kByte:  return (int) getByteAt(offset);
+      case kShort: return (int) getShortAt(offset);
+      case kInt:   return getIntAt(offset);
       default: printf("---> error : requested INT for [%s] type = %d\n",
 		      bankSchema.getEntryName(item).c_str(),type); break;
       }
@@ -351,8 +385,8 @@ namespace hipo {
       int type = bankSchema.getEntryType(item);
       int offset = bankSchema.getOffset(item, index, bankRows);
       switch(type){
-      case 1: return (int) getByteAt(offset);
-      case 2: return (int) getShortAt(offset);
+      case kByte:  return (int) getByteAt(offset);
+      case kShort: return (int) getShortAt(offset);
       default: printf("---> error : requested SHORT for [%s] type = %d\n",
 		      bankSchema.getEntryName(item).c_str(),type); break;
       }
@@ -363,7 +397,7 @@ namespace hipo {
       int type = bankSchema.getEntryType(item);
       int offset = bankSchema.getOffset(item, index, bankRows);
       switch(type){
-      case 1: return (int) getByteAt(offset);
+      case kByte: return (int) getByteAt(offset);
       default: printf("---> error : requested BYTE for [%s] type = %d\n",
 		      bankSchema.getEntryName(item).c_str(),type); break;
       }
@@ -374,9 +408,9 @@ namespace hipo {
       int type = bankSchema.getEntryType(item);
       int offset = bankSchema.getOffset(item, index, bankRows);
       switch(type){
-      case 1: return (int) getByteAt(offset);
-      case 2: return (int) getShortAt(offset);
-      case 3: return getIntAt(offset);
+      case kByte:  return (int) getByteAt(offset);
+      case kShort: return (int) getShortAt(offset);
+      case kInt:   return getIntAt(offset);
       default: printf("---> error : requested INT for [%s] type = %d\n",name,type); break;
       }
       return 0;
@@ -387,8 +421,8 @@ namespace hipo {
       int type = bankSchema.getEntryType(item);
       int offset = bankSchema.getOffset(item, index, bankRows);
       switch(type){
-      case 1: return (int) getByteAt(offset);
-      case 2: return (int) getShortAt(offset);
+      case kByte:  return (int) getByteAt(offset);
+      case kShort: return (int) getShortAt(offset);
       default: printf("---> error : requested SHORT for [%s] type = %d\n",
 		      bankSchema.getEntryName(item).c_str(),type); break;
       }
@@ -399,7 +433,7 @@ namespace hipo {
       int type = bankSchema.getEntryType(item);
       int offset = bankSchema.getOffset(item, index, bankRows);
       switch(type){
-      case 1: return (int) getByteAt(offset);
+      case kByte: return (int) getByteAt(offset);
       default: printf("---> error : requested BYTE for [%s] type = %d\n",
 		      bankSchema.getEntryName(item).c_str(),type); break;
       }
@@ -408,20 +442,20 @@ namespace hipo {
 
     inline float  bank::getFloat(const char *name, int index) const noexcept{
       int item = bankSchema.getEntryOrder(name);
-      if(bankSchema.getEntryType(item)==4){
-	int offset = bankSchema.getOffset(item, index, bankRows);
-	return getFloatAt(offset);
+      if(bankSchema.getEntryType(item)==kFloat){
+        int offset = bankSchema.getOffset(item, index, bankRows);
+        return getFloatAt(offset);
       }
       return 0.0;
     }
 
     inline double  bank::getDouble(const char *name, int index) const noexcept{
       int item = bankSchema.getEntryOrder(name);
-      if(bankSchema.getEntryType(item)==5){
-	      int offset = bankSchema.getOffset(item, index, bankRows);
-	      return getDoubleAt(offset);
+      if(bankSchema.getEntryType(item)==kDouble){
+        int offset = bankSchema.getOffset(item, index, bankRows);
+        return getDoubleAt(offset);
       }
-      if(bankSchema.getEntryType(item)==4){
+      if(bankSchema.getEntryType(item)==kFloat){
         int offset = bankSchema.getOffset(item, index, bankRows);
         return (double) getFloatAt(offset);
       }
@@ -430,9 +464,9 @@ namespace hipo {
 
     inline long bank::getLong(const char *name, int index) const noexcept{
       int item = bankSchema.getEntryOrder(name);
-      if(bankSchema.getEntryType(item)==8){
-	int offset = bankSchema.getOffset(item, index, bankRows);
-	return getLongAt(offset);
+      if(bankSchema.getEntryType(item)==kLong){
+        int offset = bankSchema.getOffset(item, index, bankRows);
+        return getLongAt(offset);
       }
       return 0;
     }
