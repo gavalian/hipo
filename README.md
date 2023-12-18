@@ -88,7 +88,7 @@ Here is an example with lambda function:
   hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
   std::function charged = [](hipo::bank &b, int row) { return b.getInt("charge",row)!=0 ? 1.0 : 0.0;};
 
-  while( r.next(list)&&counter<350){
+  while( r.next(list)){
     hipo::iterator it = hipo::iterator::reduce(charged,list[0]);
     for(it.begin(); !it.end(); it.next()){
       printf("\t pid [%d] = %d\n",it.index(), list[0].getInt(0,it.index()));
@@ -102,7 +102,7 @@ Iterators can be used also to get indicies of the refernce bank. For example:
   hipo::reader   r(file);
   hipo::banklist list = r.getBanks({"REC::Particle","REC::Calorimeter"});
 
-  while( r.next(list)&&counter<350){
+  while( r.next(list)){
     int status = list[0].getInt("status",0);
     if(list[0].getInt(0,0)==11&&abs(status)>=2000&&abs(status)<3000){
       hipo::iterator it = hipo::iterator::link(list[1],0,1);
