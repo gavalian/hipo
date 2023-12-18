@@ -166,23 +166,17 @@ void example7(const char *file){
 }
 
 void example8(const char *file){
+  
   hipo::reader   r(file);
   hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
-  int counter = 0;
-
-  std::function charged = [](hipo::bank &b, int row) {
-    int charge = b.getInt("charge",row);
-    if(charge!=0) return 1.0; return 0.0;
-  };
+  std::function charged = [](hipo::bank &b, int row) { return b.getInt("charge",row)!=0 ? 1.0 : 0.0;};
   
+  int counter = 0;
   while( r.next(list)&&counter<350){
     counter++;
     hipo::iterator it = hipo::iterator::reduce(charged,list[0]);
     list[0].show();
     it.show();
-      //for(it.begin(); !it.end(); it.next()){
-      //  printf("\t pid [%d] = %d\n",it.index(), list[0].getInt(0,it.index()));
-      //}
   }
 }
 
