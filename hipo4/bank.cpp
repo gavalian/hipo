@@ -408,6 +408,16 @@ hipo::iterator iterator::link(hipo::bank &bank, int row, int column){
     return blink;
 }
 
+hipo::iterator iterator::reduce(std::function<double(hipo::bank&, int)> func, hipo::bank& bank){
+  hipo::iterator it(bank);
+  int nrows = bank.getRows();
+  for(int r = 0; r < nrows; r++){
+    double v = func(bank,r);
+    if(v>0.5) it.add(r);
+  }
+  return it;
+}
+
 hipo::iterator iterator::reduce(hipo::bank &bank, const char *expression){
   hipo::Parser p(expression);
 
@@ -417,11 +427,11 @@ hipo::iterator iterator::reduce(hipo::bank &bank, const char *expression){
   hipo::iterator it(bank);
   for(int k = 0; k < nrows; k++){
      for(int i = 0; i < nitems; i++){
-        p[schema.getEntryName(i)] = bank.getInt(i,k);
+       p[schema.getEntryName(i)] = bank.get(i,k);
      }
      double value = p.Evaluate();
-     printf(" row = %d - value %f\n",k,value);
-      if(value>0.5) it.add(k);
+     //printf(" row = %d - value %f\n",k,value);
+     if(value>0.5) it.add(k);
   }
   return it;
 }

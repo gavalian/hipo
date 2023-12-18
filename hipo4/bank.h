@@ -45,6 +45,7 @@
 #include <map>
 #include "dictionary.h"
 #include "node.h"
+#include "functional"
 
 namespace hipo {
 
@@ -335,6 +336,7 @@ namespace hipo {
       void show(){ for(int i = 0; i < rows.size(); i++) printf("%5d ",rows[i]); printf("\n");}
       
       static hipo::iterator link(hipo::bank &b, int row, int column);
+      static hipo::iterator reduce(std::function<double(hipo::bank&, int)> func, hipo::bank& bank);
       static hipo::iterator reduce(hipo::bank &bank, const char *expression);
   };
     /////////////////////////////////////

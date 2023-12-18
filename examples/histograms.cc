@@ -165,6 +165,27 @@ void example7(const char *file){
   }
 }
 
+void example8(const char *file){
+  hipo::reader   r(file);
+  hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
+  int counter = 0;
+
+  std::function charged = [](hipo::bank &b, int row) {
+    int charge = b.getInt("charge",row);
+    if(charge!=0) return 1.0; return 0.0;
+  };
+  
+  while( r.next(list)&&counter<350){
+    counter++;
+    hipo::iterator it = hipo::iterator::reduce(charged,list[0]);
+    list[0].show();
+    it.show();
+      //for(it.begin(); !it.end(); it.next()){
+      //  printf("\t pid [%d] = %d\n",it.index(), list[0].getInt(0,it.index()));
+      //}
+  }
+}
+
 int main(int argc, char** argv) {
   
   std::cout << " reading CLAS12 hipo file and plotting missing mass (ep->epi+pi-X) "  << __cplusplus << std::endl;
@@ -185,9 +206,9 @@ int main(int argc, char** argv) {
   //example1(inputFile);
   //example2(inputFile);
 
-  example4(inputFile);
+  //example4(inputFile);
   //example5(inputFile);
   //example6(inputFile);
-  //example7(inputFile);
+  example7(inputFile);
 }
 //### END OF GENERATED CODE
