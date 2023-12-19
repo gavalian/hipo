@@ -90,9 +90,10 @@ set(HIPO_SOURCE_FILES
         hipo4/event.cpp
         hipo4/fusion.cpp
         hipo4/node.cpp
+        hipo4/parser.cpp
         hipo4/reader.cpp
-        hipo4/record.cpp
         hipo4/recordbuilder.cpp
+        hipo4/record.cpp
         hipo4/tuple.cpp
         hipo4/utils.cpp
         hipo4/wrapper.cpp
@@ -104,14 +105,22 @@ set(HIPO_HEADERS
         hipo4/datastream.h
         hipo4/dictionary.h
         hipo4/event.h
+        hipo4/fizika.h
         hipo4/fusion.h
         hipo4/hipoexceptions.h
+        hipo4/json.h
+        hipo4/jsonutil.h
         hipo4/node.h
+        hipo4/parser.h
+        hipo4/reaction.h
         hipo4/reader.h
-        hipo4/record.h
         hipo4/recordbuilder.h
+        hipo4/record.h
+        hipo4/tuple.h
+        hipo4/twig.h
         hipo4/utils.h
-        hipo4/writer.h)
+        hipo4/writer.h
+        )
 
 add_library(hipo4_objs   OBJECT ${HIPO_SOURCE_FILES})
 add_library(hipo4        SHARED $<TARGET_OBJECTS:hipo4_objs>)
