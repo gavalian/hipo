@@ -1,0 +1,9 @@
+prefix=${pcfiledir}/../..
+includedir=${prefix}/include
+libdir=${prefix}/lib
+
+Name: hipo4
+Description: High Performance Output data format for experimental physics
+Version: @HIPO_VERSION@
+Libs: -L${libdir} -lhipo4
+Cflags: -I${includedir}

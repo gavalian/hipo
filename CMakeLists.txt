@@ -168,3 +168,9 @@ configure_package_config_file( cmake/hipo4Config.cmake.in
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hipo4Config.cmake ${CMAKE_CURRENT_BINARY_DIR}/hipo4ConfigVersion.cmake
         DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/cmake/hipo4)
+
+configure_file(${PROJECT_SOURCE_DIR}/cmake/hipo4.pc.in
+               ${PROJECT_BINARY_DIR}/hipo4.pc
+               @ONLY)
+install(FILES ${PROJECT_BINARY_DIR}/hipo4.pc
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
