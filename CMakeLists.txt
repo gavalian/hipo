@@ -75,7 +75,7 @@ if(NOT LZ4_FOUND)
 endif()
 
 add_compile_definitions(__LZ4__)
-# include_directories(${LZ4_INCLUDE_DIRS})
+include_directories(PkgConfig::LZ4)
 
 set(DATAFRAME_IN_MAIN TRUE)
 add_subdirectory(extensions/dataframes)
