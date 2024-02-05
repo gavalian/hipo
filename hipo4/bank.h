@@ -309,24 +309,19 @@ namespace hipo {
 
   class iterator {
     private:
-      hipo::bank  &ib;
       std::vector<int> rows;
       decltype(rows)::size_type current_index;
     public:
-      iterator();
-      iterator(hipo::bank &b, std::vector<int> index) : ib(b) {
-        ib = b; for(auto id : index) rows.push_back(id);
-        current_index = 0;
+      iterator(std::vector<int> index={}) : current_index(0) {
+        for(auto id : index) rows.push_back(id);
       }
-      iterator(bank &b) : ib(b) {ib=b; current_index = 0;}
       virtual ~iterator(){}
 
-      
       void    reset(){ rows.clear();}
       void    add(int index){rows.push_back(index);}
       void    begin(){current_index=0;}
       bool    next(){
-        current_index++; if(current_index>rows.size()) { 
+        current_index++; if(current_index>rows.size()) {
           current_index = rows.size(); return false;
         }
         return true;
@@ -334,10 +329,10 @@ namespace hipo {
       bool end(){return current_index>=rows.size();}
       int  index(){ return rows[current_index];}
       void show(){ for(const auto& row : rows) printf("%5d ",row); printf("\n");}
-      
-      static hipo::iterator link(hipo::bank &b, int row, int column);
-      static hipo::iterator reduce(std::function<double(hipo::bank&, int)> func, hipo::bank& bank);
-      static hipo::iterator reduce(hipo::bank &bank, const char *expression);
+
+      void link(hipo::bank& b, int row, int column);
+      void reduce(hipo::bank& bank, std::function<double(hipo::bank&, int)> func);
+      void reduce(hipo::bank& bank, const char *expression);
   };
     /////////////////////////////////////
     //inlined getters

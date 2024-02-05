@@ -399,41 +399,35 @@ void    bank::putLong(const char *name, int index, int64_t value){
   putLongAt(offset,value);
 }
 
-hipo::iterator iterator::link(hipo::bank &bank, int row, int column){
-    hipo::iterator blink(bank);
-    int nrows = bank.getRows();
-    for(int r = 0; r < nrows; r++) { 
-      if(bank.getInt(column,r)==row) blink.add(r);
-    }
-    return blink;
+void iterator::link(hipo::bank& bank, int row, int column){
+  int nrows = bank.getRows();
+  for(int r = 0; r < nrows; r++) {
+    if(bank.getInt(column,r)==row) add(r);
+  }
 }
 
-hipo::iterator iterator::reduce(std::function<double(hipo::bank&, int)> func, hipo::bank& bank){
-  hipo::iterator it(bank);
+void iterator::reduce(hipo::bank& bank,std::function<double(hipo::bank&, int)> func){
   int nrows = bank.getRows();
   for(int r = 0; r < nrows; r++){
     double v = func(bank,r);
-    if(v>0.5) it.add(r);
+    if(v>0.5) add(r);
   }
-  return it;
 }
 
-hipo::iterator iterator::reduce(hipo::bank &bank, const char *expression){
+void iterator::reduce(hipo::bank& bank, const char *expression){
   hipo::Parser p(expression);
 
   int nrows = bank.getRows();
   int nitems = bank.getSchema().getEntries();
   hipo::schema &schema = bank.getSchema();
-  hipo::iterator it(bank);
   for(int k = 0; k < nrows; k++){
      for(int i = 0; i < nitems; i++){
        p[schema.getEntryName(i)] = bank.get(i,k);
      }
      double value = p.Evaluate();
      //printf(" row = %d - value %f\n",k,value);
-     if(value>0.5) it.add(k);
+     if(value>0.5) add(k);
   }
-  return it;
 }
 
 void bank::show(){

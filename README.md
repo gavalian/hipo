@@ -89,7 +89,7 @@ Here is an example with lambda function:
   std::function charged = [](hipo::bank &b, int row) { return b.getInt("charge",row)!=0 ? 1.0 : 0.0;};
 
   while( r.next(list)){
-    hipo::iterator it = hipo::iterator::reduce(charged,list[0]);
+    hipo::iterator it = hipo::iterator::reduce(list[0],charged);
     for(it.begin(); !it.end(); it.next()){
       printf("\t pid [%d] = %d\n",it.index(), list[0].getInt(0,it.index()));
     }

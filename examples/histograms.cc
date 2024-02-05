@@ -120,7 +120,7 @@ void example5(const char *file){
     printf(" rows = %d\n",nrows);
 
     if(nrows>6){
-      hipo::iterator it(list[0],{0,1,4});
+      hipo::iterator it({0,1,4});
       for(it.begin(); !it.end(); it.next()){
         printf("\t pid [%d] = %d\n",it.index(), list[0].getInt(0,it.index()));
       }
@@ -138,7 +138,8 @@ void example6(const char *file){
     int status = list[0].getInt("status",0);
     if(list[0].getInt(0,0)==11&&abs(status)>=2000&&abs(status)<3000){
       printf("found electron\n");
-      hipo::iterator it = hipo::iterator::link(list[1],0,1);
+      hipo::iterator it();
+      it.link(list[1],0,1);
       double energy = 0.0;
       for(it.begin(); !it.end(); it.next()){
         energy += list[1].getFloat("energy",it.index());
@@ -156,7 +157,8 @@ void example7(const char *file){
   int counter = 0;
   while( r.next(list)&&counter<350){ 
     counter++; 
-      hipo::iterator it = hipo::iterator::reduce(list[0],"charge!=0");
+      hipo::iterator it();
+      it.reduce(list[0],"charge!=0");
       list[0].show();
       it.show();
       //for(it.begin(); !it.end(); it.next()){
@@ -174,7 +176,8 @@ void example8(const char *file){
   int counter = 0;
   while( r.next(list)&&counter<350){
     counter++;
-    hipo::iterator it = hipo::iterator::reduce(charged,list[0]);
+    hipo::iterator it();
+    it.reduce(list[0],charged);
     list[0].show();
     it.show();
   }
