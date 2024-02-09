@@ -75,7 +75,6 @@ if(NOT LZ4_FOUND)
 endif()
 
 add_compile_definitions(__LZ4__)
-include_directories(PkgConfig::LZ4)
 
 set(DATAFRAME_IN_MAIN TRUE)
 add_subdirectory(extensions/dataframes)
@@ -141,8 +140,9 @@ target_include_directories(hipo4 PUBLIC
                            $<INSTALL_INTERFACE:include/hipo4>
                            )
 
-target_link_libraries(hipo4 PUBLIC  ${LZ4_LIBRARIES} )
-target_link_libraries(hipo4_static PUBLIC ${LZ4_LIBRARIES})
+target_compile_options(hipo4_objs PUBLIC ${LZ4_CLFAGS} ${LZ4_CFLAGS_OTHER})
+target_link_libraries(hipo4 PUBLIC  ${LZ4_LINK_LIBRARIES} )
+target_link_libraries(hipo4_static PUBLIC ${LZ4_LINK_LIBRARIES})
 
 install(TARGETS hipo4
         EXPORT hipo4-export
