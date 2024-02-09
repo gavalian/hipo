@@ -76,11 +76,6 @@ if(NOT LZ4_FOUND)
 endif()
 
 add_compile_definitions(__LZ4__)
-# Debug LZ4 section. 
-#include(/Users/maurik/cmake/cmake_debug_properties.cmake )
-#print_target_properties(PkgConfig::LZ4)
-#include(CMakePrintHelpers)
-#cmake_print_properties(TARGETS PkgConfig::LZ4 PROPERTIES NAME IMPORTED INTERFACE_INCLUDE_DIRECTORIES INTERFACE_LINK_LIBRARIES)
 
 set(DATAFRAME_IN_MAIN TRUE)
 add_subdirectory(extensions/dataframes)
