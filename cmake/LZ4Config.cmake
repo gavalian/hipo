@@ -3,7 +3,7 @@
 #
 set(ENV{PKG_CONFIG_PATH} "${PKG_CONFIG_PATH}:${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(LZ4 liblz4)
+pkg_check_modules(LZ4 IMPORTED_TARGET "liblz4")
 
 if (NOT LZ4_FOUND)
     message(STATUS "No system version of LZ4 found.")
