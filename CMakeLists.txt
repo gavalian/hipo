@@ -6,12 +6,13 @@
 ##########################################################
 
 # minimum version of CMake, which is determined by Geant4's requirements
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.20)
 
 project(HIPO VERSION 4.0.1)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 #
 # Set a default build type if none was specified
 #
@@ -60,25 +61,21 @@ find_package(LZ4 QUIET CONFIG PATHS ${PROJECT_SOURCE_DIR}/cmake )
 
 if(NOT LZ4_FOUND)
     message(STATUS "**LZ4********************************************************************")
-    message(STATUS "* We did not find a system LZ4 package -- We will build this locally.   *")
+    message(STATUS "* We did not find a system (or local build) LZ4 package.                *")
+    message(STATUS "* Please install lz4 (Centos: yum install lz4  MacOS: brew install lz4) *")
+    message(STATUS "* Or build lz4 from the included sources.                               *")
+    message(STATUS "*                                                                       *")
     message(STATUS "* To make this possible, please make sure you initialized the submodule.*")
     message(STATUS "* If you did not include --recurse-submodules at initial clone do:      *")
     message(STATUS "* git submodule init                                                    *")
     message(STATUS "* git submodule update                                                  *")
+    message(STATUS "* Then: 'cd lz4' followed by:                                           *")
+    message(STATUS "* make PREFIX=${CMAKE_INSTALL_PREFIX} CFLAGS='-fPIC' install ")
     message(STATUS "*************************************************************************")
-    message("PROJECT_SOURCE_DIR = ${PROJECT_SOURCE_DIR}")
-    file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/include/hipo4)
-    add_custom_target(LZ4 ALL
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/lz4/lib
-                      COMMAND make PREFIX=${CMAKE_INSTALL_PREFIX} CFLAGS="-fPIC" install
-                      )
-
-    set(LZ4_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/include)
-    set(LZ4_LIBRARIES  ${CMAKE_INSTALL_PREFIX}/lib/liblz4.a)
+    message(FATAL_ERROR "stop processing until lz4 is available")
 endif()
 
 add_compile_definitions(__LZ4__)
-include_directories(${LZ4_INCLUDE_DIRS})
 
 set(DATAFRAME_IN_MAIN TRUE)
 add_subdirectory(extensions/dataframes)
@@ -129,7 +126,9 @@ set_target_properties(hipo4_static PROPERTIES OUTPUT_NAME hipo4)   # So that the
 
 # Required on Unix OS family to be able to be linked into shared libraries.
 set_target_properties(hipo4_objs PROPERTIES POSITION_INDEPENDENT_CODE ON)
-add_dependencies(hipo4_objs LZ4)
+# Note: Neither add_dependencies(hipo4_objs PkgConfig::LZ4) nor target_include_directories(hipo4_objs PUBLIC PkgConfig::LZ4)
+# work in an Intel Mac.
+target_include_directories(hipo4_objs PUBLIC ${LZ4_INCLUDE_DIRS})
 
 # Include the macros for creating export package.
 include(CMakePackageConfigHelpers)
@@ -144,8 +143,8 @@ target_include_directories(hipo4 PUBLIC
                            $<INSTALL_INTERFACE:include/hipo4>
                            )
 
-target_link_libraries(hipo4 PUBLIC  ${LZ4_LIBRARIES} )
-target_link_libraries(hipo4_static PUBLIC ${LZ4_LIBRARIES})
+target_link_libraries(hipo4 PUBLIC PkgConfig::LZ4 )
+target_link_libraries(hipo4_static PUBLIC PkgConfig::LZ4)
 
 install(TARGETS hipo4
         EXPORT hipo4-export
