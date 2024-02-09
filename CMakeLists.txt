@@ -6,12 +6,13 @@
 ##########################################################
 
 # minimum version of CMake, which is determined by Geant4's requirements
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.20)
 
 project(HIPO VERSION 4.0.1)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 #
 # Set a default build type if none was specified
 #
@@ -75,7 +76,6 @@ if(NOT LZ4_FOUND)
 endif()
 
 add_compile_definitions(__LZ4__)
-include_directories(PkgConfig::LZ4)
 
 set(DATAFRAME_IN_MAIN TRUE)
 add_subdirectory(extensions/dataframes)
@@ -126,7 +126,9 @@ set_target_properties(hipo4_static PROPERTIES OUTPUT_NAME hipo4)   # So that the
 
 # Required on Unix OS family to be able to be linked into shared libraries.
 set_target_properties(hipo4_objs PROPERTIES POSITION_INDEPENDENT_CODE ON)
-add_dependencies(hipo4_objs LZ4)
+# Note: Neither add_dependencies(hipo4_objs PkgConfig::LZ4) nor target_include_directories(hipo4_objs PUBLIC PkgConfig::LZ4)
+# work in an Intel Mac.
+target_include_directories(hipo4_objs PUBLIC ${LZ4_INCLUDE_DIRS})
 
 # Include the macros for creating export package.
 include(CMakePackageConfigHelpers)
@@ -141,8 +143,8 @@ target_include_directories(hipo4 PUBLIC
                            $<INSTALL_INTERFACE:include/hipo4>
                            )
 
-target_link_libraries(hipo4 PUBLIC  ${LZ4_LIBRARIES} )
-target_link_libraries(hipo4_static PUBLIC ${LZ4_LIBRARIES})
+target_link_libraries(hipo4 PUBLIC PkgConfig::LZ4 )
+target_link_libraries(hipo4_static PUBLIC PkgConfig::LZ4)
 
 install(TARGETS hipo4
         EXPORT hipo4-export
