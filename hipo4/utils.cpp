@@ -119,7 +119,7 @@ namespace hipo {
     file_header.append("   char inputFile[256];\n\n" );
     file_header.append("   if(argc>1) {\n      sprintf(inputFile,\"%s\",argv[1]);\n   } else {\n " );
     file_header.append("     std::cout << \" *** please provide a file name...\" << std::endl;\n" );
-    file_header.append("     exit(0);\n   }\n\n");
+    file_header.append("     exit(1);\n   }\n\n");
     file_header.append("   hipo::reader  reader;\n");
     file_header.append("   reader.open(inputFile);\n\n" );
     return file_header;

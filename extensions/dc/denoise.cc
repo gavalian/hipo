@@ -157,7 +157,7 @@ std::cout << std::endl;
  
    /*char inputFile[256];
    if(argc>1) { sprintf(inputFile,"%s",argv[1]);} else {
-      std::cout << " *** please provide a file name..." << std::endl;exit(0);
+      std::cout << " *** please provide a file name..." << std::endl;exit(1);
       }*/
 
    chamber.setRows(112);

@@ -336,7 +336,7 @@ namespace cli {
 				args.output << this->usage();
 				//#pragma warning(push)
 				//#pragma warning(disable: 4702)
-				exit(0);
+				exit(1);
 				return false;
 				//#pragma warning(pop)
 			}), "", true);
