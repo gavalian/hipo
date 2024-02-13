@@ -48,7 +48,7 @@ int main(int argc, char** argv){
       //sprintf(outputFile,"%s",argv[2]);
    } else {
       std::cout << " *** please provide a file name..." << std::endl;
-     exit(0);
+     exit(1);
    }
     
     //bank.show();

@@ -291,7 +291,7 @@ std::vector<hipo::bank> reader::getBanks(std::vector<std::string> names){
   
   if(inputStream.is_open()==false){
     printf("\n\nhipo::reader (ERROR) file is not open.... exiting...\n\n");
-    exit(0);
+    exit(1);
   }
   long position = header.headerLength*4;
   hipo::record  dictRecord;
@@ -322,7 +322,7 @@ std::vector<hipo::bank> reader::getBanks(std::vector<std::string> names){
 void  reader::readDictionary(hipo::dictionary &dict){
   if(inputStream.is_open()==false){
     printf("\n\nhipo::reader (ERROR) file is not open.... exiting...\n\n");
-    exit(0);
+    exit(1);
   }
   long position = header.headerLength*4;
   hipo::record  dictRecord;

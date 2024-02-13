@@ -156,7 +156,7 @@ class schema {
     schema &getSchema(const char *name){ 
       if(factory.count(name)==0){
         printf("\n\nhipo::dictionary (ERROR) schema {%s} does not exist... exiting\n\n",name);
-           exit(0);
+           exit(1);
       }
       return factory[name];
     }
