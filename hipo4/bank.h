@@ -201,11 +201,31 @@ namespace hipo {
   };
   //typedef std::auto_ptr<hipo::generic_node> node_pointer;
 
+class iterator {
+    private:
+      std::vector<int> rows;
+      decltype(rows)::size_type current_index;
+    public:
+      iterator(){}
+      virtual ~iterator(){}
+      void    reset(){ rows.clear();}
+      void    add(int index){rows.push_back(index);}
+      void    begin(){current_index=0;}
+      bool    next(){
+        current_index++; if(current_index>rows.size()) { 
+          current_index = rows.size(); return false;
+        } return true;
+      }
+      bool   end(){return current_index>=rows.size();}
+      int    index(){ return rows[current_index];}
+      void   show(){ for(const auto& row : rows) printf("%5d ",row); printf("\n");}
+};
     class bank : public hipo::structure {
 
     private:
 
-      hipo::schema  bankSchema;
+      hipo::schema    bankSchema;
+      hipo::iterator  bankIterator;
       int           bankRows{-1};
 
     protected:
@@ -234,7 +254,7 @@ namespace hipo {
         //void show();
 
         hipo::schema  &getSchema() { return bankSchema;}
-
+        hipo::iterator &getIterator(){ return bankIterator;}
         int    getRows()  const noexcept{ return bankRows;}
         void   setRows(   int rows);
         int    getInt(    int item, int index) const noexcept;
@@ -298,7 +318,8 @@ namespace hipo {
               printf("---> error(put) : unknown type for [%s] type = %d\n", bankSchema.getEntryName(item).c_str(), type);
           }
         }
-     
+        void reduce(std::function<double(hipo::bank&, int)> func, bool doReset);
+        void reduce(const char *expression, bool doReset);
         void    show() override;
         void    reset();
         //virtual  void notify(){ };
@@ -307,6 +328,7 @@ namespace hipo {
 
   };
 
+/*
   class iterator {
     private:
       hipo::bank  &ib;
@@ -339,6 +361,7 @@ namespace hipo {
       static hipo::iterator reduce(std::function<double(hipo::bank&, int)> func, hipo::bank& bank);
       static hipo::iterator reduce(hipo::bank &bank, const char *expression);
   };
+  */
     /////////////////////////////////////
     //inlined getters
 

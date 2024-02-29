@@ -398,7 +398,7 @@ void    bank::putLong(const char *name, int index, int64_t value){
   int offset = bankSchema.getOffset(item, index, bankRows);
   putLongAt(offset,value);
 }
-
+/*
 hipo::iterator iterator::link(hipo::bank &bank, int row, int column){
     hipo::iterator blink(bank);
     int nrows = bank.getRows();
@@ -407,33 +407,62 @@ hipo::iterator iterator::link(hipo::bank &bank, int row, int column){
     }
     return blink;
 }
-
-hipo::iterator iterator::reduce(std::function<double(hipo::bank&, int)> func, hipo::bank& bank){
-  hipo::iterator it(bank);
-  int nrows = bank.getRows();
-  for(int r = 0; r < nrows; r++){
-    double v = func(bank,r);
-    if(v>0.5) it.add(r);
+*/
+void bank::reduce(std::function<double(hipo::bank&, int)> func, bool doReset){
+  
+  if(doReset==true){
+    bankIterator.reset();
+    int nrows = getRows();
+    for(int r = 0; r < nrows; r++){
+      double v = func(*this,r);
+      if(v>0.5) bankIterator.add(r);
+    }
+  } else {
+    std::vector<int> indx;
+    for(bankIterator.begin();!bankIterator.end(); bankIterator.next()){
+      indx.push_back(bankIterator.index());
+    }
+    bankIterator.reset();
+    int nrows = (int) indx.size();
+    for(int r = 0; r < nrows; r++){
+      double v = func(*this,indx[r]);
+      if(v>0.5) bankIterator.add(indx[r]);
+    }
   }
-  return it;
+  //return it;
 }
 
-hipo::iterator iterator::reduce(hipo::bank &bank, const char *expression){
+void bank::reduce(const char *expression, bool doReset){
   hipo::Parser p(expression);
-
-  int nrows = bank.getRows();
-  int nitems = bank.getSchema().getEntries();
-  hipo::schema &schema = bank.getSchema();
-  hipo::iterator it(bank);
-  for(int k = 0; k < nrows; k++){
-     for(int i = 0; i < nitems; i++){
-       p[schema.getEntryName(i)] = bank.get(i,k);
-     }
-     double value = p.Evaluate();
+  int nrows  = getRows();
+  int nitems = getSchema().getEntries();
+  hipo::schema &schema = getSchema();
+  if(doReset==true){
+    bankIterator.reset();
+    for(int k = 0; k < nrows; k++){
+      for(int i = 0; i < nitems; i++){
+        p[schema.getEntryName(i)] = get(i,k);
+      }
+      double value = p.Evaluate();
      //printf(" row = %d - value %f\n",k,value);
-     if(value>0.5) it.add(k);
+      if(value>0.5) bankIterator.add(k);
+    }
+  } else {
+    std::vector<int> indx;
+    for(bankIterator.begin();!bankIterator.end(); bankIterator.next()){
+      indx.push_back(bankIterator.index());
+    }
+    bankIterator.reset();
+    for(int k = 0; k < (int) indx.size(); k++){
+      for(int i = 0; i < nitems; i++){
+        p[schema.getEntryName(i)] = get(i,indx[k]);
+      }
+      double value = p.Evaluate();
+     //printf(" row = %d - value %f\n",k,value);
+      if(value>0.5) bankIterator.add(indx[k]);
+    }
   }
-  return it;
+  //return it;
 }
 
 void bank::show(){
