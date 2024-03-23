@@ -90,14 +90,14 @@ namespace hipo {
 	       return getSize()-getHeaderSize();
       }
 
-      int          getType();
-      int          getGroup();
-      int          getItem();
+      int          getType() const;
+      int          getGroup() const;
+      int          getItem() const;
       void         init(const char *buffer, int size);
       void         initNoCopy(const char *buffer, int size);
 
       const char    *getAddress();
-      virtual void   show();
+      virtual void   show() const;
       void           setSize(int size);
       void           setHeaderSize(int size);
       void           setDataSize(int size);
@@ -182,7 +182,11 @@ namespace hipo {
       void       parse(int group, int item, std::string format, int maxrows);
       virtual   ~composite(){}
       
+      /// @returns the number of bank rows. This is the number of **all** of the rows, _i.e._, not
+      ///          the reduced number if `hipo::bank::reduce` was called; for the latter, use
+      ///          `hipo::bank::getRowList().size()`.
       int      getRows() const noexcept { return dataLength()/rowOffset;}
+
       int      getEntries() const noexcept { return offsets.size();}
       int      getEntryType(int index) const noexcept { return types[index];}
       void     setRows(int rows);// { setDataLength(rows*rowOffset);}
@@ -201,35 +205,15 @@ namespace hipo {
   };
   //typedef std::auto_ptr<hipo::generic_node> node_pointer;
 
-class iterator {
-    private:
-      std::vector<int> rows;
-      decltype(rows)::size_type current_index;
-    public:
-      iterator(){}
-      virtual ~iterator(){}
-      void    reset(){ rows.clear();}
-      void    add(int index){rows.push_back(index);}
-      void    begin(){current_index=0;}
-      bool    next(){
-        current_index++; if(current_index>rows.size()) { 
-          current_index = rows.size(); return false;
-        } return true;
-      }
-      bool   end(){return current_index>=rows.size();}
-      int    index(){ return rows[current_index];}
-      void   show(){ for(const auto& row : rows) printf("%5d ",row); printf("\n");}
-};
     class bank : public hipo::structure {
 
+      using rowlist = std::vector<int>;
+
     private:
 
-      hipo::schema    bankSchema;
-      hipo::iterator  bankIterator;
-      int           bankRows{-1};
-
-    protected:
-        void setBankRows(int rows){ bankRows = rows;}
+      hipo::schema bankSchema;
+      rowlist      bankIteratorRows{-1};
+      int          bankRows{-1};
 
     public:
 
@@ -237,15 +221,10 @@ class iterator {
         // constructor initializes the nodes in the bank
         // and they will be filled automatically by reader.next()
         // method.
-        bank(const hipo::schema& __schema){
-          bankSchema = __schema;
-          bankRows   = -1;
-        }
+        bank(const hipo::schema& __schema) : bankSchema(__schema) {}
 
-        bank(const hipo::schema& __schema, int __rows){
-          bankSchema = __schema;
-          bankRows   = __rows;
-          int size   = bankSchema.getSizeForRows(__rows);
+        bank(const hipo::schema& __schema, int __rows) : bankSchema(__schema), bankRows(__rows) {
+          int size = bankSchema.getSizeForRows(bankRows);
           initStructureBySize(bankSchema.getGroup(),bankSchema.getItem(), 11, size);
         }
 
@@ -254,7 +233,6 @@ class iterator {
         //void show();
 
         hipo::schema  &getSchema() { return bankSchema;}
-        hipo::iterator &getIterator(){ return bankIterator;}
         int    getRows()  const noexcept{ return bankRows;}
         void   setRows(   int rows);
         int    getInt(    int item, int index) const noexcept;
@@ -329,9 +307,34 @@ class iterator {
               printf("---> error(put) : unknown type for [%s] type = %d\n", bankSchema.getEntryName(item).c_str(), type);
           }
         }
-        void reduce(std::function<double(hipo::bank&, int)> func, bool doReset);
-        void reduce(const char *expression, bool doReset);
-        void    show() override;
+
+        /// @returns a `rowlist` for this bank, to be used for looping over bank rows
+        /// @param getAllRows if true, gets **all** the bank rows,
+        ///                   otherwise gets the rows that have not been filtered by, _e.g._, `hipo::bank::reduce`
+        rowlist const getRowList(bool const getAllRows=false) const;
+
+        /// @returns a `rowlist` for this bank, for rows `r` such that `getInt(column,r) == row`
+        /// @param row the value to check
+        /// @param column the column to check (must be an integer-type column, _e.g._, that of `"pindex"`)
+        rowlist const getRowListLinked(int const row, int const column) const;
+
+        /// reduces this bank's `rowlist` according to `func`
+        /// @param func a first order function which will be called on `this` bank for each `int` row in the current `rowlist`;
+        ///             if the function call returns a value greater than `0.5`, the row will be included in the updated `rowlist`
+        /// @param doReset if true, initializes the `rowlist` so **all** rows are checked, otherwise just the ones in `rowlist` are checked
+        void reduce(std::function<double(hipo::bank&, int)> func, bool doReset=false);
+
+        /// reduces this bank's `rowlist` according to `expression`
+        /// @param expression an expression to decide whether to include a row in the updated `rowlist`
+        /// @param doReset if true, initializes the `rowlist` so **all** rows are checked, otherwise just the ones in `rowlist` are checked
+        void reduce(const char *expression, bool doReset=false);
+
+        /// show this bank's contents; only the rows in its `rowlist` are shown
+        void    show() const override { show(false); }
+        /// show this bank's contents
+        /// @param showAllRows if true, show **all** this bank's rows, otherwise just the rows in its `rowlist`, which may have been reduced
+        void    show(bool const showAllRows) const;
+
         void    reset();
         //virtual  void notify(){ };
 
@@ -339,40 +342,6 @@ class iterator {
 
   };
 
-/*
-  class iterator {
-    private:
-      hipo::bank  &ib;
-      std::vector<int> rows;
-      decltype(rows)::size_type current_index;
-    public:
-      iterator();
-      iterator(hipo::bank &b, std::vector<int> index) : ib(b) {
-        ib = b; for(auto id : index) rows.push_back(id);
-        current_index = 0;
-      }
-      iterator(bank &b) : ib(b) {ib=b; current_index = 0;}
-      virtual ~iterator(){}
-
-      
-      void    reset(){ rows.clear();}
-      void    add(int index){rows.push_back(index);}
-      void    begin(){current_index=0;}
-      bool    next(){
-        current_index++; if(current_index>rows.size()) { 
-          current_index = rows.size(); return false;
-        }
-        return true;
-      }
-      bool end(){return current_index>=rows.size();}
-      int  index(){ return rows[current_index];}
-      void show(){ for(const auto& row : rows) printf("%5d ",row); printf("\n");}
-      
-      static hipo::iterator link(hipo::bank &b, int row, int column);
-      static hipo::iterator reduce(std::function<double(hipo::bank&, int)> func, hipo::bank& bank);
-      static hipo::iterator reduce(hipo::bank &bank, const char *expression);
-  };
-  */
     /////////////////////////////////////
     //inlined getters
 

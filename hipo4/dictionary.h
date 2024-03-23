@@ -78,7 +78,7 @@ class schema {
     virtual ~schema()= default;
 
     void  parse(const std::string& schString);
-    std::string   getName(){ return schemaName;}
+    std::string   getName() const { return schemaName;}
     int   getGroup(){ return groupid;}
     int   getItem(){ return itemid;}
     int   getSizeForRows(int rows);
