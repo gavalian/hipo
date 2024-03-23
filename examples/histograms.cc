@@ -110,6 +110,7 @@ void example4(const char *file){
 }
 
 
+// example using a custom hipo::bank::rowlist
 void example5(const char *file){
   hipo::reader   r(file);
   hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
@@ -120,51 +121,53 @@ void example5(const char *file){
     printf(" rows = %d\n",nrows);
 
     if(nrows>6){
-      hipo::iterator it(list[0],{0,1,4});
-      for(it.begin(); !it.end(); it.next()){
-        printf("\t pid [%d] = %d\n",it.index(), list[0].getInt(0,it.index()));
+      for(auto const& it : hipo::bank::rowlist{0, 1, 4}){
+        printf("\t pid [%d] = %d\n",it, list[0].getInt(0,it));
       }
     }
   }
 }
 
+
+// Example showing how rowlists can be used to get indicies of the reference bank.
+// The link function will return a hipo::bank::rowlist for the bank "REC::Calorimeter"
+// where the column number 1 (which is "pindex") has a value of 0. Then by itarating over the returned
+// indicies the total energy can be calculated.
 void example6(const char *file){
   hipo::reader   r(file);
   hipo::banklist list = r.getBanks({"REC::Particle","REC::Calorimeter"});
+  int const pindex_column = 1; // of REC::Calorimeter
+  int const electron_row = 0;
   int counter = 0;
 
   while( r.next(list)&&counter<350){
-    counter++; 
-    int status = list[0].getInt("status",0);
-    if(list[0].getInt(0,0)==11&&abs(status)>=2000&&abs(status)<3000){
+    counter++;
+    int status = list[0].getInt("status",electron_row);
+    if(list[0].getInt("pid",electron_row)==11&&abs(status)>=2000&&abs(status)<3000){
       printf("found electron\n");
-      hipo::iterator it = hipo::iterator::link(list[1],0,1);
       double energy = 0.0;
-      for(it.begin(); !it.end(); it.next()){
-        energy += list[1].getFloat("energy",it.index());
+      for(auto const& it : list[1].getRowListLinked(electron_row, pindex_column)){
+        printf("  links REC::Calorimeter row=%d\n", it);
+        energy += list[1].getFloat("energy",it);
       }
-
-      it.show();
-      printf("energy = %f\n",energy);
+      printf("total energy = %f\n",energy);
     }
   }
 }
 
+// example showing how to reduce a bank's rowlist with an expression
 void example7(const char *file){
   hipo::reader   r(file);
   hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
   int counter = 0;
   while( r.next(list)&&counter<350){ 
     counter++; 
-      hipo::iterator it = hipo::iterator::reduce(list[0],"charge!=0");
-      list[0].show();
-      it.show();
-      //for(it.begin(); !it.end(); it.next()){
-      //  printf("\t pid [%d] = %d\n",it.index(), list[0].getInt(0,it.index()));
-      //}
+    list[0].reduce("charge!=0");
+    list[0].show();
   }
 }
 
+// example showing how to reduce a bank's rowlist with an first-order (lambda) function
 void example8(const char *file){
   
   hipo::reader   r(file);
@@ -174,9 +177,8 @@ void example8(const char *file){
   int counter = 0;
   while( r.next(list)&&counter<350){
     counter++;
-    hipo::iterator it = hipo::iterator::reduce(charged,list[0]);
+    list[0].reduce(charged);
     list[0].show();
-    it.show();
   }
 }
 

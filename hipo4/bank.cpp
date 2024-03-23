@@ -35,7 +35,6 @@
  */
 
 #include "bank.h"
-#include "utils.h"
 #include "parser.h"
 
 namespace hipo {
@@ -89,17 +88,17 @@ namespace hipo {
     }
 
     // return the type of the structure
-    int structure::getType(){
+    int structure::getType() const {
       auto type = (int) (*reinterpret_cast<uint8_t *>(structureAddress+3));
       return type;
     }
     // returns the group number of the object
-    int structure::getGroup(){
+    int structure::getGroup() const {
       auto group = (int) (*reinterpret_cast<uint16_t *>(structureAddress));
       return group;
     }
     // returns the item number of the structure
-    int structure::getItem(){
+    int structure::getItem() const {
       auto item = (int) (*reinterpret_cast<uint8_t *>(structureAddress+2));
       return item;
     }
@@ -113,7 +112,7 @@ namespace hipo {
       structureAddress = &structureBuffer[0];
     }
 
-    void structure::show(){
+    void structure::show() const {
       printf("structure : [%5d,%5d] type = %4d, header = %5d, length = %6d, data size = %5d, offset = %5d, capacity = %5lu\n",
          getGroup(),getItem(),getType(),getHeaderSize(), getSize(), getDataSize(), dataOffset, structureBuffer.size());
     }
@@ -275,7 +274,7 @@ void     composite::putFloat  ( int element, int row, float value){
    if(row>=rows) setRows(row+1);
    int offset = getRowSize()*row  + offsets[element];
    if(type==4) putFloatAt(offset, value); 
-    else printf("[putFloat] error : type = %d\n",type);
+   else printf("[putFloat] error : type = %d\n",type);
 }
 
 void composite::notify(){
@@ -328,7 +327,7 @@ void   composite::print(){
          int type = getEntryType(e);
          if(type==1||type==2||type==3) printf("%8d ",getInt(e,r));
          if(type==4) printf("%8.5f ",getFloat(e,r));
-         if(type==8) printf("%lld ",getLong(e,r));
+         if(type==8) printf("%ld ",getLong(e,r));
     }
     printf("\n");
   }
@@ -350,6 +349,8 @@ void    bank::setRows(int rows){
 void bank::reset(){
    setSize(0);
    bankRows = 0;
+   bankIteratorRows.clear();
+   bankIteratorRows.push_back(-1);
 }
 
 void bank::notify(){
@@ -398,80 +399,65 @@ void    bank::putLong(const char *name, int index, int64_t value){
   int offset = bankSchema.getOffset(item, index, bankRows);
   putLongAt(offset,value);
 }
-/*
-hipo::iterator iterator::link(hipo::bank &bank, int row, int column){
-    hipo::iterator blink(bank);
-    int nrows = bank.getRows();
-    for(int r = 0; r < nrows; r++) { 
-      if(bank.getInt(column,r)==row) blink.add(r);
-    }
-    return blink;
-}
-*/
-void bank::reduce(std::function<double(hipo::bank&, int)> func, bool doReset){
-  
-  if(doReset==true){
-    bankIterator.reset();
-    int nrows = getRows();
-    for(int r = 0; r < nrows; r++){
-      double v = func(*this,r);
-      if(v>0.5) bankIterator.add(r);
-    }
-  } else {
-    std::vector<int> indx;
-    for(bankIterator.begin();!bankIterator.end(); bankIterator.next()){
-      indx.push_back(bankIterator.index());
-    }
-    bankIterator.reset();
-    int nrows = (int) indx.size();
-    for(int r = 0; r < nrows; r++){
-      double v = func(*this,indx[r]);
-      if(v>0.5) bankIterator.add(indx[r]);
-    }
+
+bank::rowlist const bank::getRowList(bool const getAllRows) const {
+  if(getAllRows) {
+    bank::rowlist all_rows;
+    for(int row = 0; row < getRows(); row++)
+      all_rows.push_back(row);
+    return all_rows;
   }
-  //return it;
+  else {
+    if(!bankIteratorRows.empty() && bankIteratorRows.at(0) == -1)
+      return getRowList(true); // return full rowlist, if not set
+    else
+      return bankIteratorRows;
+  }
+}
+
+bank::rowlist const bank::getRowListLinked(int const row, int const column) const {
+  bank::rowlist linked_rows;
+  for(auto const& r : getRowList()) {
+    if(getInt(column,r)==row)
+      linked_rows.push_back(r);
+  }
+  return linked_rows;
+}
+
+void bank::reduce(std::function<double(hipo::bank&, int)> func, bool doReset){
+  bank::rowlist indx = getRowList(doReset);
+  bankIteratorRows.clear();
+  for(auto const& r : indx)
+    if(func(*this,r) > 0.5)
+      bankIteratorRows.push_back(r);
 }
 
 void bank::reduce(const char *expression, bool doReset){
   hipo::Parser p(expression);
-  int nrows  = getRows();
   int nitems = getSchema().getEntries();
   hipo::schema &schema = getSchema();
-  if(doReset==true){
-    bankIterator.reset();
-    for(int k = 0; k < nrows; k++){
-      for(int i = 0; i < nitems; i++){
-        p[schema.getEntryName(i)] = get(i,k);
-      }
-      double value = p.Evaluate();
-     //printf(" row = %d - value %f\n",k,value);
-      if(value>0.5) bankIterator.add(k);
-    }
-  } else {
-    std::vector<int> indx;
-    for(bankIterator.begin();!bankIterator.end(); bankIterator.next()){
-      indx.push_back(bankIterator.index());
-    }
-    bankIterator.reset();
-    for(int k = 0; k < (int) indx.size(); k++){
-      for(int i = 0; i < nitems; i++){
-        p[schema.getEntryName(i)] = get(i,indx[k]);
-      }
-      double value = p.Evaluate();
-     //printf(" row = %d - value %f\n",k,value);
-      if(value>0.5) bankIterator.add(indx[k]);
-    }
+  bank::rowlist indx = getRowList(doReset);
+  bankIteratorRows.clear();
+  for(auto const& r : indx){
+    for(int i = 0; i < nitems; i++)
+      p[schema.getEntryName(i)] = get(i,r);
+    if(p.Evaluate() > 0.5)
+      bankIteratorRows.push_back(r);
   }
-  //return it;
 }
 
-void bank::show(){
+void bank::show(bool showAllRows) const {
 
-  printf("BANK :: NAME %24s , ROWS %6d \n",bankSchema.getName().c_str(),getRows());
+  bank::rowlist indx = getRowList(showAllRows);
+  if(showAllRows || indx.size() == getRows())
+    printf("BANK :: NAME %24s , ROWS %6d\n",bankSchema.getName().c_str(),getRows());
+  else
+    printf("BANK :: NAME %24s , ROWS %6ld (REDUCED FROM %d)\n",bankSchema.getName().c_str(),indx.size(),getRows());
+
   for(int i = 0; i < bankSchema.getEntries(); i++){
     //printf("%14d : ", i);
     printf("%18s : ", bankSchema.getEntryName(i).c_str());
-      for(int k = 0; k < bankRows; k++){
+      for(auto const& k : indx){
          if(bankSchema.getEntryType(i) < 4){
 	          printf("%8d ",getInt(i,k));
          } else {
