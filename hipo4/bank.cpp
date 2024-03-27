@@ -334,6 +334,84 @@ void   composite::print(){
 }
 
 
+//////////////////////////////////////////////////////////////////////////////////
+// hipo::bank::rowlist
+//////////////////////////////////////////////////////////////////////////////////
+
+bank::rowlist::list_t bank::rowlist::generate_number_list(list_t::size_type num) {
+  list_t result;
+  for(list_t::size_type i = 0; i < num; i++)
+    result.push_back(i);
+  return result;
+}
+
+bank::rowlist::list_t bank::rowlist::copy_number_list(list_t::size_type num) {
+  if(num <= s_number_list.size())
+    return list_t(s_number_list.begin(), s_number_list.begin() + num);
+  else {
+    auto result = s_number_list;
+    for(list_t::size_type i = s_number_list.size(); i < num; i++)
+      result.push_back(i);
+    return result;
+  }
+}
+
+bank::rowlist::list_t bank::rowlist::s_number_list = bank::rowlist::generate_number_list();
+
+void bank::rowlist::initialize(int numRows) {
+  m_list = copy_number_list(numRows);
+  m_init = true;
+}
+
+void bank::rowlist::uninitialize() {
+  m_list.clear();
+  m_init = false;
+}
+
+bank::rowlist::list_t const& bank::rowlist::getList() const {
+  if(!m_init)
+    std::cerr << "WARNING: attempted to get an uninitialized bank row list" << std::endl;
+  return m_list;
+}
+
+void bank::rowlist::setList(list_t& list) {
+  m_list = list;
+  m_init = true;
+}
+
+void bank::rowlist::reduce(std::function<double(hipo::bank&, int)> func) {
+  if(m_owner_bank == nullptr) {
+    std::cerr << "ERROR: attempted to call rowlist::reduce() but no bank is owned (please call setBank())" << std::endl;
+    return;
+  }
+  auto indx = m_list;
+  m_list.clear();
+  for(auto const& r : indx)
+    if(func(*m_owner_bank, r) > 0.5)
+      m_list.push_back(r);
+}
+
+void bank::rowlist::reduce(const char *expression) {
+  if(m_owner_bank == nullptr) {
+    std::cerr << "ERROR: attempted to call rowlist::reduce() but no bank is owned (please call setBank())" << std::endl;
+    return;
+  }
+  hipo::Parser p(expression);
+  int nitems = m_owner_bank->getSchema().getEntries();
+  hipo::schema &schema = m_owner_bank->getSchema();
+  auto indx = m_list;
+  m_list.clear();
+  for(auto const& r : indx){
+    for(int i = 0; i < nitems; i++)
+      p[schema.getEntryName(i)] = m_owner_bank->get(i,r);
+    if(p.Evaluate() > 0.5)
+      m_list.push_back(r);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+// hipo::bank
+//////////////////////////////////////////////////////////////////////////////////
 
 bank::bank()= default;
 
@@ -349,8 +427,7 @@ void    bank::setRows(int rows){
 void bank::reset(){
    setSize(0);
    bankRows = 0;
-   bankIteratorRows.clear();
-   bankIteratorRows.push_back(-1);
+   bankRowList.initialize(0);
 }
 
 void bank::notify(){
@@ -359,7 +436,6 @@ void bank::notify(){
   //printf("---> bank notify called structure size = %8d (size = %5d)  rows = %d\n",
   //    getSize(),size, bankRows);
 }
-
 
 void    bank::putInt(const char *name, int index, int32_t value){
   int item = bankSchema.getEntryOrder(name);
@@ -400,23 +476,8 @@ void    bank::putLong(const char *name, int index, int64_t value){
   putLongAt(offset,value);
 }
 
-bank::rowlist const bank::getRowList(bool const getAllRows) const {
-  if(getAllRows) {
-    bank::rowlist all_rows;
-    for(int row = 0; row < getRows(); row++)
-      all_rows.push_back(row);
-    return all_rows;
-  }
-  else {
-    if(!bankIteratorRows.empty() && bankIteratorRows.at(0) == -1)
-      return getRowList(true); // return full rowlist, if not set
-    else
-      return bankIteratorRows;
-  }
-}
-
-bank::rowlist const bank::getRowListLinked(int const row, int const column) const {
-  bank::rowlist linked_rows;
+bank::rowlist::list_t const bank::getRowListLinked(int const row, int const column) const {
+  rowlist::list_t linked_rows;
   for(auto const& r : getRowList()) {
     if(getInt(column,r)==row)
       linked_rows.push_back(r);
@@ -424,31 +485,14 @@ bank::rowlist const bank::getRowListLinked(int const row, int const column) cons
   return linked_rows;
 }
 
-void bank::reduce(std::function<double(hipo::bank&, int)> func, bool doReset){
-  bank::rowlist indx = getRowList(doReset);
-  bankIteratorRows.clear();
-  for(auto const& r : indx)
-    if(func(*this,r) > 0.5)
-      bankIteratorRows.push_back(r);
-}
-
-void bank::reduce(const char *expression, bool doReset){
-  hipo::Parser p(expression);
-  int nitems = getSchema().getEntries();
-  hipo::schema &schema = getSchema();
-  bank::rowlist indx = getRowList(doReset);
-  bankIteratorRows.clear();
-  for(auto const& r : indx){
-    for(int i = 0; i < nitems; i++)
-      p[schema.getEntryName(i)] = get(i,r);
-    if(p.Evaluate() > 0.5)
-      bankIteratorRows.push_back(r);
-  }
+bank::rowlist bank::getMutableRowList() {
+  bankRowList.setBank(this);
+  return bankRowList;
 }
 
 void bank::show(bool showAllRows) const {
 
-  bank::rowlist indx = getRowList(showAllRows);
+  auto indx = showAllRows ? rowlist::copy_number_list(getRows()) : getRowList();
   if(showAllRows || indx.size() == getRows())
     printf("BANK :: NAME %24s , ROWS %6d\n",bankSchema.getName().c_str(),getRows());
   else

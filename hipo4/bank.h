@@ -207,12 +207,44 @@ namespace hipo {
 
     class bank : public hipo::structure {
 
-      using rowlist = std::vector<int>;
+    public:
+
+      class rowlist {
+
+      public:
+        using list_t = std::vector<int>;
+
+        rowlist() : m_list({}), m_init(false) {}
+        rowlist(int numRows) { initialize(numRows); }
+
+        static list_t copy_number_list(list_t::size_type num);
+
+        void initialize(int numRows);
+        void uninitialize();
+
+        bool const isInitialized() const { return m_init; }
+        list_t const& getList() const;
+
+        void setList(list_t& list);
+        void setBank(bank* ownerBank) { m_owner_bank = ownerBank; }
+
+        void reduce(std::function<double(hipo::bank&, int)> func);
+        void reduce(char const* expression);
+
+      private:
+        bool m_init;
+        list_t m_list;
+        bank* m_owner_bank;
+
+        static list_t generate_number_list(list_t::size_type num = 500);
+        static list_t s_number_list;
+
+      };
 
     private:
 
       hipo::schema bankSchema;
-      rowlist      bankIteratorRows{-1};
+      rowlist      bankRowList;
       int          bankRows{-1};
 
     public:
@@ -308,26 +340,13 @@ namespace hipo {
           }
         }
 
-        /// @returns a `rowlist` for this bank, to be used for looping over bank rows
-        /// @param getAllRows if true, gets **all** the bank rows,
-        ///                   otherwise gets the rows that have not been filtered by, _e.g._, `hipo::bank::reduce`
-        rowlist const getRowList(bool const getAllRows=false) const;
+        rowlist::list_t const& getRowList() const { return bankRowList.getList(); }
+        rowlist getMutableRowList();
 
         /// @returns a `rowlist` for this bank, for rows `r` such that `getInt(column,r) == row`
         /// @param row the value to check
         /// @param column the column to check (must be an integer-type column, _e.g._, that of `"pindex"`)
-        rowlist const getRowListLinked(int const row, int const column) const;
-
-        /// reduces this bank's `rowlist` according to `func`
-        /// @param func a first order function which will be called on `this` bank for each `int` row in the current `rowlist`;
-        ///             if the function call returns a value greater than `0.5`, the row will be included in the updated `rowlist`
-        /// @param doReset if true, initializes the `rowlist` so **all** rows are checked, otherwise just the ones in `rowlist` are checked
-        void reduce(std::function<double(hipo::bank&, int)> func, bool doReset=false);
-
-        /// reduces this bank's `rowlist` according to `expression`
-        /// @param expression an expression to decide whether to include a row in the updated `rowlist`
-        /// @param doReset if true, initializes the `rowlist` so **all** rows are checked, otherwise just the ones in `rowlist` are checked
-        void reduce(const char *expression, bool doReset=false);
+        rowlist::list_t const getRowListLinked(int const row, int const column) const;
 
         /// show this bank's contents; only the rows in its `rowlist` are shown
         void    show() const override { show(false); }
