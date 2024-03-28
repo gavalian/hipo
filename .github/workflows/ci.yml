@@ -74,4 +74,5 @@ jobs:
         with:
           key: test_data
           path: test_data.hipo
-      - run: examples/histograms.exe test_data.hipo # FIXME: test the other examples
+      - run: examples/bankRowList.exe test_data.hipo
+      - run: examples/histograms.exe test_data.hipo # FIXME: test ALL the other examples

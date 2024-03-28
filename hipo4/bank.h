@@ -236,8 +236,6 @@ namespace hipo {
         /// information from the owner bank, such as `hipo::bank::rowlist::reduce`
         void setBank(bank* ownerBank);
 
-        /// reset and re-initialize the list, according to the number of rows in the owner bank
-        void reset();
         /// filter the list according to a function
         /// @param func a function which takes a `hipo::bank` reference and an `int` row number and returns a `double`;
         /// if the returned `double` is larger than 0.5, the row is accepted
@@ -275,6 +273,7 @@ namespace hipo {
         bank(const hipo::schema& __schema, int __rows) : bankSchema(__schema), bankRows(__rows) {
           int size = bankSchema.getSizeForRows(bankRows);
           initStructureBySize(bankSchema.getGroup(),bankSchema.getItem(), 11, size);
+          bankRowList.initialize(bankRows);
         }
 
         ~bank() override;
