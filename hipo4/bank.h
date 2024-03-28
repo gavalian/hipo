@@ -215,10 +215,8 @@ namespace hipo {
       public:
         using list_t = std::vector<int>;
 
-        /// constructor
-        /// @param ownerBank if set, associate this `rowlist` with bank `ownerBank`
-        rowlist(bank* ownerBank = nullptr) : m_owner_bank(ownerBank) {}
-        ~rowlist() {}
+        rowlist()  = default;
+        ~rowlist() = default;
 
         /// initialize with a full list with specified number of rows
         /// @param numRows if negative, use the owner `bank` to set the number of rows, otherwise use `numRows`
@@ -242,10 +240,13 @@ namespace hipo {
         /// @param num the size of the list
         static list_t getFullList(list_t::size_type num);
 
+        /// @param ownerBank set the owner bank
+        void setOwnerBank(bank* const ownerBank) { m_owner_bank = ownerBank; }
+
       private:
         bool m_init{false};
         list_t m_list{};
-        bank* m_owner_bank;
+        bank* m_owner_bank{nullptr};
 
         static list_t s_number_list_init(list_t::size_type num = 500);
         static list_t s_number_list;
@@ -258,7 +259,7 @@ namespace hipo {
 
       schema  bankSchema;
       int     bankRows{-1};
-      rowlist bankRowList{this};
+      rowlist bankRowList;
 
     public:
 
@@ -276,7 +277,7 @@ namespace hipo {
           bankRows   = __rows;
           int size   = bankSchema.getSizeForRows(__rows);
           initStructureBySize(bankSchema.getGroup(),bankSchema.getItem(), 11, size);
-          bankRowList.reset();
+          bankRowList.reset(bankRows);
         }
 
         ~bank() override;
@@ -360,15 +361,15 @@ namespace hipo {
 
         /// @returns an immutable list of available rows for this bank. This list may be a subset of the full
         /// list of rows, if for example the bank was filtered (see `hipo::bank::rowlist::reduce`); _cf._ `hipo::bank::rowlist::getFullRowList`
-        rowlist::list_t const& getRowList() const { return bankRowList.getList(); }
+        rowlist::list_t const& getRowList() const;
 
         /// @returns an immutable list of **all** rows in the bank; _cf._ `hipo::bank::rowlist::getRowList`. This method
         /// may be less efficient than simply using a `for` loop from `0` to `getRows()`
-        rowlist::list_t const getFullRowList() const { return bankRowList.getFullList(getRows()); }
+        rowlist::list_t const getFullRowList() const;
 
         /// @returns a reference to the mutable `hipo::bank::rowlist` owned by this bank. For example, use this method to
         /// call `hipo::bank::rowlist::reduce`.
-        rowlist& getMutableRowList() { return bankRowList; }
+        rowlist& getMutableRowList();
 
         /// @returns a `hipo::bank::rowlist` for this bank, for rows `r` such that `getInt(column,r) == row`
         /// @param row the value to check
@@ -376,7 +377,7 @@ namespace hipo {
         rowlist::list_t const getRowListLinked(int const row, int const column) const;
 
         /// show this bank's contents; only the rows in its current `rowlist` instance are shown
-        void show() const override { show(false); }
+        void show() const override;
 
         /// show this bank's contents
         /// @param showAllRows if `true`, show **all** this bank's rows, otherwise just the rows in its `rowlist` instance,

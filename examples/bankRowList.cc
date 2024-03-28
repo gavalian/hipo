@@ -15,6 +15,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <cassert>
 #include "reader.h"
 #include "twig.h"
 #include "reaction.h"
@@ -28,6 +29,7 @@ void example1(const char *file){
   while( r.next(list)&&counter<350){
     counter++;
     int nrows = list[0].getRows();
+    printf("\n>>> NEW EVENT <<<\n");
     printf(" rows = %d\n",nrows);
 
     // first, loop over all the rows
@@ -37,13 +39,70 @@ void example1(const char *file){
 
     // then, set the rowlist to contain only a few rows, and loop over those
     if(nrows>6){
-      printf(" there are more than 6 rows, let's loop over some specific rows:\n");
-      list[0].getMutableRowList().setList({0, 1, 4}); // need the mutable rowlist in order to mutate it
-      for(auto const& row : list[0].getRowList()) {
+
+      // set the list of rows, then loop over those
+      printf(" there are more than 6 rows, let's loop over some specific rows: 0, 1, and 4\n");
+      list[0].getMutableRowList().setList({0, 1, 4});
+      for(auto const& row : list[0].getRowList())
         printf("\t pid [%d] = %d\n", row, list[0].getInt(0,row));
-      }
+      assert((list[0].getRowList().size() == 3)); // test
+
+      // it's still possible to access the full set of rows
+      printf(" we can still loop over all the rows with `getFullRowList()`\n");
+      for(auto const& row : list[0].getFullRowList())
+        printf("\t pid [%d] = %d\n", row, list[0].getInt(0,row));
+      printf(" or similarly with `getRows()`\n");
+      for(int row=0; row<list[0].getRows(); row++)
+        printf("\t pid [%d] = %d\n", row, list[0].getInt(0,row));
+      assert((static_cast<int>(list[0].getFullRowList().size()) == list[0].getRows())); // test
+
+      // you may also reset the list to its original, full state
+      printf(" resetting the rowlist restores the full row list\n");
+      list[0].getMutableRowList().reset();
+      for(auto const& row : list[0].getRowList())
+        printf("\t pid [%d] = %d\n", row, list[0].getInt(0,row));
+      assert((static_cast<int>(list[0].getRowList().size()) == list[0].getRows())); // test
     }
 
+  }
+}
+
+// example showing how to reduce a bank's rowlist with an expression
+void example2(const char *file){
+  printf("===== EXAMPLE 2 =====\n");
+  hipo::reader   r(file);
+  hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
+  int counter = 0;
+  while( r.next(list)&&counter<350){
+    counter++;
+    printf("\n>>> NEW EVENT <<<\n");
+    printf("=== BEFORE ==================================\n");
+    list[0].show();
+    list[0].getMutableRowList().reduce("charge!=0");
+    printf("=== AFTER ===================================\n");
+    list[0].show();
+    // list[0].show(true); // call `show(true)` if you still need to see the full (not reduced) bank
+  }
+}
+
+// example showing how to reduce a bank's rowlist with an first-order (lambda) function
+void example3(const char *file){
+  printf("===== EXAMPLE 3 =====\n");
+
+  hipo::reader   r(file);
+  hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
+  std::function charged = [](hipo::bank &b, int row) { return b.getInt("charge",row)!=0 ? 1.0 : 0.0;};
+
+  int counter = 0;
+  while( r.next(list)&&counter<350){
+    counter++;
+    printf("\n>>> NEW EVENT <<<\n");
+    printf("=== BEFORE ==================================\n");
+    list[0].show();
+    list[0].getMutableRowList().reduce(charged);
+    printf("=== AFTER ===================================\n");
+    list[0].show();
+    // list[0].show(true); // call `show(true)` if you still need to see the full (not reduced) bank
   }
 }
 
@@ -51,8 +110,8 @@ void example1(const char *file){
 // The link function will return a hipo::bank::rowlist for the bank "REC::Calorimeter"
 // where the column number 1 (which is "pindex") has a value of 0. Then by itarating over the returned
 // indicies the total energy can be calculated.
-void example2(const char *file){
-  printf("===== EXAMPLE 2 =====\n");
+void example4(const char *file){
+  printf("===== EXAMPLE 4 =====\n");
   hipo::reader   r(file);
   hipo::banklist list = r.getBanks({"REC::Particle","REC::Calorimeter"});
   int const pindex_column = 1; // of REC::Calorimeter
@@ -63,43 +122,18 @@ void example2(const char *file){
     counter++;
     int status = list[0].getInt("status",electron_row);
     if(list[0].getInt("pid",electron_row)==11&&abs(status)>=2000&&abs(status)<3000){
-      printf("found electron\n");
+      printf("\n>>> NEW EVENT <<<\n");
+      printf("found electron in row %d\n", electron_row);
       double energy = 0.0;
       for(auto const& it : list[1].getRowListLinked(electron_row, pindex_column)){
-        printf("  links REC::Calorimeter row=%d\n", it);
-        energy += list[1].getFloat("energy",it);
+        auto e = list[1].getFloat("energy",it);
+        printf(" => links REC::Calorimeter row=%d, which has energy %f\n", it, e);
+        energy += e;
       }
-      printf("total energy = %f\n",energy);
+      printf("=========================\ntotal energy = %f\n=========================\n",energy);
+      list[0].show();
+      list[1].show();
     }
-  }
-}
-
-// example showing how to reduce a bank's rowlist with an expression
-void example3(const char *file){
-  printf("===== EXAMPLE 3 =====\n");
-  hipo::reader   r(file);
-  hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
-  int counter = 0;
-  while( r.next(list)&&counter<350){
-    counter++;
-    list[0].getMutableRowList().reduce("charge!=0");
-    list[0].show();
-  }
-}
-
-// example showing how to reduce a bank's rowlist with an first-order (lambda) function
-void example4(const char *file){
-  printf("===== EXAMPLE 4 =====\n");
-
-  hipo::reader   r(file);
-  hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
-  std::function charged = [](hipo::bank &b, int row) { return b.getInt("charge",row)!=0 ? 1.0 : 0.0;};
-
-  int counter = 0;
-  while( r.next(list)&&counter<350){
-    counter++;
-    list[0].getMutableRowList().reduce(charged);
-    list[0].show();
   }
 }
 

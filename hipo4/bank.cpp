@@ -435,20 +435,20 @@ void    bank::setRows(int rows){
    bankRows = rows;
    int size = bankSchema.getSizeForRows(bankRows);
    initStructureBySize(bankSchema.getGroup(),bankSchema.getItem(), 11, size);
-   bankRowList.reset();
+   bankRowList.reset(bankRows);
    //allocate(size+12);
 }
 
 void bank::reset(){
    setSize(0);
    bankRows = 0;
-   bankRowList.reset();
+   bankRowList.reset(bankRows);
 }
 
 void bank::notify(){
   int size = bankSchema.getRowLength();
   bankRows = getSize()/size;
-   bankRowList.reset();
+  bankRowList.reset(bankRows);
   //printf("---> bank notify called structure size = %8d (size = %5d)  rows = %d\n",
   //    getSize(),size, bankRows);
 }
@@ -493,6 +493,19 @@ void    bank::putLong(const char *name, int index, int64_t value){
   putLongAt(offset,value);
 }
 
+bank::rowlist::list_t const& bank::getRowList() const {
+  return bankRowList.getList();
+}
+
+bank::rowlist::list_t const bank::getFullRowList() const {
+  return bankRowList.getFullList(getRows());
+}
+
+bank::rowlist& bank::getMutableRowList() {
+  bankRowList.setOwnerBank(this);
+  return bankRowList;
+}
+
 bank::rowlist::list_t const bank::getRowListLinked(int const row, int const column) const {
   rowlist::list_t linked_rows;
   for(auto const& r : getRowList()) {
@@ -500,6 +513,10 @@ bank::rowlist::list_t const bank::getRowListLinked(int const row, int const colu
       linked_rows.push_back(r);
   }
   return linked_rows;
+}
+
+void bank::show() const {
+  show(false);
 }
 
 void bank::show(bool const showAllRows) const {
