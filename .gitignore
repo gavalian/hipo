@@ -1,4 +1,6 @@
 *.o
+*.exe
 lib
 slib
 __pycache__
+build

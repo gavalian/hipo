@@ -77,7 +77,7 @@ class h1d {
       }
       void series(std::vector<double> &data){
          data.resize(container.size()-2);
-         for(int i = 1; i < container.size()-1;i++) data[i-1] = container[i];
+         for(decltype(container)::size_type i = 1; i < container.size()-1;i++) data[i-1] = container[i];
       }
       void print(){
          std::vector<double> data;

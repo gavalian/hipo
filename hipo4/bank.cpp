@@ -35,7 +35,6 @@
  */
 
 #include "bank.h"
-#include "utils.h"
 #include "parser.h"
 
 namespace hipo {
@@ -89,17 +88,17 @@ namespace hipo {
     }
 
     // return the type of the structure
-    int structure::getType(){
+    int structure::getType() const {
       auto type = (int) (*reinterpret_cast<uint8_t *>(structureAddress+3));
       return type;
     }
     // returns the group number of the object
-    int structure::getGroup(){
+    int structure::getGroup() const {
       auto group = (int) (*reinterpret_cast<uint16_t *>(structureAddress));
       return group;
     }
     // returns the item number of the structure
-    int structure::getItem(){
+    int structure::getItem() const {
       auto item = (int) (*reinterpret_cast<uint8_t *>(structureAddress+2));
       return item;
     }
@@ -113,7 +112,7 @@ namespace hipo {
       structureAddress = &structureBuffer[0];
     }
 
-    void structure::show(){
+    void structure::show() const {
       printf("structure : [%5d,%5d] type = %4d, header = %5d, length = %6d, data size = %5d, offset = %5d, capacity = %5lu\n",
          getGroup(),getItem(),getType(),getHeaderSize(), getSize(), getDataSize(), dataOffset, structureBuffer.size());
     }
@@ -275,7 +274,7 @@ void     composite::putFloat  ( int element, int row, float value){
    if(row>=rows) setRows(row+1);
    int offset = getRowSize()*row  + offsets[element];
    if(type==4) putFloatAt(offset, value); 
-    else printf("[putFloat] error : type = %d\n",type);
+   else printf("[putFloat] error : type = %d\n",type);
 }
 
 void composite::notify(){
@@ -328,13 +327,114 @@ void   composite::print(){
          int type = getEntryType(e);
          if(type==1||type==2||type==3) printf("%8d ",getInt(e,r));
          if(type==4) printf("%8.5f ",getFloat(e,r));
-         if(type==8) printf("%lld ",getLong(e,r));
+         if(type==8) printf("%ld ",getLong(e,r));
     }
     printf("\n");
   }
 }
 
 
+//////////////////////////////////////////////////////////////////////////////////
+// hipo::bank::rowlist
+//////////////////////////////////////////////////////////////////////////////////
+
+bank::rowlist::rowlist(int numRows) : m_list({}), m_init(false) {
+  if(numRows >= 0)
+    initialize(numRows);
+}
+
+void bank::rowlist::initialize(int numRows) {
+  uninitialize();
+  m_list = copy_number_list(numRows);
+  m_init = true;
+}
+
+void bank::rowlist::uninitialize() {
+  m_list.clear();
+  m_init = false;
+}
+
+bool const bank::rowlist::isInitialized() const {
+  return m_init;
+}
+
+bank::rowlist::list_t const& bank::rowlist::getList() const {
+  if(!m_init)
+    std::cerr << "WARNING: attempted to get an uninitialized bank row list" << std::endl;
+  return m_list;
+}
+
+void bank::rowlist::setList(list_t list) {
+  m_list = list;
+  m_init = true;
+}
+
+void bank::rowlist::setBank(bank* ownerBank) {
+  m_owner_bank = ownerBank;
+}
+
+void bank::rowlist::reduce(std::function<double(hipo::bank&, int)> func) {
+  if(unknownOwnerBank("reduce"))
+    return;
+  auto indx = m_list;
+  m_list.clear();
+  for(auto const& r : indx)
+    if(func(*m_owner_bank, r) > 0.5)
+      m_list.push_back(r);
+}
+
+void bank::rowlist::reduce(const char *expression) {
+  if(unknownOwnerBank("reduce"))
+    return;
+  hipo::Parser p(expression);
+  int nitems = m_owner_bank->getSchema().getEntries();
+  hipo::schema &schema = m_owner_bank->getSchema();
+  auto indx = m_list;
+  m_list.clear();
+  for(auto const& r : indx){
+    for(int i = 0; i < nitems; i++)
+      p[schema.getEntryName(i)] = m_owner_bank->get(i,r);
+    if(p.Evaluate() > 0.5)
+      m_list.push_back(r);
+  }
+}
+
+bank::rowlist::list_t bank::rowlist::generate_number_list(list_t::size_type num) {
+  list_t result;
+  for(list_t::size_type i = 0; i < num; i++)
+    result.push_back(i);
+  return result;
+}
+
+bank::rowlist::list_t bank::rowlist::s_number_list = bank::rowlist::generate_number_list();
+
+bank::rowlist::list_t bank::rowlist::copy_number_list(list_t::size_type num) {
+  if(num <= s_number_list.size())
+    return list_t(s_number_list.begin(), s_number_list.begin() + num);
+  else {
+    auto result = s_number_list;
+    for(list_t::size_type i = s_number_list.size(); i < num; i++)
+      result.push_back(i);
+    return result;
+  }
+}
+
+bool bank::rowlist::unknownOwnerBank(std::string_view caller) {
+  if(m_owner_bank == nullptr) {
+    std::cerr <<
+      "ERROR: attempted to call hipo::bank::rowlist " <<
+      (caller=="" ? "method" : caller) <<
+      ", but no bank is owned (please call setBank())" <<
+      std::endl;
+    return true;
+  }
+  return false;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+// hipo::bank
+//////////////////////////////////////////////////////////////////////////////////
 
 bank::bank()= default;
 
@@ -344,21 +444,23 @@ void    bank::setRows(int rows){
    bankRows = rows;
    int size = bankSchema.getSizeForRows(bankRows);
    initStructureBySize(bankSchema.getGroup(),bankSchema.getItem(), 11, size);
+   bankRowList.initialize(bankRows);
    //allocate(size+12);
 }
 
 void bank::reset(){
    setSize(0);
    bankRows = 0;
+   bankRowList.initialize(bankRows);
 }
 
 void bank::notify(){
   int size = bankSchema.getRowLength();
   bankRows = getSize()/size;
+   bankRowList.initialize(bankRows);
   //printf("---> bank notify called structure size = %8d (size = %5d)  rows = %d\n",
   //    getSize(),size, bankRows);
 }
-
 
 void    bank::putInt(const char *name, int index, int32_t value){
   int item = bankSchema.getEntryOrder(name);
@@ -398,96 +500,61 @@ void    bank::putLong(const char *name, int index, int64_t value){
   int offset = bankSchema.getOffset(item, index, bankRows);
   putLongAt(offset,value);
 }
-/*
-hipo::iterator iterator::link(hipo::bank &bank, int row, int column){
-    hipo::iterator blink(bank);
-    int nrows = bank.getRows();
-    for(int r = 0; r < nrows; r++) { 
-      if(bank.getInt(column,r)==row) blink.add(r);
-    }
-    return blink;
-}
-*/
-void bank::reduce(std::function<double(hipo::bank&, int)> func, bool doReset){
-  
-  if(doReset==true){
-    bankIterator.reset();
-    int nrows = getRows();
-    for(int r = 0; r < nrows; r++){
-      double v = func(*this,r);
-      if(v>0.5) bankIterator.add(r);
-    }
-  } else {
-    std::vector<int> indx;
-    for(bankIterator.begin();!bankIterator.end(); bankIterator.next()){
-      indx.push_back(bankIterator.index());
-    }
-    bankIterator.reset();
-    int nrows = (int) indx.size();
-    for(int r = 0; r < nrows; r++){
-      double v = func(*this,indx[r]);
-      if(v>0.5) bankIterator.add(indx[r]);
-    }
+
+bank::rowlist::list_t const bank::getRowListLinked(int const row, int const column) const {
+  rowlist::list_t linked_rows;
+  for(auto const& r : getRowList()) {
+    if(getInt(column,r)==row)
+      linked_rows.push_back(r);
   }
-  //return it;
+  return linked_rows;
 }
 
-void bank::reduce(const char *expression, bool doReset){
-  hipo::Parser p(expression);
-  int nrows  = getRows();
-  int nitems = getSchema().getEntries();
-  hipo::schema &schema = getSchema();
-  if(doReset==true){
-    bankIterator.reset();
-    for(int k = 0; k < nrows; k++){
-      for(int i = 0; i < nitems; i++){
-        p[schema.getEntryName(i)] = get(i,k);
-      }
-      double value = p.Evaluate();
-     //printf(" row = %d - value %f\n",k,value);
-      if(value>0.5) bankIterator.add(k);
-    }
-  } else {
-    std::vector<int> indx;
-    for(bankIterator.begin();!bankIterator.end(); bankIterator.next()){
-      indx.push_back(bankIterator.index());
-    }
-    bankIterator.reset();
-    for(int k = 0; k < (int) indx.size(); k++){
-      for(int i = 0; i < nitems; i++){
-        p[schema.getEntryName(i)] = get(i,indx[k]);
-      }
-      double value = p.Evaluate();
-     //printf(" row = %d - value %f\n",k,value);
-      if(value>0.5) bankIterator.add(indx[k]);
-    }
-  }
-  //return it;
+bank::rowlist::list_t const& bank::getRowList() const {
+  return bankRowList.getList();
 }
 
-void bank::show(){
+bank::rowlist& bank::getMutableRowList() {
+  bankRowList.setBank(this);
+  return bankRowList;
+}
 
-  printf("BANK :: NAME %24s , ROWS %6d \n",bankSchema.getName().c_str(),getRows());
+void bank::show(bool const showAllRows) const {
+
+  bool loopAllRows = showAllRows || ! bankRowList.isInitialized() || getRowList().size() == getRows();
+  if(loopAllRows)
+    printf("BANK :: NAME %24s , ROWS %6d\n", bankSchema.getName().c_str(), getRows());
+  else
+    printf("BANK :: NAME %24s , ROWS %6ld (REDUCED FROM %d)\n", bankSchema.getName().c_str(), getRowList().size(),getRows());
+
   for(int i = 0; i < bankSchema.getEntries(); i++){
-    //printf("%14d : ", i);
     printf("%18s : ", bankSchema.getEntryName(i).c_str());
-      for(int k = 0; k < bankRows; k++){
-         if(bankSchema.getEntryType(i) < 4){
-	          printf("%8d ",getInt(i,k));
-         } else {
-            if(bankSchema.getEntryType(i)==4) {
-              printf("%8.5f ",getFloat(i,k));
-            }
-            if(bankSchema.getEntryType(i)==5) {
-              printf("%8.5f ",getDouble(i,k));
-            }
-            if(bankSchema.getEntryType(i)==8){
-              printf("%14ld ", getLong(i,k));
-            }
-
-        }
-    }
+    if(loopAllRows)
+      for(int k = 0; k < getRows(); k++)
+        printValue(i, k);
+    else
+      for(auto const& k : getRowList())
+        printValue(i, k);
     printf("\n");
+  }
+}
+
+void bank::printValue(int schemaEntry, int row) const {
+  switch(bankSchema.getEntryType(schemaEntry)) {
+    case kByte:
+    case kShort:
+    case kInt:
+      printf("%8d ", getInt(schemaEntry, row));
+      break;
+    case kFloat:
+      printf("%8.5f ", getFloat(schemaEntry, row));
+      break;
+    case kDouble:
+      printf("%8.5f ", getDouble(schemaEntry, row));
+      break;
+    case kLong:
+      printf("%14ld ", getLong(schemaEntry, row));
+      break;
   }
 }
 
