@@ -338,12 +338,6 @@ void   composite::print(){
 // hipo::bank::rowlist
 //////////////////////////////////////////////////////////////////////////////////
 
-bank::rowlist::rowlist(bank* const ownerBank)
-  : m_list({})
-  , m_init(false)
-  , m_ownerBank(ownerBank)
-{}
-
 void bank::rowlist::reset(int numRows) {
   m_list.clear();
   m_init = false;
@@ -355,10 +349,6 @@ void bank::rowlist::reset(int numRows) {
     m_list = copy_number_list(m_owner_bank->getRows());
   }
   m_init = true;
-}
-
-bool const bank::rowlist::isInitialized() const {
-  return m_init;
 }
 
 bank::rowlist::list_t const& bank::rowlist::getList() const {
@@ -505,14 +495,6 @@ bank::rowlist::list_t const bank::getRowListLinked(int const row, int const colu
       linked_rows.push_back(r);
   }
   return linked_rows;
-}
-
-bank::rowlist::list_t const& bank::getRowList() const {
-  return bankRowList.getList();
-}
-
-bank::rowlist& bank::getMutableRowList() {
-  return bankRowList;
 }
 
 void bank::show(bool const showAllRows) const {

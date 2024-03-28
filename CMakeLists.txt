@@ -6,7 +6,7 @@
 ##########################################################
 
 # minimum version of CMake, which is determined by Geant4's requirements
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.18)
 
 project(HIPO VERSION 4.0.1)
 
@@ -78,7 +78,7 @@ endif()
 add_compile_definitions(__LZ4__)
 
 set(DATAFRAME_IN_MAIN TRUE)
-add_subdirectory(extensions/dataframes)
+# add_subdirectory(extensions/dataframes)
 
 set(HIPO_SOURCE_FILES
         hipo4/bank.cpp

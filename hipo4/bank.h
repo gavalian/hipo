@@ -216,13 +216,13 @@ namespace hipo {
 
         /// constructor
         /// @param ownerBank if set, associate this `rowlist` with bank `ownerBank`
-        rowlist(bank* const ownerBank = nullptr);
+        rowlist(bank* const ownerBank = nullptr) : m_list({}), m_init(false), m_ownerBank(ownerBank) {}
         ~rowlist() {}
 
         /// initialize with a full list with specified number of rows
         /// @param numRows if negative, use the owner `bank` to set the number of rows, otherwise use `numRows`
         void reset(int numRows = -1);
-        bool const isInitialized() const;
+        bool const isInitialized() const { return m_init; }
 
         /// @returns reference to the immutable list
         list_t const& getList() const;
@@ -350,11 +350,11 @@ namespace hipo {
 
         /// @returns an immutable list of available rows for this bank. This list may be a subset of the full
         /// list of rows, if for example the bank was filtered (see `hipo::bank::rowlist::reduce`)
-        rowlist::list_t const& getRowList() const;
+        rowlist::list_t const& getRowList() const { return bankRowList.getList(); }
 
         /// @returns a reference to the mutable `hipo::bank::rowlist` owned by this bank. For example, use this method to
         /// call `hipo::bank::rowlist::reduce`.
-        rowlist& getMutableRowList();
+        rowlist& getMutableRowList() { return bankRowList; }
 
         /// @returns a `hipo::bank::rowlist` for this bank, for rows `r` such that `getInt(column,r) == row`
         /// @param row the value to check
