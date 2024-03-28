@@ -215,26 +215,19 @@ namespace hipo {
         using list_t = std::vector<int>;
 
         /// constructor
-        /// @param numRows if non-negative, initialize with `numRows` rows, otherwise do not initialize and start with an empty list
-        rowlist(int numRows = -1);
+        /// @param ownerBank if set, associate this `rowlist` with bank `ownerBank`
+        rowlist(bank* const ownerBank = nullptr);
         ~rowlist() {}
 
         /// initialize with a full list with specified number of rows
-        /// @param numRows the number of rows
-        void initialize(int numRows);
-        /// clear the stored list
-        void uninitialize();
-        /// @returns true if the list has been initialized
+        /// @param numRows if negative, use the owner `bank` to set the number of rows, otherwise use `numRows`
+        void reset(int numRows = -1);
         bool const isInitialized() const;
 
         /// @returns reference to the immutable list
         list_t const& getList() const;
         /// @param list set the list to this list
         void setList(list_t list);
-
-        /// @param ownerBank set the pointer to the owner `hipo::bank`; this is required for mutation methods which need
-        /// information from the owner bank, such as `hipo::bank::rowlist::reduce`
-        void setBank(bank* ownerBank);
 
         /// filter the list according to a function
         /// @param func a function which takes a `hipo::bank` reference and an `int` row number and returns a `double`;
@@ -247,12 +240,13 @@ namespace hipo {
       private:
         bool m_init;
         list_t m_list;
-        bank* m_owner_bank;
+        bank* const m_owner_bank;
 
         static list_t generate_number_list(list_t::size_type num = 500);
         static list_t copy_number_list(list_t::size_type num);
         static list_t s_number_list;
-        bool unknownOwnerBank(std::string_view caller = "");
+
+        bool ownerBankIsUnknown(std::string_view caller = "");
 
       };
 
@@ -264,19 +258,19 @@ namespace hipo {
 
     public:
 
-        bank();
+        bank() : bankRowList(rowlist(this)) = default;
         // constructor initializes the nodes in the bank
         // and they will be filled automatically by reader.next()
         // method.
-        bank(const hipo::schema& __schema) : bankSchema(__schema) {}
+        bank(const hipo::schema& __schema) : bankSchema(__schema), bankRowList(rowlist(this)) {}
 
-        bank(const hipo::schema& __schema, int __rows) : bankSchema(__schema), bankRows(__rows) {
+        bank(const hipo::schema& __schema, int __rows) : bankSchema(__schema), bankRows(__rows), bankRowList(rowlist(this)) {
           int size = bankSchema.getSizeForRows(bankRows);
           initStructureBySize(bankSchema.getGroup(),bankSchema.getItem(), 11, size);
-          bankRowList.initialize(bankRows);
+          bankRowList.reset();
         }
 
-        ~bank() override;
+        ~bank() = default;
 
         hipo::schema  &getSchema() { return bankSchema;}
         int    getRows()  const noexcept{ return bankRows;}
