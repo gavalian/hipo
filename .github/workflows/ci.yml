@@ -74,5 +74,12 @@ jobs:
         with:
           key: test_data
           path: test_data.hipo
+      - run: examples/writeFile.exe
+      - run: examples/readFile.exe example_output.hipo
+      - run: examples/readFileTags.exe
+      - run: examples/showFile.exe example_output.hipo event::particle
+      - run: examples/readJson.exe test_data.hipo
+      - run: examples/tupleFile.exe
+      - run: examples/writeUserHeader.exe
       - run: examples/bankRowList.exe test_data.hipo
-      - run: examples/histograms.exe test_data.hipo # FIXME: test ALL the other examples
+      - run: examples/histograms.exe test_data.hipo

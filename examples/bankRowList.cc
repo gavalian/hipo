@@ -8,7 +8,6 @@
 //************************ Jefferson National Lab (2017) ***********
 //******************************************************************
 //* Example program for reading HIPO-4 Files..
-//* Reads the file created by writeFile program
 //*--
 //* Author: G.Gavalian
 //*

@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
      snprintf(inputBank,256,"%s",argv[2]);
       //sprintf(outputFile,"%s",argv[2]);
    } else {
-      std::cout << " *** please provide a file name..." << std::endl;
+      std::cout << " *** please provide a file name and bank..." << std::endl;
      exit(1);
    }
 
