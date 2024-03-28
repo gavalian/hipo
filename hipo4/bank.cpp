@@ -373,12 +373,6 @@ void bank::rowlist::setBank(bank* ownerBank) {
   m_owner_bank = ownerBank;
 }
 
-void bank::rowlist::reset() {
-  if(unknownOwnerBank("reset"))
-    return;
-  initialize(m_owner_bank->getRows());
-}
-
 void bank::rowlist::reduce(std::function<double(hipo::bank&, int)> func) {
   if(unknownOwnerBank("reduce"))
     return;
@@ -450,18 +444,20 @@ void    bank::setRows(int rows){
    bankRows = rows;
    int size = bankSchema.getSizeForRows(bankRows);
    initStructureBySize(bankSchema.getGroup(),bankSchema.getItem(), 11, size);
+   bankRowList.initialize(bankRows);
    //allocate(size+12);
 }
 
 void bank::reset(){
    setSize(0);
    bankRows = 0;
-   bankRowList.initialize(0);
+   bankRowList.initialize(bankRows);
 }
 
 void bank::notify(){
   int size = bankSchema.getRowLength();
   bankRows = getSize()/size;
+   bankRowList.initialize(bankRows);
   //printf("---> bank notify called structure size = %8d (size = %5d)  rows = %d\n",
   //    getSize(),size, bankRows);
 }

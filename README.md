@@ -67,7 +67,7 @@ Output:
 
 ## Row Lists
 
-Row lists (`hipo::bank::rowlist`) can be used to iterate through a bank's rows. They may also be used for filtering banks (`hipo::bank::rowlist::reduce`), using expressions or lambda functions. See [`examples/histograms.cc`](/examples/histograms.cc) for examples.
+Row lists (`hipo::bank::rowlist`) can be used to iterate through a bank's rows. They may also be used for filtering banks (`hipo::bank::rowlist::reduce`), using expressions or lambda functions. See [`examples/bankRowList.cc`](/examples/bankRowList.cc) for examples.
 
 If you want to loop over **all** of a bank's rows (not filtered or reduced):
 ```cpp
