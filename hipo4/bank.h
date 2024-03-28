@@ -183,7 +183,7 @@ namespace hipo {
       virtual   ~composite(){}
       
       /// @returns the number of bank rows. This is the number of **all** of the rows, _i.e._, not
-      ///          the reduced number if `hipo::bank::reduce` was called; for the latter, use
+      ///          the reduced number if `hipo::bank::rowlist::reduce` was called; for the latter, use
       ///          `hipo::bank::getRowList().size()`.
       int      getRows() const noexcept { return dataLength()/rowOffset;}
 
@@ -214,21 +214,36 @@ namespace hipo {
       public:
         using list_t = std::vector<int>;
 
-        rowlist() : m_list({}), m_init(false) {}
-        rowlist(int numRows) { initialize(numRows); }
+        /// constructor
+        /// @param numRows if non-negative, initialize with `numRows` rows, otherwise do not initialize and start with an empty list
+        rowlist(int numRows = -1);
+        ~rowlist() {}
 
-        static list_t copy_number_list(list_t::size_type num);
-
+        /// initialize with a full list with specified number of rows
+        /// @param numRows the number of rows
         void initialize(int numRows);
+        /// clear the stored list
         void uninitialize();
+        /// @returns true if the list has been initialized
+        bool const isInitialized() const;
 
-        bool const isInitialized() const { return m_init; }
+        /// @returns reference to the immutable list
         list_t const& getList() const;
+        /// @param list set the list to this list
+        void setList(list_t list);
 
-        void setList(list_t& list);
-        void setBank(bank* ownerBank) { m_owner_bank = ownerBank; }
+        /// @param ownerBank set the pointer to the owner `hipo::bank`; this is required for mutation methods which need
+        /// information from the owner bank, such as `hipo::bank::rowlist::reduce`
+        void setBank(bank* ownerBank);
 
+        /// reset and re-initialize the list, according to the number of rows in the owner bank
+        void reset();
+        /// filter the list according to a function
+        /// @param func a function which takes a `hipo::bank` reference and an `int` row number and returns a `double`;
+        /// if the returned `double` is larger than 0.5, the row is accepted
         void reduce(std::function<double(hipo::bank&, int)> func);
+        /// filter the list according to an expression
+        /// @param expression the filter expression
         void reduce(char const* expression);
 
       private:
@@ -237,7 +252,9 @@ namespace hipo {
         bank* m_owner_bank;
 
         static list_t generate_number_list(list_t::size_type num = 500);
+        static list_t copy_number_list(list_t::size_type num);
         static list_t s_number_list;
+        bool unknownOwnerBank(std::string_view caller = "");
 
       };
 
@@ -261,8 +278,6 @@ namespace hipo {
         }
 
         ~bank() override;
-        // display the content of the bank
-        //void show();
 
         hipo::schema  &getSchema() { return bankSchema;}
         int    getRows()  const noexcept{ return bankRows;}
@@ -340,22 +355,33 @@ namespace hipo {
           }
         }
 
-        rowlist::list_t const& getRowList() const { return bankRowList.getList(); }
-        rowlist getMutableRowList();
+        /// @returns an immutable list of available rows for this bank. This list may be a subset of the full
+        /// list of rows, if for example the bank was filtered (see `hipo::bank::rowlist::reduce`)
+        rowlist::list_t const& getRowList() const;
 
-        /// @returns a `rowlist` for this bank, for rows `r` such that `getInt(column,r) == row`
+        /// @returns a reference to the mutable `hipo::bank::rowlist` owned by this bank. For example, use this method to
+        /// call `hipo::bank::rowlist::reduce`.
+        rowlist& getMutableRowList();
+
+        /// @returns a `hipo::bank::rowlist` for this bank, for rows `r` such that `getInt(column,r) == row`
         /// @param row the value to check
         /// @param column the column to check (must be an integer-type column, _e.g._, that of `"pindex"`)
         rowlist::list_t const getRowListLinked(int const row, int const column) const;
 
-        /// show this bank's contents; only the rows in its `rowlist` are shown
-        void    show() const override { show(false); }
-        /// show this bank's contents
-        /// @param showAllRows if true, show **all** this bank's rows, otherwise just the rows in its `rowlist`, which may have been reduced
-        void    show(bool const showAllRows) const;
+        /// show this bank's contents; only the rows in its current `rowlist` instance are shown
+        void show() const override { show(false); }
 
-        void    reset();
-        //virtual  void notify(){ };
+        /// show this bank's contents
+        /// @param showAllRows if `true`, show **all** this bank's rows, otherwise just the rows in its `rowlist` instance,
+        /// which may have been reduced
+        void show(bool const showAllRows) const;
+
+        /// print a stored value
+        /// @param schemaEntry the schema entry number
+        /// @param row the row number
+        void printValue(int schemaEntry, int row) const;
+
+        void reset();
 
         void notify() override;
 
