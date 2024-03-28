@@ -16,7 +16,8 @@ defaults:
 
 jobs:
 
-  build:
+  build_cmake:
+    name: CMake build
     strategy:
       fail-fast: false
       matrix:
@@ -33,8 +34,36 @@ jobs:
         if: ${{ matrix.runner == 'macos-latest' }}
       - run: tree install
 
+  build_make:
+    name: Makefile build
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ ubuntu-latest, macos-latest ]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: hipo_src
+          submodules: recursive # FIXME: need `lz4` submoudle for Makefile, whereas `cmake` does not
+      - name: build
+        working-directory: hipo_src
+        run: |
+          make -j4
+          make -j4 -C examples
+      - run: brew install tree
+        if: ${{ matrix.runner == 'macos-latest' }}
+      - run: tree hipo_src
+      - name: tar
+        run: tar cavf hipo_src{.tar.zst,}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build_make_${{ matrix.runner }}
+          retention-days: 5
+          path: hipo_src.tar.zst
+
   download_test_data:
-    name: download test data
+    name: Download test data
     runs-on: ubuntu-latest
     env:
       type: physics
@@ -54,21 +83,23 @@ jobs:
           mv -v $(find validation_files -type f -name "*.hipo" | head -n1) test_data.hipo
 
   examples:
-    name: run examples
-    needs: [ download_test_data ]
+    name: Run examples
+    needs: [ download_test_data, build_make ]
     strategy:
       fail-fast: false
       matrix:
         runner: [ ubuntu-latest, macos-latest ]
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
         with:
-          submodules: recursive # FIXME: need `lz4` submoudle for Makefile, whereas `cmake` does not
-      - name: build # FIXME: examples aren't in `cmake` config, so rebuild using `make`
+          name: build_make_${{ matrix.runner }}
+      - name: untar artifacts
         run: |
-          make -j4
-          make -j4 -C examples
+          ls *.tar.zst | xargs -I{} tar xvf {}
+          rm *.tar.zst
+          mv -v hipo_src/* ./
+          rm -rf hipo_src
       - name: get test data
         uses: actions/cache/restore@v4
         with:
