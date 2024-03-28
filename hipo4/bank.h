@@ -238,13 +238,16 @@ namespace hipo {
         /// @param expression the filter expression
         void reduce(char const* expression);
 
+        /// @returns a list of numbers from 0 to `num`
+        /// @param num the size of the list
+        static list_t getFullList(list_t::size_type num);
+
       private:
         bool m_init{false};
         list_t m_list{};
         bank* m_owner_bank;
 
-        static list_t generate_number_list(list_t::size_type num = 500);
-        static list_t copy_number_list(list_t::size_type num);
+        static list_t s_number_list_init(list_t::size_type num = 500);
         static list_t s_number_list;
 
         bool ownerBankIsUnknown(std::string_view caller = "");
@@ -356,8 +359,12 @@ namespace hipo {
         }
 
         /// @returns an immutable list of available rows for this bank. This list may be a subset of the full
-        /// list of rows, if for example the bank was filtered (see `hipo::bank::rowlist::reduce`)
+        /// list of rows, if for example the bank was filtered (see `hipo::bank::rowlist::reduce`); _cf._ `hipo::bank::rowlist::getFullRowList`
         rowlist::list_t const& getRowList() const { return bankRowList.getList(); }
+
+        /// @returns an immutable list of **all** rows in the bank; _cf._ `hipo::bank::rowlist::getRowList`. This method
+        /// may be less efficient than simply using a `for` loop from `0` to `getRows()`
+        rowlist::list_t const getFullRowList() const { return bankRowList.getFullList(getRows()); }
 
         /// @returns a reference to the mutable `hipo::bank::rowlist` owned by this bank. For example, use this method to
         /// call `hipo::bank::rowlist::reduce`.

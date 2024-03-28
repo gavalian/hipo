@@ -342,11 +342,11 @@ void bank::rowlist::reset(int numRows) {
   m_list.clear();
   m_init = false;
   if(numRows >= 0)
-    m_list = copy_number_list(numRows);
+    m_list = getFullList(numRows);
   else {
     if(ownerBankIsUnknown("reset"))
       return;
-    m_list = copy_number_list(m_owner_bank->getRows());
+    m_list = getFullList(m_owner_bank->getRows());
   }
   m_init = true;
 }
@@ -388,16 +388,14 @@ void bank::rowlist::reduce(const char *expression) {
   }
 }
 
-bank::rowlist::list_t bank::rowlist::generate_number_list(list_t::size_type num) {
+bank::rowlist::list_t bank::rowlist::s_number_list_init(list_t::size_type num) {
   list_t result;
   for(list_t::size_type i = 0; i < num; i++)
     result.push_back(i);
   return result;
 }
 
-bank::rowlist::list_t bank::rowlist::s_number_list = bank::rowlist::generate_number_list();
-
-bank::rowlist::list_t bank::rowlist::copy_number_list(list_t::size_type num) {
+bank::rowlist::list_t bank::rowlist::getFullList(list_t::size_type num) {
   if(num < 0)
     return {};
   if(num <= s_number_list.size())
@@ -409,6 +407,8 @@ bank::rowlist::list_t bank::rowlist::copy_number_list(list_t::size_type num) {
     return result;
   }
 }
+
+bank::rowlist::list_t bank::rowlist::s_number_list = bank::rowlist::s_number_list_init();
 
 bool bank::rowlist::ownerBankIsUnknown(std::string_view caller) {
   if(m_owner_bank == nullptr) {
