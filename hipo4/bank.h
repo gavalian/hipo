@@ -257,9 +257,6 @@ namespace hipo {
       int     bankRows{-1};
       rowlist bankRowList{this};
 
-    protected:
-        void setBankRows(int rows){ bankRows = rows;}
-
     public:
 
         bank();
