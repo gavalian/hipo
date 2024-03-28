@@ -43,9 +43,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <map>
+#include <functional>
 #include "dictionary.h"
 #include "node.h"
-#include "functional"
 
 namespace hipo {
 
@@ -209,6 +209,7 @@ namespace hipo {
 
     public:
 
+      /// `rowlist` encapsulates a list of rows for this `bank`, providing a way to iterate over them
       class rowlist {
 
       public:
@@ -253,8 +254,11 @@ namespace hipo {
     private:
 
       schema  bankSchema;
-      rowlist bankRowList{this};
       int     bankRows{-1};
+      rowlist bankRowList{this};
+
+    protected:
+        void setBankRows(int rows){ bankRows = rows;}
 
     public:
 
@@ -262,10 +266,15 @@ namespace hipo {
         // constructor initializes the nodes in the bank
         // and they will be filled automatically by reader.next()
         // method.
-        bank(const schema& __schema) : bankSchema(__schema) {}
+        bank(const schema& __schema){
+          bankSchema = __schema;
+          bankRows   = -1;
+        }
 
-        bank(const schema& __schema, int __rows) : bankSchema(__schema), bankRows(__rows) {
-          int size = bankSchema.getSizeForRows(bankRows);
+        bank(const schema& __schema, int __rows){
+          bankSchema = __schema;
+          bankRows   = __rows;
+          int size   = bankSchema.getSizeForRows(__rows);
           initStructureBySize(bankSchema.getGroup(),bankSchema.getItem(), 11, size);
           bankRowList.reset();
         }
@@ -273,6 +282,7 @@ namespace hipo {
         ~bank() override;
 
         schema  &getSchema() { return bankSchema;}
+
         int    getRows()  const noexcept{ return bankRows;}
         void   setRows(   int rows);
         int    getInt(    int item, int index) const noexcept;
@@ -379,7 +389,6 @@ namespace hipo {
         void notify() override;
 
   };
-
     /////////////////////////////////////
     //inlined getters
 
