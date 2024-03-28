@@ -338,27 +338,13 @@ void   composite::print(){
 // hipo::bank::rowlist
 //////////////////////////////////////////////////////////////////////////////////
 
-bank::rowlist::list_t bank::rowlist::generate_number_list(list_t::size_type num) {
-  list_t result;
-  for(list_t::size_type i = 0; i < num; i++)
-    result.push_back(i);
-  return result;
+bank::rowlist::rowlist(int numRows) : m_list({}), m_init(false) {
+  if(numRows >= 0)
+    initialize(numRows);
 }
-
-bank::rowlist::list_t bank::rowlist::copy_number_list(list_t::size_type num) {
-  if(num <= s_number_list.size())
-    return list_t(s_number_list.begin(), s_number_list.begin() + num);
-  else {
-    auto result = s_number_list;
-    for(list_t::size_type i = s_number_list.size(); i < num; i++)
-      result.push_back(i);
-    return result;
-  }
-}
-
-bank::rowlist::list_t bank::rowlist::s_number_list = bank::rowlist::generate_number_list();
 
 void bank::rowlist::initialize(int numRows) {
+  uninitialize();
   m_list = copy_number_list(numRows);
   m_init = true;
 }
@@ -368,22 +354,34 @@ void bank::rowlist::uninitialize() {
   m_init = false;
 }
 
+bool const bank::rowlist::isInitialized() const {
+  return m_init;
+}
+
 bank::rowlist::list_t const& bank::rowlist::getList() const {
   if(!m_init)
     std::cerr << "WARNING: attempted to get an uninitialized bank row list" << std::endl;
   return m_list;
 }
 
-void bank::rowlist::setList(list_t& list) {
+void bank::rowlist::setList(list_t list) {
   m_list = list;
   m_init = true;
 }
 
-void bank::rowlist::reduce(std::function<double(hipo::bank&, int)> func) {
-  if(m_owner_bank == nullptr) {
-    std::cerr << "ERROR: attempted to call rowlist::reduce() but no bank is owned (please call setBank())" << std::endl;
+void bank::rowlist::setBank(bank* ownerBank) {
+  m_owner_bank = ownerBank;
+}
+
+void bank::rowlist::reset() {
+  if(unknownOwnerBank("reset"))
     return;
-  }
+  initialize(m_owner_bank->getRows());
+}
+
+void bank::rowlist::reduce(std::function<double(hipo::bank&, int)> func) {
+  if(unknownOwnerBank("reduce"))
+    return;
   auto indx = m_list;
   m_list.clear();
   for(auto const& r : indx)
@@ -392,10 +390,8 @@ void bank::rowlist::reduce(std::function<double(hipo::bank&, int)> func) {
 }
 
 void bank::rowlist::reduce(const char *expression) {
-  if(m_owner_bank == nullptr) {
-    std::cerr << "ERROR: attempted to call rowlist::reduce() but no bank is owned (please call setBank())" << std::endl;
+  if(unknownOwnerBank("reduce"))
     return;
-  }
   hipo::Parser p(expression);
   int nitems = m_owner_bank->getSchema().getEntries();
   hipo::schema &schema = m_owner_bank->getSchema();
@@ -408,6 +404,39 @@ void bank::rowlist::reduce(const char *expression) {
       m_list.push_back(r);
   }
 }
+
+bank::rowlist::list_t bank::rowlist::generate_number_list(list_t::size_type num) {
+  list_t result;
+  for(list_t::size_type i = 0; i < num; i++)
+    result.push_back(i);
+  return result;
+}
+
+bank::rowlist::list_t bank::rowlist::s_number_list = bank::rowlist::generate_number_list();
+
+bank::rowlist::list_t bank::rowlist::copy_number_list(list_t::size_type num) {
+  if(num <= s_number_list.size())
+    return list_t(s_number_list.begin(), s_number_list.begin() + num);
+  else {
+    auto result = s_number_list;
+    for(list_t::size_type i = s_number_list.size(); i < num; i++)
+      result.push_back(i);
+    return result;
+  }
+}
+
+bool bank::rowlist::unknownOwnerBank(std::string_view caller) {
+  if(m_owner_bank == nullptr) {
+    std::cerr <<
+      "ERROR: attempted to call hipo::bank::rowlist " <<
+      (caller=="" ? "method" : caller) <<
+      ", but no bank is owned (please call setBank())" <<
+      std::endl;
+    return true;
+  }
+  return false;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////
 // hipo::bank
@@ -485,39 +514,51 @@ bank::rowlist::list_t const bank::getRowListLinked(int const row, int const colu
   return linked_rows;
 }
 
-bank::rowlist bank::getMutableRowList() {
+bank::rowlist::list_t const& bank::getRowList() const {
+  return bankRowList.getList();
+}
+
+bank::rowlist& bank::getMutableRowList() {
   bankRowList.setBank(this);
   return bankRowList;
 }
 
-void bank::show(bool showAllRows) const {
+void bank::show(bool const showAllRows) const {
 
-  auto indx = showAllRows ? rowlist::copy_number_list(getRows()) : getRowList();
-  if(showAllRows || indx.size() == getRows())
-    printf("BANK :: NAME %24s , ROWS %6d\n",bankSchema.getName().c_str(),getRows());
+  bool loopAllRows = showAllRows || ! bankRowList.isInitialized() || getRowList().size() == getRows();
+  if(loopAllRows)
+    printf("BANK :: NAME %24s , ROWS %6d\n", bankSchema.getName().c_str(), getRows());
   else
-    printf("BANK :: NAME %24s , ROWS %6ld (REDUCED FROM %d)\n",bankSchema.getName().c_str(),indx.size(),getRows());
+    printf("BANK :: NAME %24s , ROWS %6ld (REDUCED FROM %d)\n", bankSchema.getName().c_str(), getRowList().size(),getRows());
 
   for(int i = 0; i < bankSchema.getEntries(); i++){
-    //printf("%14d : ", i);
     printf("%18s : ", bankSchema.getEntryName(i).c_str());
-      for(auto const& k : indx){
-         if(bankSchema.getEntryType(i) < 4){
-	          printf("%8d ",getInt(i,k));
-         } else {
-            if(bankSchema.getEntryType(i)==4) {
-              printf("%8.5f ",getFloat(i,k));
-            }
-            if(bankSchema.getEntryType(i)==5) {
-              printf("%8.5f ",getDouble(i,k));
-            }
-            if(bankSchema.getEntryType(i)==8){
-              printf("%14ld ", getLong(i,k));
-            }
-
-        }
-    }
+    if(loopAllRows)
+      for(int k = 0; k < getRows(); k++)
+        printValue(i, k);
+    else
+      for(auto const& k : getRowList())
+        printValue(i, k);
     printf("\n");
+  }
+}
+
+void bank::printValue(int schemaEntry, int row) const {
+  switch(bankSchema.getEntryType(schemaEntry)) {
+    case kByte:
+    case kShort:
+    case kInt:
+      printf("%8d ", getInt(schemaEntry, row));
+      break;
+    case kFloat:
+      printf("%8.5f ", getFloat(schemaEntry, row));
+      break;
+    case kDouble:
+      printf("%8.5f ", getDouble(schemaEntry, row));
+      break;
+    case kLong:
+      printf("%14ld ", getLong(schemaEntry, row));
+      break;
   }
 }
 
