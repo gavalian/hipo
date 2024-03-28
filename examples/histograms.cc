@@ -26,6 +26,7 @@
  * @param file file name to process
  */
 void example1(const char *file){
+  printf("===== EXAMPLE 1 =====\n");
 
   // open a file, initialize internal beam vector to 10.6 gev.
   // and set event filter to:
@@ -62,6 +63,7 @@ void example1(const char *file){
  * @param file data file name to process
  */
 void example2(const char *file){
+  printf("===== EXAMPLE 2 =====\n");
 
   // open a file, initialize internal beam vector to 10.6 gev.
   // and set event filter to:
@@ -85,6 +87,7 @@ void example2(const char *file){
  * @param file data file name to process
  */
 void example3(const char *file){
+  printf("===== EXAMPLE 3 =====\n");
    hipo::reader   r(file);
    hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
    int counter = 0;
@@ -98,6 +101,7 @@ void example3(const char *file){
  * @param file data file name to process
  */
 void example4(const char *file){
+  printf("===== EXAMPLE 4 =====\n");
    twig::h1d hz(120,-15,5);
    hipo::reader   r(file);
    hipo::banklist list = r.getBanks({"REC::Particle"});
@@ -110,30 +114,41 @@ void example4(const char *file){
 }
 
 
-// example using a custom hipo::bank::rowlist
+// example using hipo::bank::rowlist to loop through a bank's rows
 void example5(const char *file){
+  printf("===== EXAMPLE 5 =====\n");
   hipo::reader   r(file);
   hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
   int counter = 0;
-  while( r.next(list)&&counter<350){ 
-    counter++; 
+  while( r.next(list)&&counter<350){
+    throw std::runtime_error("FIXME: the bank's rowlist MUST be reset after every event read");
+    counter++;
     int nrows = list[0].getRows();
     printf(" rows = %d\n",nrows);
 
+    // first, loop over all the rows
+    printf(" loop over all rows:\n");
+    for(auto const& row : list[0].getRowList())
+      printf("\t pid [%d] = %d\n", row, list[0].getInt(0,row));
+
+    // then, set the rowlist to contain only a few rows, and loop over those
+    printf(" loop over some specific rows:\n");
     if(nrows>6){
-      for(auto const& it : hipo::bank::rowlist{0, 1, 4}){
-        printf("\t pid [%d] = %d\n",it, list[0].getInt(0,it));
+      list[0].getMutableRowList().setList({0, 1, 4}); // need the mutable rowlist in order to mutate it
+      for(auto const& row : list[0].getRowList()) {
+        printf("\t pid [%d] = %d\n", row, list[0].getInt(0,row));
       }
     }
+
   }
 }
-
 
 // Example showing how rowlists can be used to get indicies of the reference bank.
 // The link function will return a hipo::bank::rowlist for the bank "REC::Calorimeter"
 // where the column number 1 (which is "pindex") has a value of 0. Then by itarating over the returned
 // indicies the total energy can be calculated.
 void example6(const char *file){
+  printf("===== EXAMPLE 6 =====\n");
   hipo::reader   r(file);
   hipo::banklist list = r.getBanks({"REC::Particle","REC::Calorimeter"});
   int const pindex_column = 1; // of REC::Calorimeter
@@ -157,27 +172,29 @@ void example6(const char *file){
 
 // example showing how to reduce a bank's rowlist with an expression
 void example7(const char *file){
+  printf("===== EXAMPLE 7 =====\n");
   hipo::reader   r(file);
   hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
   int counter = 0;
-  while( r.next(list)&&counter<350){ 
-    counter++; 
-    list[0].reduce("charge!=0");
+  while( r.next(list)&&counter<350){
+    counter++;
+    list[0].getMutableRowList().reduce("charge!=0");
     list[0].show();
   }
 }
 
 // example showing how to reduce a bank's rowlist with an first-order (lambda) function
 void example8(const char *file){
-  
+  printf("===== EXAMPLE 8 =====\n");
+
   hipo::reader   r(file);
   hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
   std::function charged = [](hipo::bank &b, int row) { return b.getInt("charge",row)!=0 ? 1.0 : 0.0;};
-  
+
   int counter = 0;
   while( r.next(list)&&counter<350){
     counter++;
-    list[0].reduce(charged);
+    list[0].getMutableRowList().reduce(charged);
     list[0].show();
   }
 }
@@ -189,22 +206,41 @@ int main(int argc, char** argv) {
   //printf("bin = %d\n",x.find(0.4));
   
   char inputFile[256];
+  int example_num = -1;
   
   if(argc>1) {
     snprintf(inputFile,256,"%s",argv[1]);
     //sprintf(outputFile,"%s",argv[2]);
   } else {
-    std::cout << " *** please provide a file name..." << std::endl;
+    std::cerr << " *** please provide a file name..." << std::endl;
     exit(1);
   }
+  if(argc>2)
+    example_num = std::stoi(argv[2]);
 
-  //example3(inputFile);
-  //example1(inputFile);
-  //example2(inputFile);
+  switch(example_num) {
+    case -1:
+      example1(inputFile);
+      example2(inputFile);
+      example3(inputFile);
+      example4(inputFile);
+      example5(inputFile);
+      example6(inputFile);
+      example7(inputFile);
+      example8(inputFile);
+      break;
+    case 1: example1(inputFile); break;
+    case 2: example2(inputFile); break;
+    case 3: example3(inputFile); break;
+    case 4: example4(inputFile); break;
+    case 5: example5(inputFile); break;
+    case 6: example6(inputFile); break;
+    case 7: example7(inputFile); break;
+    case 8: example8(inputFile); break;
+    default:
+            std::cerr << " *** ERROR: unknown example..." << std::endl;
+            exit(1);
+  }
 
-  //example4(inputFile);
-  //example5(inputFile);
-  //example6(inputFile);
-  example7(inputFile);
 }
 //### END OF GENERATED CODE
