@@ -63,6 +63,8 @@ jobs:
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive # FIXME: need `lz4` submoudle for Makefile, whereas `cmake` does not
       - name: build # FIXME: examples aren't in `cmake` config, so rebuild using `make`
         run: |
           make -j4
