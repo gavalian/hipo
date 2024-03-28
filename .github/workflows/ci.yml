@@ -56,6 +56,10 @@ jobs:
   examples:
     name: run examples
     needs: [ download_test_data ]
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ ubuntu-latest, macos-latest ]
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
