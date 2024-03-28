@@ -362,7 +362,7 @@ void bank::rowlist::setList(list_t list) {
   m_init = true;
 }
 
-void bank::rowlist::reduce(std::function<double(hipo::bank&, int)> func) {
+void bank::rowlist::reduce(std::function<double(bank&, int)> func) {
   if(ownerBankIsUnknown("reduce"))
     return;
   auto indx = m_list;
@@ -375,9 +375,9 @@ void bank::rowlist::reduce(std::function<double(hipo::bank&, int)> func) {
 void bank::rowlist::reduce(const char *expression) {
   if(ownerBankIsUnknown("reduce"))
     return;
-  hipo::Parser p(expression);
+  Parser p(expression);
   int nitems = m_owner_bank->getSchema().getEntries();
-  hipo::schema &schema = m_owner_bank->getSchema();
+  schema &schema = m_owner_bank->getSchema();
   auto indx = m_list;
   m_list.clear();
   for(auto const& r : indx){
@@ -399,7 +399,7 @@ bank::rowlist::list_t bank::rowlist::s_number_list = bank::rowlist::generate_num
 
 bank::rowlist::list_t bank::rowlist::copy_number_list(list_t::size_type num) {
   if(num < 0)
-    return {}
+    return {};
   if(num <= s_number_list.size())
     return list_t(s_number_list.begin(), s_number_list.begin() + num);
   else {
@@ -426,6 +426,10 @@ bool bank::rowlist::ownerBankIsUnknown(std::string_view caller) {
 //////////////////////////////////////////////////////////////////////////////////
 // hipo::bank
 //////////////////////////////////////////////////////////////////////////////////
+
+bank::bank()= default;
+
+bank::~bank()= default;
 
 void    bank::setRows(int rows){
    bankRows = rows;

@@ -154,7 +154,7 @@ namespace hipo {
       friend class event;
   };
 
-  class composite : public hipo::node {
+  class composite : public node {
     /**
      * @brief This is composite bank with type = 10, who knows why
      * Class is used to store formated data structures without dictionary.
@@ -205,7 +205,7 @@ namespace hipo {
   };
   //typedef std::auto_ptr<hipo::generic_node> node_pointer;
 
-    class bank : public hipo::structure {
+    class bank : public structure {
 
     public:
 
@@ -216,7 +216,7 @@ namespace hipo {
 
         /// constructor
         /// @param ownerBank if set, associate this `rowlist` with bank `ownerBank`
-        rowlist(bank* const ownerBank = nullptr) : m_list({}), m_init(false), m_ownerBank(ownerBank) {}
+        rowlist(bank* ownerBank = nullptr) : m_owner_bank(ownerBank) {}
         ~rowlist() {}
 
         /// initialize with a full list with specified number of rows
@@ -232,15 +232,15 @@ namespace hipo {
         /// filter the list according to a function
         /// @param func a function which takes a `hipo::bank` reference and an `int` row number and returns a `double`;
         /// if the returned `double` is larger than 0.5, the row is accepted
-        void reduce(std::function<double(hipo::bank&, int)> func);
+        void reduce(std::function<double(bank&, int)> func);
         /// filter the list according to an expression
         /// @param expression the filter expression
         void reduce(char const* expression);
 
       private:
-        bool m_init;
-        list_t m_list;
-        bank* const m_owner_bank;
+        bool m_init{false};
+        list_t m_list{};
+        bank* m_owner_bank;
 
         static list_t generate_number_list(list_t::size_type num = 500);
         static list_t copy_number_list(list_t::size_type num);
@@ -252,27 +252,27 @@ namespace hipo {
 
     private:
 
-      hipo::schema bankSchema;
-      rowlist      bankRowList;
-      int          bankRows{-1};
+      schema  bankSchema;
+      rowlist bankRowList{this};
+      int     bankRows{-1};
 
     public:
 
-        bank() : bankRowList(rowlist(this)) = default;
+        bank();
         // constructor initializes the nodes in the bank
         // and they will be filled automatically by reader.next()
         // method.
-        bank(const hipo::schema& __schema) : bankSchema(__schema), bankRowList(rowlist(this)) {}
+        bank(const schema& __schema) : bankSchema(__schema) {}
 
-        bank(const hipo::schema& __schema, int __rows) : bankSchema(__schema), bankRows(__rows), bankRowList(rowlist(this)) {
+        bank(const schema& __schema, int __rows) : bankSchema(__schema), bankRows(__rows) {
           int size = bankSchema.getSizeForRows(bankRows);
           initStructureBySize(bankSchema.getGroup(),bankSchema.getItem(), 11, size);
           bankRowList.reset();
         }
 
-        ~bank() = default;
+        ~bank() override;
 
-        hipo::schema  &getSchema() { return bankSchema;}
+        schema  &getSchema() { return bankSchema;}
         int    getRows()  const noexcept{ return bankRows;}
         void   setRows(   int rows);
         int    getInt(    int item, int index) const noexcept;
