@@ -230,15 +230,15 @@ namespace hipo {
 
         /// filter the list according to a function
         /// @param func a function which takes a `hipo::bank` reference and an `int` row number and returns a `double`;
-        /// if the returned `double` is larger than 0.5, the row is accepted
-        void reduce(std::function<double(bank&, int)> func);
+        /// if the returned `bool` is `true`, the row is accepted
+        void reduce(std::function<bool(bank&, int)> func);
         /// filter the list according to an expression
         /// @param expression the filter expression
         void reduce(char const* expression);
 
         /// @returns a list of numbers from 0 to `num`
         /// @param num the size of the list
-        static list_t getFullList(list_t::size_type num);
+        static list_t getFullList(int num);
 
         /// @param ownerBank set the owner bank
         void setOwnerBank(bank* const ownerBank) { m_owner_bank = ownerBank; }

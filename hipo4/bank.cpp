@@ -362,13 +362,13 @@ void bank::rowlist::setList(list_t list) {
   m_init = true;
 }
 
-void bank::rowlist::reduce(std::function<double(bank&, int)> func) {
+void bank::rowlist::reduce(std::function<bool(bank&, int)> func) {
   if(ownerBankIsUnknown("reduce"))
     return;
   auto indx = m_list;
   m_list.clear();
   for(auto const& r : indx)
-    if(func(*m_owner_bank, r) > 0.5)
+    if(func(*m_owner_bank, r) == true)
       m_list.push_back(r);
 }
 
@@ -376,9 +376,9 @@ void bank::rowlist::reduce(const char *expression) {
   if(ownerBankIsUnknown("reduce"))
     return;
   Parser p(expression);
-  int nitems = m_owner_bank->getSchema().getEntries();
+  int nitems     = m_owner_bank->getSchema().getEntries();
   schema &schema = m_owner_bank->getSchema();
-  auto indx = m_list;
+  auto indx      = m_list;
   m_list.clear();
   for(auto const& r : indx){
     for(int i = 0; i < nitems; i++)
@@ -388,16 +388,11 @@ void bank::rowlist::reduce(const char *expression) {
   }
 }
 
-bank::rowlist::list_t bank::rowlist::s_number_list_init(list_t::size_type num) {
-  list_t result;
-  for(list_t::size_type i = 0; i < num; i++)
-    result.push_back(i);
-  return result;
-}
-
-bank::rowlist::list_t bank::rowlist::getFullList(list_t::size_type num) {
-  if(num < 0)
+bank::rowlist::list_t bank::rowlist::getFullList(int num) {
+  if(num < 0) {
+    std::cerr << "ERROR: attempted to call rowlist::getFullRowList with a negative size" << std::endl;
     return {};
+  }
   if(num <= s_number_list.size())
     return list_t(s_number_list.begin(), s_number_list.begin() + num);
   else {
@@ -407,8 +402,6 @@ bank::rowlist::list_t bank::rowlist::getFullList(list_t::size_type num) {
     return result;
   }
 }
-
-bank::rowlist::list_t bank::rowlist::s_number_list = bank::rowlist::s_number_list_init();
 
 bool bank::rowlist::ownerBankIsUnknown(std::string_view caller) {
   if(m_owner_bank == nullptr) {
@@ -421,6 +414,15 @@ bool bank::rowlist::ownerBankIsUnknown(std::string_view caller) {
   }
   return false;
 }
+
+bank::rowlist::list_t bank::rowlist::s_number_list_init(list_t::size_type num) {
+  list_t result;
+  for(list_t::size_type i = 0; i < num; i++)
+    result.push_back(i);
+  return result;
+}
+
+bank::rowlist::list_t bank::rowlist::s_number_list = bank::rowlist::s_number_list_init();
 
 
 //////////////////////////////////////////////////////////////////////////////////
