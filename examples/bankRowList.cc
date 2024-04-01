@@ -66,7 +66,7 @@ void example1(const char *file){
   }
 }
 
-// example showing how to reduce a bank's rowlist with an expression
+// example showing how to filter a bank's rowlist with an expression
 void example2(const char *file){
   printf("===== EXAMPLE 2 =====\n");
   hipo::reader   r(file);
@@ -77,14 +77,14 @@ void example2(const char *file){
     printf("\n>>> NEW EVENT <<<\n");
     printf("=== BEFORE ==================================\n");
     list[0].show();
-    list[0].getMutableRowList().reduce("charge!=0");
+    list[0].getMutableRowList().filter("charge!=0");
     printf("=== AFTER ===================================\n");
     list[0].show();
-    // list[0].show(true); // call `show(true)` if you still need to see the full (not reduced) bank
+    // list[0].show(true); // call `show(true)` if you still need to see the full (not filtered) bank
   }
 }
 
-// example showing how to reduce a bank's rowlist with an first-order (lambda) function
+// example showing how to filter a bank's rowlist with an first-order (lambda) function
 void example3(const char *file){
   printf("===== EXAMPLE 3 =====\n");
 
@@ -98,10 +98,10 @@ void example3(const char *file){
     printf("\n>>> NEW EVENT <<<\n");
     printf("=== BEFORE ==================================\n");
     list[0].show();
-    list[0].getMutableRowList().reduce(charged);
+    list[0].getMutableRowList().filter(charged);
     printf("=== AFTER ===================================\n");
     list[0].show();
-    // list[0].show(true); // call `show(true)` if you still need to see the full (not reduced) bank
+    // list[0].show(true); // call `show(true)` if you still need to see the full (not filtered) bank
   }
 }
 
