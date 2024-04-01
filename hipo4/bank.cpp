@@ -362,8 +362,8 @@ void bank::rowlist::setList(list_t list) {
   m_init = true;
 }
 
-void bank::rowlist::reduce(std::function<bool(bank&, int)> func) {
-  if(ownerBankIsUnknown("reduce"))
+void bank::rowlist::filter(std::function<bool(bank&, int)> func) {
+  if(ownerBankIsUnknown("filter"))
     return;
   auto indx = m_list;
   m_list.clear();
@@ -372,8 +372,8 @@ void bank::rowlist::reduce(std::function<bool(bank&, int)> func) {
       m_list.push_back(r);
 }
 
-void bank::rowlist::reduce(const char *expression) {
-  if(ownerBankIsUnknown("reduce"))
+void bank::rowlist::filter(const char *expression) {
+  if(ownerBankIsUnknown("filter"))
     return;
   Parser p(expression);
   int nitems     = m_owner_bank->getSchema().getEntries();
@@ -527,7 +527,7 @@ void bank::show(bool const showAllRows) const {
   if(loopAllRows)
     printf("BANK :: NAME %24s , ROWS %6d\n", bankSchema.getName().c_str(), getRows());
   else
-    printf("BANK :: NAME %24s , ROWS %6ld (REDUCED FROM %d)\n", bankSchema.getName().c_str(), getRowList().size(),getRows());
+    printf("BANK :: NAME %24s , ROWS %6ld SELECTED FROM %d\n", bankSchema.getName().c_str(), getRowList().size(),getRows());
 
   for(int i = 0; i < bankSchema.getEntries(); i++){
     printf("%18s : ", bankSchema.getEntryName(i).c_str());

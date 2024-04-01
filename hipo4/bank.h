@@ -182,8 +182,8 @@ namespace hipo {
       void       parse(int group, int item, std::string format, int maxrows);
       virtual   ~composite(){}
       
-      /// @returns the number of bank rows. This is the number of **all** of the rows, _i.e._, not
-      ///          the reduced number if `hipo::bank::rowlist::reduce` was called; for the latter, use
+      /// @returns the number of bank rows. This is the number of **all** of the rows, not
+      ///          the reduced number if, _e.g._, `hipo::bank::rowlist::filter` was called; for the latter, use
       ///          `hipo::bank::getRowList().size()`.
       int      getRows() const noexcept { return dataLength()/rowOffset;}
 
@@ -231,10 +231,10 @@ namespace hipo {
         /// filter the list according to a function
         /// @param func a function which takes a `hipo::bank` reference and an `int` row number and returns a `double`;
         /// if the returned `bool` is `true`, the row is accepted
-        void reduce(std::function<bool(bank&, int)> func);
+        void filter(std::function<bool(bank&, int)> func);
         /// filter the list according to an expression
         /// @param expression the filter expression
-        void reduce(char const* expression);
+        void filter(char const* expression);
 
         /// @returns a list of numbers from 0 to `num`
         /// @param num the size of the list
@@ -360,7 +360,7 @@ namespace hipo {
         }
 
         /// @returns an immutable list of available rows for this bank. This list may be a subset of the full
-        /// list of rows, if for example the bank was filtered (see `hipo::bank::rowlist::reduce`); _cf._ `hipo::bank::rowlist::getFullRowList`
+        /// list of rows, if for example the bank was filtered (see `hipo::bank::rowlist::filter`); _cf._ `hipo::bank::rowlist::getFullRowList`
         rowlist::list_t const& getRowList() const;
 
         /// @returns an immutable list of **all** rows in the bank; _cf._ `hipo::bank::rowlist::getRowList`. This method
@@ -368,7 +368,7 @@ namespace hipo {
         rowlist::list_t const getFullRowList() const;
 
         /// @returns a reference to the mutable `hipo::bank::rowlist` owned by this bank. For example, use this method to
-        /// call `hipo::bank::rowlist::reduce`.
+        /// call `hipo::bank::rowlist::filter`.
         rowlist& getMutableRowList();
 
         /// @returns a `hipo::bank::rowlist` for this bank, for rows `r` such that `getInt(column,r) == row`
@@ -381,7 +381,7 @@ namespace hipo {
 
         /// show this bank's contents
         /// @param showAllRows if `true`, show **all** this bank's rows, otherwise just the rows in its `rowlist` instance,
-        /// which may have been reduced
+        /// which may have been reduced by, _e.g._, `hipo::bank::rowlist::filter`
         void show(bool const showAllRows) const;
 
         /// print a stored value
