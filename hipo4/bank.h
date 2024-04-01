@@ -226,7 +226,7 @@ namespace hipo {
         /// @returns reference to the immutable list
         list_t const& getList() const;
         /// @param list set the list to this list
-        void setList(list_t list);
+        void setList(list_t const& list);
 
         /// filter the list according to a function
         /// @param func a function which takes a `hipo::bank` reference and an `int` row number and returns a `double`;
@@ -236,9 +236,9 @@ namespace hipo {
         /// @param expression the filter expression
         void filter(char const* expression);
 
-        /// @returns a list of numbers from 0 to `num`
+        /// @returns create a list of numbers from 0 to `num`
         /// @param num the size of the list
-        static list_t getFullList(int num);
+        static list_t createFullList(int num);
 
         /// @param ownerBank set the owner bank
         void setOwnerBank(bank* const ownerBank) { m_owner_bank = ownerBank; }

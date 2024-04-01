@@ -342,11 +342,11 @@ void bank::rowlist::reset(int numRows) {
   m_list.clear();
   m_init = false;
   if(numRows >= 0)
-    m_list = getFullList(numRows);
+    m_list = createFullList(numRows);
   else {
     if(ownerBankIsUnknown("reset"))
       return;
-    m_list = getFullList(m_owner_bank->getRows());
+    m_list = createFullList(m_owner_bank->getRows());
   }
   m_init = true;
 }
@@ -357,7 +357,7 @@ bank::rowlist::list_t const& bank::rowlist::getList() const {
   return m_list;
 }
 
-void bank::rowlist::setList(list_t list) {
+void bank::rowlist::setList(list_t const& list) {
   m_list = list;
   m_init = true;
 }
@@ -375,7 +375,7 @@ void bank::rowlist::filter(std::function<bool(bank&, int)> func) {
 void bank::rowlist::filter(const char *expression) {
   if(ownerBankIsUnknown("filter"))
     return;
-  Parser p(expression);
+  Parser p(expression); // FIXME: move `Parser p` creation upstream to separate function
   int nitems     = m_owner_bank->getSchema().getEntries();
   schema &schema = m_owner_bank->getSchema();
   auto indx      = m_list;
@@ -388,13 +388,13 @@ void bank::rowlist::filter(const char *expression) {
   }
 }
 
-bank::rowlist::list_t bank::rowlist::getFullList(int num) {
+bank::rowlist::list_t bank::rowlist::createFullList(int num) {
   if(num < 0) {
     std::cerr << "ERROR: attempted to call rowlist::getFullRowList with a negative size" << std::endl;
     return {};
   }
   if(num <= s_number_list.size())
-    return list_t(s_number_list.begin(), s_number_list.begin() + num);
+    return list_t(s_number_list.begin(), s_number_list.begin() + num); // FIXME: benchmark this vs. `memcpy`
   else {
     auto result = s_number_list;
     for(list_t::size_type i = s_number_list.size(); i < num; i++)
@@ -500,7 +500,7 @@ bank::rowlist::list_t const& bank::getRowList() const {
 }
 
 bank::rowlist::list_t const bank::getFullRowList() const {
-  return bankRowList.getFullList(getRows());
+  return bankRowList.createFullList(getRows());
 }
 
 bank::rowlist& bank::getMutableRowList() {
