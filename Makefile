@@ -11,15 +11,30 @@
 #   === Jefferson National Lab (2017)                      *
 #***********************************************************
 #
-SHAREDEXT=so
 
-ifneq (,$(findstring darwin,$(OSTYPE)))
-  SHAREDEXT=dylib
+### Detect OS
+ifeq ($(OS),Windows_NT)
+  $(info OS detection: Windows)
+  $(error Windows is not supported for make, try cmake)
 endif
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+  $(info OS detection: Linux)
+  SHAREDEXT = so
+endif
+ifeq ($(UNAME_S),Darwin)
+  $(info OS detection: Darwin)
+  SHAREDEXT = dylib
+endif
+ifeq ($(SHAREDEXT),)
+  $(warning OS detection failed; assuming Linux)
+  SHAREDEXT = so
+endif
+
 
 all: lib shlib
 
-lib: 
+lib:
 	@test -d lib || mkdir -p lib
 	@cd lz4 ; make lz4
 	@cp lz4/lib/liblz4.a lib/.
