@@ -132,4 +132,6 @@ else()
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/HipoDataFrameConfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/HipoDataFrameConfigVersion.cmake
             DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/cmake/HipoDataFrame)
 
+    list(APPEND PKGCONFIG_LIBS HipoDataFrame)
+    set(PKGCONFIG_LIBS ${PKGCONFIG_LIBS} PARENT_SCOPE)
 endif()
