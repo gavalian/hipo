@@ -416,6 +416,37 @@ bool  reader::loadRecord(int irec){
     record.readRecord(inputStream,position,0);
     return true;
 }
+
+std::vector<int>   reader::getInt(  const char *bank, const char *column, int max ){
+   std::vector<int> rowvec;
+   std::vector<hipo::bank> b = getBanks({bank});
+   int item = b[0].getSchema().getEntryOrder(column);
+   int counter = 0;
+   while(next(b)==true){
+        for(int row = 0 ; row < b[0].getRows();row++){
+            rowvec.push_back(b[0].getInt(item,row));
+            counter++;
+        }
+        if(max>0&&counter>max) break;
+   }
+   return rowvec;
+}
+
+std::vector<float> reader::getFloat(const char *bank, const char *column, int max ){
+  std::vector<float> rowvec;
+   std::vector<hipo::bank> b = getBanks({bank});
+   int item = b[0].getSchema().getEntryOrder(column);
+   int counter = 0;
+   while(next(b)==true){
+        for(int row = 0 ; row < b[0].getRows();row++){
+            rowvec.push_back(b[0].getFloat(item,row));
+            counter++;
+        }
+        if(max>0&&counter>max) break;
+   }
+   return rowvec;
+}
+
 //dglazier
 bool  reader::nextInRecord(){
   if(readerEventIndex.canAdvanceInRecord()==false) return false;
@@ -513,6 +544,7 @@ bool readerIndex::gotoEvent(int eventNumber){
     currentEvent        = eventNumber;
     return true;
 }
+
 
   void readerIndex::show(){
     for(int i = 0; i < recordEvents.size(); i++){

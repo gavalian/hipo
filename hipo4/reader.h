@@ -242,6 +242,7 @@ namespace hipo {
       ~reader();
 
       void  about();
+      void  rewind(){ readerEventIndex.rewind();}
       void  readDictionary(hipo::dictionary &dict);
       void  getStructure(hipo::structure &structure,int group, int item);
       void  getStructureNoCopy(hipo::structure &structure,int group, int item);
@@ -272,6 +273,8 @@ namespace hipo {
       bool loadRecord(int irec);
       bool loadRecord(hipo::record &record, int irec);
       int  getEntries(){return readerEventIndex.getMaxEvents();}
+      std::vector<int>   getInt(  const char *bank, const char *column, int max = -1);
+      std::vector<float> getFloat(const char *bank, const char *column, int max = -1);
    };
 }
 #endif /* HIPOREADER_H */

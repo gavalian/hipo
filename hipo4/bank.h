@@ -263,6 +263,11 @@ class iterator {
         float  getFloat(  int item, int index) const noexcept;
         double getDouble( int item, int index) const noexcept;
         long   getLong(   int item, int index) const noexcept;
+
+        std::vector<int>    getInt(    int item) const noexcept;
+        std::vector<float>  getFloat(  int item) const noexcept;
+        std::vector<double> getDouble( int item) const noexcept;
+
         template<typename T = double> T get(int item, int index) const noexcept {
           auto type   = bankSchema.getEntryType(item);
           auto offset = bankSchema.getOffset(item, index, bankRows);
@@ -280,11 +285,17 @@ class iterator {
         }
 
         int    getInt(    const char *name, int index) const noexcept;
+        
         int    getShort(  const char *name, int index) const noexcept;
         int    getByte(   const char *name, int index) const noexcept;
         float  getFloat(  const char *name, int index) const noexcept;
         double getDouble( const char *name, int index) const noexcept;
         long   getLong(   const char *name, int index) const noexcept;
+        
+        std::vector<int>    getInt(    const char *name) const noexcept;
+        std::vector<float>  getFloat(  const char *name) const noexcept;
+        std::vector<double> getDouble( const char *name) const noexcept;
+
         template<typename T = double> T get(const char *name, int index) const noexcept {
           return get<T>(bankSchema.getEntryOrder(name), index);
         }
@@ -406,6 +417,25 @@ class iterator {
       return 0;
     }
 
+  inline std::vector<int>    bank::getInt(int item) const noexcept{
+      int type = bankSchema.getEntryType(item);
+      
+      std::vector<int> row;
+      int nrows = getRows();
+
+      for(int j = 0; j < nrows; j++){
+        int offset = bankSchema.getOffset(item, j, bankRows);
+      switch(type){
+          case kByte:  row.push_back((int) getByteAt(offset)); break;
+          case kShort: row.push_back((int) getShortAt(offset)); break; 
+          case kInt:   row.push_back((int) getIntAt(offset)); break;
+      default: printf("---> error : requested INT for [%s] type = %d\n",
+		      bankSchema.getEntryName(item).c_str(),type); break;
+      }
+      }
+      return row;
+    }
+
     inline int    bank::getShort(int item, int index) const noexcept{
       int type = bankSchema.getEntryType(item);
       int offset = bankSchema.getOffset(item, index, bankRows);
@@ -441,6 +471,24 @@ class iterator {
       return 0;
     }
 
+    inline std::vector<int>    bank::getInt(const char *name) const noexcept{
+      int item = bankSchema.getEntryOrder(name);
+      int type = bankSchema.getEntryType(item);
+      std::vector<int> row;
+
+      int nrows = getRows();
+      for(int j = 0; j < nrows; j++){
+          int offset = bankSchema.getOffset(item, j, bankRows);
+         switch(type){
+             case kByte:  row.push_back((int) getByteAt(offset)); break;
+             case kShort: row.push_back((int) getShortAt(offset)); break; 
+             case kInt:   row.push_back((int) getIntAt(offset)); break;
+             default: printf("---> error : requested INT for [%s] type = %d\n",name,type); break;
+         }
+      }
+      return row;
+    }
+
     inline int    bank::getShort(const char *name, int index) const noexcept{
       int item = bankSchema.getEntryOrder(name);
       int type = bankSchema.getEntryType(item);
@@ -474,6 +522,30 @@ class iterator {
       return 0.0;
     }
 
+  inline std::vector<float>  bank::getFloat(const char *name) const noexcept{
+      int item = bankSchema.getEntryOrder(name);
+      std::vector<float> row;
+      int nrows = getRows();
+      if(bankSchema.getEntryType(item)==kFloat){
+        for(int j = 0; j < nrows; j++){
+          int offset = bankSchema.getOffset(item, j, bankRows);
+          row.push_back( getFloatAt(offset));
+        }
+      }
+      return row;
+    }
+    
+    inline std::vector<float>  bank::getFloat(int item) const noexcept{
+      std::vector<float> row;
+      int nrows = getRows();
+      if(bankSchema.getEntryType(item)==kFloat){
+        for(int j = 0; j < nrows; j++){
+          int offset = bankSchema.getOffset(item, j, bankRows);
+          row.push_back( getFloatAt(offset));
+        }
+      }
+      return row;
+    }
     inline double  bank::getDouble(const char *name, int index) const noexcept{
       int item = bankSchema.getEntryOrder(name);
       if(bankSchema.getEntryType(item)==kDouble){
@@ -487,6 +559,45 @@ class iterator {
       return 0.0;
     }
 
+    inline std::vector<double>  bank::getDouble(int item) const noexcept{
+      std::vector<double> row;
+      int nrows = getRows();      
+
+      if(bankSchema.getEntryType(item)==kDouble){
+        for(int j = 0; j < nrows; j++){
+          int offset = bankSchema.getOffset(item, j, bankRows);
+          row.push_back(getDoubleAt(offset));
+        }
+      }
+      if(bankSchema.getEntryType(item)==kFloat){
+        for(int j = 0; j < nrows; j++){
+          int offset = bankSchema.getOffset(item, j, bankRows);
+          row.push_back((double) getFloatAt(offset));
+        }
+      }
+      return row;
+    }
+
+    inline std::vector<double>  bank::getDouble(const char *name) const noexcept{
+      std::vector<double> row;
+      int nrows = getRows();
+      int item = bankSchema.getEntryOrder(name);
+
+      if(bankSchema.getEntryType(item)==kDouble){
+        for(int j = 0; j < nrows; j++){
+          int offset = bankSchema.getOffset(item, j, bankRows);
+          row.push_back(getDoubleAt(offset));
+        }
+      }
+      if(bankSchema.getEntryType(item)==kFloat){
+        for(int j = 0; j < nrows; j++){
+          int offset = bankSchema.getOffset(item, j, bankRows);
+          row.push_back((double) getFloatAt(offset));
+        }
+      }
+      return row;
+    }
+    
     inline long bank::getLong(const char *name, int index) const noexcept{
       int item = bankSchema.getEntryOrder(name);
       if(bankSchema.getEntryType(item)==kLong){

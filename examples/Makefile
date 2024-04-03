@@ -14,7 +14,7 @@ LD        := g++
 LDFLAGS   :=
 
 
-all:  writeFile readFile readFileTags showFile schema writeUserHeader tupleFile readJson histograms
+all:  writeFile readFile readFileTags showFile schema writeUserHeader tupleFile readJson dataframe
 
 histograms: histograms.o
 	$(CXX) -o histograms.exe $<  $(HIPOLIBS) $(LZ4LIBS)
@@ -24,6 +24,9 @@ readEvents: readEvents.o
 
 node: node.o
 	$(CXX) -o node.exe $<  $(HIPOLIBS) $(LZ4LIBS)
+
+dataframe: dataframe.o
+	$(CXX) -o dataframe.exe $<  $(HIPOLIBS) $(LZ4LIBS)
 
 readHist: readHist.o
 	$(CXX) -o readHist.exe $<  $(HIPOLIBS) $(LZ4LIBS)
