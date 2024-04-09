@@ -67,14 +67,14 @@ Output:
 
 ## Row Lists
 
-Row lists (`hipo::bank::rowlist`) can be used to iterate through a bank's rows. They may also be used for filtering banks (`hipo::bank::rowlist::reduce`), using expressions or lambda functions. See [`examples/bankRowList.cc`](/examples/bankRowList.cc) for examples.
+Row lists (`hipo::bank::rowlist`) can be used to iterate through a bank's rows. They may also be used for filtering banks (`hipo::bank::rowlist::filter`), using expressions or lambda functions. See [`examples/bankRowList.cc`](/examples/bankRowList.cc) for examples.
 
 If you want to loop over **all** of a bank's rows (not filtered or reduced):
 ```cpp
 for(int row = 0; row < bank.getRows(); row++)
 ```
 
-If you want to loop over the filtered (reduce) set of rows, use `getRowList()` instead; if the row list has not yet been filtered, this will loop over all the banks rows:
+If you want to loop over the filtered (reduced) set of rows, use `getRowList()` instead; if the row list has not yet been filtered, this will loop over all the banks rows:
 ```cpp
 for(auto const& row : bank.getRowList())
 ```
