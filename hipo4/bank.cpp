@@ -527,7 +527,7 @@ void bank::show(bool const showAllRows) const {
   if(loopAllRows)
     printf("BANK :: NAME %24s , ROWS %6d\n", bankSchema.getName().c_str(), getRows());
   else
-    printf("BANK :: NAME %24s , ROWS %6ld SELECTED FROM %d\n", bankSchema.getName().c_str(), getRowList().size(),getRows());
+    printf("BANK :: NAME %24s , ROWS %6ld (FILTERED FROM %d TOTAL)\n", bankSchema.getName().c_str(), getRowList().size(),getRows());
 
   for(int i = 0; i < bankSchema.getEntries(); i++){
     printf("%18s : ", bankSchema.getEntryName(i).c_str());
