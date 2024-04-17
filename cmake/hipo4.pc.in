@@ -2,6 +2,8 @@ prefix=${pcfiledir}/../..
 includedir=${prefix}/include
 libdir=${prefix}/lib
 
+with_dataframes=@WITH_DATAFRAMES@
+
 Name: hipo4
 Description: High Performance Output data format for experimental physics
 Version: @HIPO_VERSION@

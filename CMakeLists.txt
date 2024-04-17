@@ -147,6 +147,7 @@ list(APPEND PKGCONFIG_LIBS hipo4)
 
 # build extensions
 option(BUILD_DATAFRAMES "Build dataframes extension" ON)
+set(WITH_DATAFRAMES FALSE)
 if(BUILD_DATAFRAMES)
     set(DATAFRAME_IN_MAIN TRUE)
     add_subdirectory(extensions/dataframes)
