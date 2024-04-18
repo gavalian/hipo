@@ -77,9 +77,6 @@ endif()
 
 add_compile_definitions(__LZ4__)
 
-set(DATAFRAME_IN_MAIN TRUE)
-add_subdirectory(extensions/dataframes)
-
 set(HIPO_SOURCE_FILES
         hipo4/bank.cpp
         hipo4/datastream.cpp
@@ -146,6 +143,16 @@ target_include_directories(hipo4 PUBLIC
 target_link_libraries(hipo4 PUBLIC PkgConfig::LZ4 )
 target_link_libraries(hipo4_static PUBLIC PkgConfig::LZ4)
 
+list(APPEND PKGCONFIG_LIBS hipo4)
+
+# build extensions
+option(BUILD_DATAFRAMES "Build dataframes extension" ON)
+set(WITH_DATAFRAMES FALSE)
+if(BUILD_DATAFRAMES)
+    set(DATAFRAME_IN_MAIN TRUE)
+    add_subdirectory(extensions/dataframes)
+endif()
+
 install(TARGETS hipo4
         EXPORT hipo4-export
         LIBRARY DESTINATION lib
@@ -177,6 +184,9 @@ configure_package_config_file( cmake/hipo4Config.cmake.in
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hipo4Config.cmake ${CMAKE_CURRENT_BINARY_DIR}/hipo4ConfigVersion.cmake
         DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/cmake/hipo4)
 
+# pkgconfig file
+list(TRANSFORM PKGCONFIG_LIBS PREPEND -l)
+list(JOIN PKGCONFIG_LIBS " " PKGCONFIG_LIB_ARGS)
 configure_file(${PROJECT_SOURCE_DIR}/cmake/hipo4.pc.in
                ${PROJECT_BINARY_DIR}/hipo4.pc
                @ONLY)

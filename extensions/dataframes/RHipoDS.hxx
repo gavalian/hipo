@@ -143,10 +143,7 @@ public:
    // Not required utility methods.
    int getEntries(){ return fHipoReader.getEntries(); }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Winconsistent-missing-override"
 ClassDef(RHipoDS, 0);
-#pragma clang diagnostic pop
 
 };
 
