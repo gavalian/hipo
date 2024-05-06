@@ -16,7 +16,8 @@ defaults:
 
 jobs:
 
-  build:
+  build_cmake:
+    name: CMake build
     strategy:
       fail-fast: false
       matrix:
@@ -27,8 +28,89 @@ jobs:
       - name: build
         run: |
           cmake -S . -B build -DCMAKE_INSTALL_PREFIX=install
-          cmake --build build -j2
+          cmake --build build -j4
           cmake --install build
       - run: brew install tree
         if: ${{ matrix.runner == 'macos-latest' }}
       - run: tree install
+
+  build_make:
+    name: Makefile build
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ ubuntu-latest, macos-latest ]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: hipo_src
+          submodules: recursive # FIXME: need `lz4` submoudle for Makefile, whereas `cmake` does not
+      - name: build
+        working-directory: hipo_src
+        run: |
+          make -j4
+          make -j4 -C examples
+      - run: brew install tree
+        if: ${{ matrix.runner == 'macos-latest' }}
+      - run: tree hipo_src
+      - name: tar
+        run: tar cavf hipo_src{.tar.zst,}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build_make_${{ matrix.runner }}
+          retention-days: 5
+          path: hipo_src.tar.zst
+
+  download_test_data:
+    name: Download test data
+    runs-on: ubuntu-latest
+    env:
+      type: physics
+    steps:
+      - uses: actions/cache@v4
+        id: cache
+        with:
+          key: test_data
+          path: test_data.hipo
+          lookup-only: true
+      - name: download
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+        run: |
+          # FIXME: it would be better to generate our own HIPO file here, rather than assuming this file will continue to exist
+          wget -nv --no-check-certificate http://clasweb.jlab.org/clas12offline/distribution/clas12-timeline/validation_files_${{ env.type }}.tar.zst
+          tar xvf validation_files_${{ env.type }}.tar.zst
+          mv -v $(find validation_files -type f -name "*.hipo" | head -n1) test_data.hipo
+
+  examples:
+    name: Run examples
+    needs: [ download_test_data, build_make ]
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ ubuntu-latest, macos-latest ]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: build_make_${{ matrix.runner }}
+      - name: untar artifacts
+        run: |
+          ls *.tar.zst | xargs -I{} tar xvf {}
+          rm *.tar.zst
+          mv -v hipo_src/* ./
+          rm -rf hipo_src
+      - name: get test data
+        uses: actions/cache/restore@v4
+        with:
+          key: test_data
+          path: test_data.hipo
+      - run: examples/writeFile.exe
+      - run: examples/readFile.exe example_output.hipo
+      - run: examples/readFileTags.exe
+      - run: examples/showFile.exe example_output.hipo event::particle
+      - run: examples/readJson.exe test_data.hipo
+      - run: examples/tupleFile.exe
+      - run: examples/writeUserHeader.exe
+      - run: examples/bankRowList.exe test_data.hipo
+      - run: examples/histograms.exe test_data.hipo

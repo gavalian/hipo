@@ -39,7 +39,7 @@ class reaction {
       void initialize(const char* file, std::vector<std::string> blist){
          reader.open(file);
          reader.readDictionary(factory);
-         for(int i = 0; i < blist.size(); i++) {
+         for(decltype(blist)::size_type i = 0; i < blist.size(); i++) {
             hipo::bank b(factory.getSchema("REC::Particle"));
             banks.push_back(b);
          }
@@ -94,7 +94,7 @@ void init_filter(std::initializer_list<std::tuple<int,int> > desc){
       bool status = reader.next();
       if(status==false) return status;
       reader.read(event);
-      for(int r = 0; r < banks.size(); r++) event.read(banks[r]);
+      for(decltype(banks)::size_type r = 0; r < banks.size(); r++) event.read(banks[r]);
       return true;
    }
    
@@ -103,7 +103,7 @@ void init_filter(std::initializer_list<std::tuple<int,int> > desc){
    }
 
    bool is_valid(){
-    for(int f = 0; f < filter.size(); f++){
+    for(decltype(filter)::size_type f = 0; f < filter.size(); f++){
          int count = countpid(filter[f].first);
          //printf(" pid = %d, count = %d\n",filter[f].first, count);
          if(filter_exclusive==true){

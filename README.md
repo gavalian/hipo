@@ -65,59 +65,19 @@ Output:
 
 <img src="https://github.com/gavalian/hipo/blob/master/documents/screenshots/histogram_vz.png" width="800">
 
-## Iterators
+## Row Lists
 
-Iterators can be used to read through bank. There are several ways to construct iterators, through expressions and
-through lambda functions. Here is an example with expressions:
+Row lists (`hipo::bank::rowlist`) can be used to iterate through a bank's rows. They may also be used for filtering banks (`hipo::bank::rowlist::filter`), using expressions or lambda functions. See [`examples/bankRowList.cc`](/examples/bankRowList.cc) for examples.
 
-```c++
-  hipo::reader   r(file);
-  hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
-  while( r.next(list)){
-      hipo::iterator it = hipo::iterator::reduce(list[0],"charge!=0");
-      for(it.begin(); !it.end(); it.next()){
-        printf("\t pid [%d] = %d\n",it.index(), list[0].getInt(0,it.index()));
-      }
-  }
+If you want to loop over **all** of a bank's rows (not filtered or reduced):
+```cpp
+for(int row = 0; row < bank.getRows(); row++)
 ```
 
-Here is an example with lambda function:
-
-```c++
-  hipo::reader   r(file);
-  hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
-  std::function charged = [](hipo::bank &b, int row) { return b.getInt("charge",row)!=0 ? 1.0 : 0.0;};
-
-  while( r.next(list)){
-    hipo::iterator it = hipo::iterator::reduce(charged,list[0]);
-    for(it.begin(); !it.end(); it.next()){
-      printf("\t pid [%d] = %d\n",it.index(), list[0].getInt(0,it.index()));
-    }
-  }
+If you want to loop over the filtered (reduced) set of rows, use `getRowList()` instead; if the row list has not yet been filtered, this will loop over all the banks rows:
+```cpp
+for(auto const& row : bank.getRowList())
 ```
-
-Iterators can be used also to get indicies of the refernce bank. For example:
-
-```c++
-  hipo::reader   r(file);
-  hipo::banklist list = r.getBanks({"REC::Particle","REC::Calorimeter"});
-
-  while( r.next(list)){
-    int status = list[0].getInt("status",0);
-    if(list[0].getInt(0,0)==11&&abs(status)>=2000&&abs(status)<3000){
-      hipo::iterator it = hipo::iterator::link(list[1],0,1);
-      double energy = 0.0;
-      for(it.begin(); !it.end(); it.next()){
-        energy += list[1].getFloat("energy",it.index());
-      }
-      printf("total energy = %f\n",energy);
-    }
-  }
-```
-
-In the example above, the link function will return an iterator for the bank "REC::Calorimeter"
-where the column number 1 (which is "pindex") has a value of 0. Then by itarating over the returned
-indicies the total energy can be calculated.
 
 ## Analysis
 

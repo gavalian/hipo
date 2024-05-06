@@ -8,7 +8,6 @@
 //************************ Jefferson National Lab (2017) ***********
 //******************************************************************
 //* Example program for reading HIPO-4 Files..
-//* Reads the file created by writeFile program
 //*--
 //* Author: G.Gavalian
 //*
@@ -26,6 +25,7 @@
  * @param file file name to process
  */
 void example1(const char *file){
+  printf("===== EXAMPLE 1 =====\n");
 
   // open a file, initialize internal beam vector to 10.6 gev.
   // and set event filter to:
@@ -62,6 +62,7 @@ void example1(const char *file){
  * @param file data file name to process
  */
 void example2(const char *file){
+  printf("===== EXAMPLE 2 =====\n");
 
   // open a file, initialize internal beam vector to 10.6 gev.
   // and set event filter to:
@@ -85,6 +86,7 @@ void example2(const char *file){
  * @param file data file name to process
  */
 void example3(const char *file){
+  printf("===== EXAMPLE 3 =====\n");
    hipo::reader   r(file);
    hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
    int counter = 0;
@@ -98,6 +100,7 @@ void example3(const char *file){
  * @param file data file name to process
  */
 void example4(const char *file){
+  printf("===== EXAMPLE 4 =====\n");
    twig::h1d hz(120,-15,5);
    hipo::reader   r(file);
    hipo::banklist list = r.getBanks({"REC::Particle"});
@@ -109,100 +112,39 @@ void example4(const char *file){
    hz.print();
 }
 
-
-void example5(const char *file){
-  hipo::reader   r(file);
-  hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
-  int counter = 0;
-  while( r.next(list)&&counter<350){ 
-    counter++; 
-    int nrows = list[0].getRows();
-    printf(" rows = %d\n",nrows);
-
-    if(nrows>6){
-      hipo::iterator it(list[0],{0,1,4});
-      for(it.begin(); !it.end(); it.next()){
-        printf("\t pid [%d] = %d\n",it.index(), list[0].getInt(0,it.index()));
-      }
-    }
-  }
-}
-
-void example6(const char *file){
-  hipo::reader   r(file);
-  hipo::banklist list = r.getBanks({"REC::Particle","REC::Calorimeter"});
-  int counter = 0;
-
-  while( r.next(list)&&counter<350){
-    counter++; 
-    int status = list[0].getInt("status",0);
-    if(list[0].getInt(0,0)==11&&abs(status)>=2000&&abs(status)<3000){
-      printf("found electron\n");
-      hipo::iterator it = hipo::iterator::link(list[1],0,1);
-      double energy = 0.0;
-      for(it.begin(); !it.end(); it.next()){
-        energy += list[1].getFloat("energy",it.index());
-      }
-
-      it.show();
-      printf("energy = %f\n",energy);
-    }
-  }
-}
-
-void example7(const char *file){
-  hipo::reader   r(file);
-  hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
-  int counter = 0;
-  while( r.next(list)&&counter<350){ 
-    counter++; 
-      hipo::iterator it = hipo::iterator::reduce(list[0],"charge!=0");
-      list[0].show();
-      it.show();
-      //for(it.begin(); !it.end(); it.next()){
-      //  printf("\t pid [%d] = %d\n",it.index(), list[0].getInt(0,it.index()));
-      //}
-  }
-}
-
-void example8(const char *file){
-  
-  hipo::reader   r(file);
-  hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
-  std::function charged = [](hipo::bank &b, int row) { return b.getInt("charge",row)!=0 ? 1.0 : 0.0;};
-  
-  int counter = 0;
-  while( r.next(list)&&counter<350){
-    counter++;
-    hipo::iterator it = hipo::iterator::reduce(charged,list[0]);
-    list[0].show();
-    it.show();
-  }
-}
-
 int main(int argc, char** argv) {
-  
+
   std::cout << " reading CLAS12 hipo file and plotting missing mass (ep->epi+pi-X) "  << __cplusplus << std::endl;
   //axis x(120,0.,1.0);
   //printf("bin = %d\n",x.find(0.4));
-  
+
   char inputFile[256];
-  
+  int example_num = -1;
+
   if(argc>1) {
     snprintf(inputFile,256,"%s",argv[1]);
     //sprintf(outputFile,"%s",argv[2]);
   } else {
-    std::cout << " *** please provide a file name..." << std::endl;
+    std::cerr << " *** please provide a file name..." << std::endl;
     exit(1);
   }
+  if(argc>2)
+    example_num = std::stoi(argv[2]);
 
-  //example3(inputFile);
-  //example1(inputFile);
-  //example2(inputFile);
+  switch(example_num) {
+    case -1:
+      example1(inputFile);
+      example2(inputFile);
+      example3(inputFile);
+      example4(inputFile);
+      break;
+    case 1: example1(inputFile); break;
+    case 2: example2(inputFile); break;
+    case 3: example3(inputFile); break;
+    case 4: example4(inputFile); break;
+    default:
+            std::cerr << " *** ERROR: unknown example..." << std::endl;
+            exit(1);
+  }
 
-  //example4(inputFile);
-  //example5(inputFile);
-  //example6(inputFile);
-  example7(inputFile);
 }
-//### END OF GENERATED CODE
