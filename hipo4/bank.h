@@ -221,7 +221,7 @@ namespace hipo {
         /// initialize with a full list with specified number of rows
         /// @param numRows if negative, use the owner `bank` to set the number of rows, otherwise use `numRows`
         void reset(int numRows = -1);
-        bool const isInitialized() const { return m_init; }
+        bool isInitialized() const { return m_init; }
 
         /// @returns reference to the immutable list
         list_t const& getList() const;
