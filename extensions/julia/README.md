@@ -79,3 +79,17 @@ schema :      CTOF::adc , group =  20400, item =  11
   38 [    1047] {  114.000} ,   38 [    1053] {  114.000} ,   39 [     670] {  115.000} ,   39 [     776] {  114.000} ,
    1 [    1723] {  114.000} ,    1 [    1802] {  114.000} ,    2 [      94] {  114.000} ,    2 [      84] {  114.000} ,
 ```
+
+# Plotting
+
+The Plots package in Julia allows histogram plotting from the script. An example can be found in file hipoPlot.jl. 
+To use the script you need to install Plots package in julia following:
+```
+prompt> julia
+
+julia> using Pkg
+julia> Pkg.add("Plots");
+```
+
+Output:
+![ADC spectra for CTOF](adcplot.png?raw=true "CTOF adc plot")
