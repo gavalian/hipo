@@ -91,5 +91,13 @@ julia> using Pkg
 julia> Pkg.add("Plots");
 ```
 
+Once the package is intalled (it takes a while), exit julia, and the run the script from the prompt:
+
+``` bash
+prompt> julia hipoPlot.jl
+```
+
+
 Output:
+
 ![ADC spectra for CTOF](adcplot.png?raw=true "CTOF adc plot")
