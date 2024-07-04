@@ -17,23 +17,25 @@ and create a symbolic link to your file and run:
 
 ``` bash
 prompt> ln -s /home/myname/myfile.hipo infile.h5
-prompt> julia hipoLib.jl
+prompt> julia printbanks.jl
 ```
 
 Code:
 ``` julia
-file = hipofile("infile.h5")
-println(file)
-hdefine(file,"CTOF::adc")
-hdescribe(file,"CTOF::adc")
+import Printf.@printf
+include("modules/Hipo.jl")
+using .Hipo
+
+file = Hipo.open("infile.h5")
+Hipo.define(file,"CTOF::adc")
 
 for j = 1:27
-  hnext(file)
-  size = hsize(file,"CTOF::adc")
-  for r = 1:size
-     cmp = hgetint(file,"CTOF::adc","component",Int32(r-1))
-     adc = hgetint(file,"CTOF::adc","ADC",Int32(r-1))
-    time = hgetfloat(file,"CTOF::adc","time",Int32(r-1))
+   Hipo.next(file)
+   rows = Hipo.getRows(file,"CTOF::adc")
+   for r = 1:rows
+     cmp = Hipo.getInt(   file,"CTOF::adc","component",Int32(r-1))
+     adc = Hipo.getInt(   file,"CTOF::adc","ADC",Int32(r-1))
+    time = Hipo.getFloat( file,"CTOF::adc","time",Int32(r-1))
     @printf("%4d [%8d] {%9.3f} , ",cmp, adc, time)
   end
   println()
@@ -94,7 +96,7 @@ julia> Pkg.add("Plots");
 Once the package is intalled (it takes a while), exit julia, and the run the script from the prompt:
 
 ``` bash
-prompt> julia hipoPlot.jl
+prompt> julia plotbanks.jl
 ```
 
 
