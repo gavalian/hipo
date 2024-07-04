@@ -17,7 +17,7 @@ include("modules/Hipo.jl")
 using .Hipo
 using  Plots
 
-#unicodeplots() - uncomment this line to use ASCII plotting backend
+#unicodeplots() #- uncomment this line to use ASCII plotting backend
 
 file = Hipo.open("infile.h5")
 Hipo.define(file,"CTOF::adc")
@@ -38,9 +38,9 @@ for j = 1:15000
   end
 end
 
-@printf("done..\n now plotting the adc spectra....\n\n\n press any key to exit (if you don't have a key named 'any', press 'enter')\n\n")
 h = Plots.histogram(vec,bins = 0:80:4000,title = "ctof ADC", xlabel="ADC", ylabel="Counts")
 Plots.display(Plots.plot(h))
 
+@printf("done..\n now plotting the adc spectra....\n\n\n press any key to exit (if you don't have a key named 'any', press 'enter')\n\n")
 #-- you need this line to wait before exiting
 readline()
