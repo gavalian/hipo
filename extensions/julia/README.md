@@ -103,3 +103,42 @@ prompt> julia plotbanks.jl
 Output:
 
 ![ADC spectra for CTOF](adcplot.png?raw=true "CTOF adc plot")
+
+
+#Plotting in the terminal
+
+If you do not have X connection to the server where you run your code, you can display the histograms in ASCII.
+Modify the script 'plotbanks.jl' to include the following lines:
+
+``` julia
+using Plots
+unicodeplots()
+```
+
+If you run the plotbanks.jl after these modifications you will get the following output on the screen.
+
+``` bash
+         ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ctof ADC⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+         ┌────────────────────────────────────────┐
+   2 127 │⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⚬⚬⚬⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│ y1
+         │⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⢸⚬⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│ y1
+         │⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⚬⣿⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│
+         │⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⢸⣿⢸⚬⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│
+         │⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⚬⢸⣿⢸⡇⚬⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│
+         │⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⢸⣿⢸⡇⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│
+         │⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⢸⣿⢸⡇⣿⚬⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│
+         │⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⚬⣿⢸⣿⢸⡇⣿⚬⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│
+         │⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⣿⢸⣿⢸⡇⣿⢸⚬⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│
+         │⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⚬⣿⢸⣿⢸⡇⣿⢸⣿⚬⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│
+         │⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⣿⢸⣿⢸⡇⣿⢸⣿⢸⚬⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│
+         │⠀⠀⡇⠀⠀⚬⚬⚬⚬⚬⚬⚬⚬⚬⚬⚬⡇⣿⢸⣿⢸⡇⣿⢸⣿⢸⡇⚬⚬⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│
+         │⠀⠀⡇⠀⠀⣿⡇⣿⢸⡇⣿⡇⣿⢸⡇⣿⡇⣿⢸⣿⢸⡇⣿⢸⣿⢸⡇⣿⢸⚬⚬⚬⡀⠀⠀⠀⠀⠀⠀⠀│
+         │⠀⠀⡇⠀⠀⣿⡇⣿⢸⡇⣿⡇⣿⢸⡇⣿⡇⣿⢸⣿⢸⡇⣿⢸⣿⢸⡇⣿⢸⣿⢸⡇⚬⚬⚬⚬⚬⠀⠀⠀│
+       0 │⠀⠀⚬⚬⚬⣿⣇⣿⣸⣇⣿⣇⣿⣸⣇⣿⣇⣿⣸⣿⣸⣇⣿⣸⣿⣸⣇⣿⣸⣿⣸⣇⣿⣸⣿⣸⚬⚬⠀⠀│
+         └────────────────────────────────────────┘
+         ⠀-247.2⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀4247.2⠀
+```
+
+If you are curious about the types of plots you can make with Plots package, please visit : [Plots Library](https://docs.juliaplots.org/stable)
+
+To the a sample of ASCII plots visit: [Unicode Plots](https://docs.juliaplots.org/stable/gallery/unicodeplots)
