@@ -102,7 +102,7 @@ prompt> julia plotbanks.jl
 
 Output:
 
-![ADC spectra for CTOF](adcplot.png?raw=true "CTOF adc plot")
+![ADC spectra for CTOF](images/adcplot.png?raw=true "CTOF adc plot")
 
 
 #Plotting in the terminal
@@ -143,3 +143,49 @@ If you run the plotbanks.jl after these modifications you will get the following
 If you are curious about the types of plots you can make with Plots package, please visit : [Plots Library](https://docs.juliaplots.org/stable)
 
 To the a sample of ASCII plots visit: [Unicode Plots](https://docs.juliaplots.org/stable/gallery/unicodeplots)
+
+
+# Physics Analysis
+
+The intarface to reacion class is implemented within the package and Reaction.jl module provides funtionality to do physics analysis on CLAS12 data.
+Here is an exampl code (reaction.jl):
+
+``` julia
+import Printf.@printf
+
+include("modules/Hipo.jl")
+include("modules/Vectors.jl")
+include("modules/Reaction.jl")
+
+using .Hipo
+using .Vectors
+using .Reaction
+using  Plots
+
+desc = Reaction.define("{1,11,0,0.0005}{1,211,0,0.139}{1,-211,0,0.139}")
+
+Reaction.define("infile.h5",10.6)
+
+cm = Reaction.cm()
+
+data = []
+while Reaction.next()==1
+  valid = Reaction.isValid()
+  if valid==1
+     v = Reaction.getVector(desc)
+     mx = cm - v 
+     mass2 = Reaction.mass2(mx)
+     push!(data,mass2)
+  end
+end
+
+h = Plots.histogram(data,bins = 0.25:0.025:3.75,title = "Reaction ep -> epi+pi-X", xlabel="Missing Mass Square (epi+pi-)", ylabel="Counts")
+Plots.display(Plots.plot(h))
+
+readline()
+
+```
+
+Output:
+
+![ADC spectra for CTOF](images/missing_mass.png?raw=true "Missing Mass Spectra")
