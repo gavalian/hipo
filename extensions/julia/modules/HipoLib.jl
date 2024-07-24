@@ -75,6 +75,24 @@ function read(fid::Int32, bank::String, df::DataFrame)
    end
 end
 #-----------------------------------------------------------------------------------------
+# READ a bank into data frame until the maxRows is reached
+#-----------------------------------------------------------------------------------------
+function read(fid::Int32, bank::String, maxRows::Int64)
+    counter = 0
+    dfresult = getBank(fid,bank)
+    dftemp   = getBank(fid,bank)
+    while next(fid)==1
+       next(fid)
+       read(fid,bank,dftemp)
+       dfresult = vcat(dfresult,dftemp)
+       counter = length(dfresult[:, 1])
+       if maxRows>0&&counter>maxRows
+       	  break
+       end
+    end
+    return dfresult
+end
+#-----------------------------------------------------------------------------------------
 # internal function to retrieve the schema for given bank from the file dictionary.
 # used by getBank function
 #-----------------------------------------------------------------------------------------
