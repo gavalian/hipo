@@ -327,7 +327,7 @@ void   composite::print(){
          int type = getEntryType(e);
          if(type==1||type==2||type==3) printf("%8d ",getInt(e,r));
          if(type==4) printf("%8.5f ",getFloat(e,r));
-         if(type==8) printf("%ld ",getLong(e,r));
+         if(type==8) printf("%lld ",getLong(e,r));
     }
     printf("\n");
   }

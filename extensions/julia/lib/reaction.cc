@@ -35,4 +35,9 @@ extern "C" {
     return status==true?1:0;
     //return __reaction->next();
   }
+
+  void get_format_string(char *data){
+    printf("data from \"C\" : [%s]\n",data);
+    strcpy(data,"troubles"); data[5] = 0;
+  }
 }

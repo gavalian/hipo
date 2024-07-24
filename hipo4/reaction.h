@@ -46,7 +46,8 @@ class reaction {
       }
       
    public:
-     reaction(){}
+
+  reaction(){}
      reaction(const char* file){ 
        initialize(file,{"REC::Particle"});
      }

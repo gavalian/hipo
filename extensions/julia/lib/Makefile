@@ -16,7 +16,7 @@ CXXFLAGS = -std=c++17
 
 
 slibhipo: $(OBJECTS)
-	$(CXX) -shared $(OBJECTS) -o libjulia.so $(HIPOLIBS) $(LZ4LIBS)
+	$(CXX) -shared $(OBJECTS) -o ../libjulia.so $(HIPOLIBS) $(LZ4LIBS)
 
 show:
 	@echo $(OBJECTS)

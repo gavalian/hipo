@@ -236,18 +236,42 @@ extern "C" {
          int handle = hFusion.open(filename); return handle;
     }
 
-  int    fusion_next(int handle){ return hFusion.next(handle)==true?1:0;}
+    int    fusion_next(int handle){ return hFusion.next(handle)==true?1:0;}
   
-  
+    int    fusion_schema_length(int handle, const char *bank){
+      std::string schema = hFusion.schema(handle,bank);
+      return (int) schema.length();
+    }
 
+  void fusion_schema_string(int handle, const char *bank, char *format){
+      std::string schema = hFusion.schema(handle,bank);
+      std::strcpy(format,schema.c_str());
+    }
 
     void   fusion_define(int handle, const char *bank){ hFusion.define(handle,bank);}
     void   fusion_describe(int handle, const char *bank){ hFusion.describe(handle,bank);}
     int    fusion_bankSize(int handle, const char *bank){ return hFusion.getSize(handle,bank);}
     
-    int    fusion_get_int(int handle, const char *bank, const char *entry, int row){ 
+    int    fusion_get_int(int handle, const char *bank, const char *entry, int row){
       return hFusion.getInt(handle,bank,entry,row);
     }
+
+    void fusion_get_byte_array(int handle, const char *bank, int entry, int8_t *ptr, int rows){ 
+        hFusion.getByteArray(handle,bank,entry,ptr,rows);
+    }
+
+    void fusion_get_short_array(int handle, const char *bank, int entry, int16_t *ptr, int rows){
+        hFusion.getShortArray(handle,bank,entry,ptr,rows);
+    }
+
+  void fusion_get_int_array(int handle, const char *bank, int entry, int32_t *ptr, int rows){
+        hFusion.getIntArray(handle,bank,entry,ptr,rows);
+    }
+
+  void fusion_get_float_array(int handle, const char *bank, int entry, float *ptr, int rows){
+        hFusion.getFloatArray(handle,bank,entry,ptr,rows);
+    }
+  
   int64_t    fusion_get_long(int handle, const char *bank, const char *entry, int row){
       return hFusion.getLong(handle,bank,entry,row);
     }

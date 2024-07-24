@@ -15,6 +15,10 @@ namespace hipo {
    reader.readDictionary(factory);
   }
 
+  std::string  inputSource::schema(const char *bank){
+    return factory.getSchema(bank).getSchemaString();
+  }
+  
   void inputSource::define(const char *bank){
       banks[std::string(bank)] = hipo::bank(factory.getSchema(bank));
   }
@@ -57,7 +61,24 @@ int64_t     inputSource::getLong(   const char *bank, const char *entry, int row
 double  inputSource::getDouble( const char *bank, const char *entry, int row){
    return banks[bank].getDouble(entry,row);
 }
+
+  void inputSource::getByteArray(  const char *bank, int entry, int8_t *ptr, int length){
+    hipo::bank &b = banks[bank];
+    for(int i = 0; i < length; i++) ptr[i] = b.getByte(entry,i);
+  }
+  void inputSource::getShortArray( const char *bank, int entry, int16_t *ptr, int length){
+    hipo::bank &b = banks[bank];
+    for(int i = 0; i < length; i++) ptr[i] = b.getShort(entry,i);
+  }
+  void inputSource::getIntArray(   const char *bank, int entry, int32_t  *ptr, int length){
+    hipo::bank &b = banks[bank];
+    for(int i = 0; i < length; i++) ptr[i] = b.getInt(entry,i);
+  }
   
+  void inputSource::getFloatArray( const char *bank, int entry, float   *ptr, int length){
+    hipo::bank &b = banks[bank];
+    for(int i = 0; i < length; i++) ptr[i] = b.getFloat(entry,i);
+  }
 
 
    int  fusion::open(const char *filename){
@@ -70,6 +91,9 @@ double  inputSource::getDouble( const char *bank, const char *entry, int row){
      sources[fid]->define(bank);
   }
 
+  std::string fusion::schema(int fid, const char *bank){
+    return sources[fid]->schema(bank);
+  }
   void fusion::describe(int fid, const char *bank){
     sources[fid]->describe(bank);
   }
