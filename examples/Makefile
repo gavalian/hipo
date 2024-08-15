@@ -14,10 +14,13 @@ LD        := g++
 LDFLAGS   :=
 
 
-all:  writeFile readFile readFileTags showFile schema writeUserHeader tupleFile readJson dataframe histograms bankRowList
+all:  writeFile readFile readFileTags showFile schema writeUserHeader tupleFile readJson dataframe histograms bankRowList multithread
 
 histograms: histograms.o
 	$(CXX) -o histograms.exe $<  $(HIPOLIBS) $(LZ4LIBS)
+
+multithread: multithread.o
+	$(CXX) -o multithread.exe $<  $(HIPOLIBS) $(LZ4LIBS)
 
 bankRowList: bankRowList.o
 	$(CXX) -o bankRowList.exe $<  $(HIPOLIBS) $(LZ4LIBS)

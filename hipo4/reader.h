@@ -111,13 +111,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <memory>
+#include <thread>
 #include <climits>
 #include "record.h"
 #include "utils.h"
 #include "bank.h"
 
 namespace hipo {
-
 
    //  typedef struct fileHeader_t {
    struct fileHeader_t {
@@ -276,5 +276,65 @@ namespace hipo {
       std::vector<int>   getInt(  const char *bank, const char *column, int max = -1);
       std::vector<float> getFloat(const char *bank, const char *column, int max = -1);
    };
+
+class readerstream {
+    private:
+      hipo::reader hr;
+      //hipo::writer hw;
+      hipo::dictionary  factory;
+      std::mutex obj;
+      long  nProcessed =  0;     
+      long  nDataLimit = -1;
+   public:
+
+  //static int eof_printout;
+
+  readerstream(){ /*datastream::eof_printout = 0;*/}
+
+  virtual ~readerstream(){}
+  void open(const char *input){
+           hr.open(input);
+           hr.readDictionary(factory);
+           //hw.addDictionary(factory);
+           //hw.open(output);
+   }
+
+   void setLimit(long limit){
+      nDataLimit = limit;
+   }
+   void run(std::function<int(int)> &&function, int nthreads){
+      std::vector<std::thread*> threads;
+      for(int i = 0; i < nthreads; i++){
+              threads.push_back(new std::thread(function,i));
+      }
+      printf("-- created denoiser with %lu threads\n", threads.size());
+      for(int k = 0; k < (int) threads.size(); k++) threads[k]->join();
+      for(int k = 0; k < (int) threads.size(); k++) delete threads[k];
+   }
+   
+   hipo::reader &reader(){return hr;}
+   hipo::dictionary &dictionary(){ return factory;}
+   void pull(std::vector<hipo::event> &events){
+        
+        std::unique_lock<std::mutex> lock(obj);
+        bool finished = false;
+        if(nDataLimit>0){ if(nProcessed>nDataLimit) finished = true;}
+
+        if(hr.hasNext()==false){ printf("\n");}
+
+        for(int n = 0; n < (int) events.size(); n++){
+            // write the event in the output if it's not empty
+            //if(events[n].getSize()>16){ hw.addEvent(events[n]);}
+            // reset event and read next in the file if any left
+            events[n].reset();
+            if(hr.next()==true&&finished==false){
+                hr.read(events[n]); nProcessed++;
+                if(nProcessed%250==0) { printf("."); fflush(stdout);}
+                if(nProcessed%10000==0) printf(" : %9lu \n",nProcessed);
+            }
+        }
+    }
+   };
+
 }
 #endif /* HIPOREADER_H */
