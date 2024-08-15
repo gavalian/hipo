@@ -113,6 +113,7 @@
 #include <memory>
 #include <thread>
 #include <climits>
+#include <mutex>
 #include "record.h"
 #include "utils.h"
 #include "bank.h"
