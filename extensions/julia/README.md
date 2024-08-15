@@ -1,3 +1,5 @@
+![Julia Logo](images/julia_logo.png?raw=true "Julia Logo")
+
 # HIPO (Julia)
 
 This is the first draft of Julia interface for reading hipo files.
