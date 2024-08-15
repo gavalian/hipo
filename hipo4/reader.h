@@ -303,6 +303,7 @@ class readerstream {
    void setLimit(long limit){
       nDataLimit = limit;
    }
+   
    void run(std::function<int(int)> &&function, int nthreads){
       std::vector<std::thread*> threads;
       for(int i = 0; i < nthreads; i++){

@@ -17,8 +17,11 @@
 #include <iostream>
 #include "reader.h"
 #include <unistd.h>
+#include "twig.h"
 
 hipo::readerstream stream;
+std::vector<twig::h1d>   histo = twig::h1d::declare(4,120,-20.0,10.0);
+
 /**
  * @brief Create a Frame object
  *  Creates an array of events
@@ -38,7 +41,7 @@ int function(int order){
    //hipo::banklist list = stream.reader().getBanks({"REC::Particle","REC::Event"});
    hipo::bank part (stream.dictionary().getSchema("REC::Particle"),48);
 
-   int isAlive = 1;
+   int isAlive    = 1;
    int nProcessed = 0;
    int nElectrons = 0;
 
@@ -49,7 +52,11 @@ int function(int order){
             if(events[e].getSize()>16) { nNonEmpty++; nProcessed ++;}
             events[e].read(part);
             if(part.getRows()>0){
-               if(part.getInt("pid",0)==11) nElectrons++;
+	      if(part.getInt("pid",0)==11) {
+		double vz = part.getFloat("vz",0);
+		histo[order].fill(vz);
+		nElectrons++;
+	      }
             }
       }
       usleep(50000); // This is neccessary to benchmark, has to be removed in real program
@@ -75,6 +82,14 @@ int main(int argc, char** argv) {
 
 
    stream.open(inputFile);
-   stream.run(function,6);
+   stream.run(function,4);
+
+   twig::h1d h = twig::h1d::accumulate(histo);
+
+   h.print();
+   histo[0].print();
+
+   //h.show();
+   //histo[0].show();
 }
 //### END OF GENERATED CODE

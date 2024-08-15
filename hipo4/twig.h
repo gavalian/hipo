@@ -53,14 +53,16 @@ namespace twig {
 
 class h1d {
 
-   private:
+   protected:
       int  hid;
       axis  x;
       std::vector<double> container;
    public:
+
       h1d(int n, double min, double max){ 
         hid = 0; x.init(n,min,max);container.resize(n+2);
       }
+
       h1d(int __id, int n, double min, double max){
          hid = __id; x.init(n,min,max);container.resize(n+2);
       }
@@ -75,10 +77,38 @@ class h1d {
       void show(){
          for(int b = 0; b < x.nbins(); b++) printf("%12.5f %12.5f\n",x.center(b), content(b));
       }
+      void setContent(int bin, double value){
+         container[bin] = value;
+      }
+
+      
       void series(std::vector<double> &data){
          data.resize(container.size()-2);
          for(decltype(container)::size_type i = 1; i < container.size()-1;i++) data[i-1] = container[i];
       }
+      static h1d accumulate(std::vector<h1d> &buffer){
+	h1d h(buffer[0].id(), buffer[0].x.nbins(), buffer[0].x.min(),buffer[0].x.max());
+	
+	for(int bin = 0; bin < buffer[0].x.nbins(); bin++){
+	  double content = 0.0;
+	  for(int j = 0; j < (int) buffer.size(); j++){
+	    content += buffer[j].content(bin);
+	  }
+	  //printf(" accumulated for bin %d = %f\n",bin,content);
+	  h.setContent(bin,content);
+	}
+	return h;
+      }
+  
+      static std::vector<h1d> declare(int count, int bins, double xmin, double xmax){
+	std::vector<h1d> buffer;
+	for(int j = 0; j < count; j++){
+	  h1d h(100+j,bins,xmin,xmax);
+	  buffer.push_back(std::move(h));
+	}
+	return buffer;
+      }
+  
       void print(){
          std::vector<double> data;
          series(data);
@@ -92,15 +122,14 @@ class h1d {
           << asciichart.height(25).offset(4).Plot(); // rescale to -3 ~ +3 lines
           //<< '\n';
 	 std::cout << "\033[38;5;45m"; 
-    for(int i = 0; i < (index-52); i++) std::cout << " ";
-    std::cout << "\u2514\u252C";
+	 for(int i = 0; i < (index-52); i++) std::cout << " ";
+	 std::cout << "\u2514\u252C";
 	 for(int i = 0; i < x.nbins()/4; i++) std::cout << "\u2500\u2500\u2500\u252C";
 	 std::cout << '\n';
-    for(int i = 0; i < (index-51); i++) std::cout << " ";
+	 for(int i = 0; i < (index-51); i++) std::cout << " ";
 	 std::cout << x.min();
 	 for(int i = 0; i < x.nbins()-4; i++) std::cout << " ";
-	 std::cout << x.max() << "\033[0m" << '\n';
-          
+	 std::cout << x.max() << "\033[0m" << '\n';	 
       }
   };
 }
