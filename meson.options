@@ -1,0 +1,1 @@
+option('dataframes', type: 'boolean', value: true, description: 'install HIPO dataframes extension')
