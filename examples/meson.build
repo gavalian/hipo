@@ -37,6 +37,7 @@ foreach ex : example_sources
     include_directories: [ hipo_inc ],
     link_with:           project_libs,
     install:             get_option('install_examples'),
+    cpp_args:            [ '-Wno-sign-compare' ], # FIXME: fix the warnings; they are suppressed by these args
   )
   if(ex.get('test_this', true))
     test(
