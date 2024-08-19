@@ -39,7 +39,7 @@ hipo_headers = files(
 hipo_lib = library(
   meson.project_name(),
   hipo_sources,
-  dependencies: [lz4_dep],
+  dependencies: [ lz4_dep ],
   cpp_args: [ # FIXME: fix the warnings; they are suppressed by these args
     '-Wno-sign-compare',
     '-Wno-unused-variable',

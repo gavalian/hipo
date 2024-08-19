@@ -1,1 +1,3 @@
-option('dataframes', type: 'boolean', value: true, description: 'install HIPO dataframes extension')
+option('dataframes',       type: 'boolean', value: true,  description: 'install HIPO dataframes extension')
+option('install_examples', type: 'boolean', value: false, description: 'install examples')
+option('test_file',        type: 'string',  value: '',    description: 'sample HIPO file to use for certain tests; if unspecified, those tests will not run')
