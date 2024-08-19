@@ -5,7 +5,16 @@
       REAL     PX(50)
       INTEGER  PID(50)
       INTEGER  CHARGE(50)
-      CALL HIPO_FILE_OPEN('infile.hipo')
+
+      INTEGER*4      ARGC
+      CHARACTER*1024 IN_FILE
+      ARGC = IARGC()
+      IF(ARGC.lt.1) THEN
+        PRINT *, 'USAGE: freader.exe [HIPO_FILE]'
+        STOP
+      END IF
+      CALL GETARG(1, IN_FILE)
+      CALL HIPO_FILE_OPEN(TRIM(IN_FILE))
 
       STATUS = 0
       COUNTER = 0

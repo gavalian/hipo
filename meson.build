@@ -11,6 +11,7 @@ project(
   },
   version: '4.2.0',
 )
+add_languages('fortran', native: false, required: get_option('test_fortran'))
 
 # modules
 fs  = import('fs')
@@ -23,12 +24,15 @@ lz4_dep = dependency('liblz4', method: 'pkg-config', version: '>=1.9', fallback:
 lz4_preproc_def = '-D__LZ4__'
 add_project_arguments(lz4_preproc_def, language: ['cpp'])
 
-# main project builds
+# build main project
 project_libs = []
 subdir('hipo4')
 subdir('examples')
+if(get_option('test_fortran'))
+  subdir('examples/fortran')
+endif
 
-# extensions
+# build extensions
 if(get_option('dataframes'))
   subdir('extensions' / 'dataframes')
 endif
