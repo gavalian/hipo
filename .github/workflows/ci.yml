@@ -93,7 +93,7 @@ jobs:
           path: test_data.hipo
       - run: meson test
         working-directory: build
-      - run: upload test logs
+      - name: upload test logs
         uses: actions/upload-artifact@v4
         if: always()
         with:
