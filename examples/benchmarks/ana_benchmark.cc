@@ -17,6 +17,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <cmath>
 #include "utils.h"
 #include "reader.h"
 
@@ -85,7 +86,7 @@ int main(int argc, char** argv) {
            float  px = particles.getFloat(1,row);
            float  py = particles.getFloat(2,row);
            float  pz = particles.getFloat(3,row);
-           double p = sqrt(px*px+py*py+pz*pz);
+           double p = std::sqrt(px*px+py*py+pz*pz);
            double energy = 0.0;
            if(responses.count(row)>0){
              c3++;

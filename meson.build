@@ -49,9 +49,6 @@ subdir('hipo4')
 
 # build examples
 subdir('examples')
-if(get_option('test_fortran'))
-  subdir('examples/fortran')
-endif
 if(ROOT_dep.found())
   subdir('examples/root')
 endif
