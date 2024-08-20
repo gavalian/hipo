@@ -18,7 +18,26 @@ fs  = import('fs')
 pkg = import('pkgconfig')
 
 # dependencies
-lz4_dep = dependency('liblz4', method: 'pkg-config', version: '>=1.9', fallback: ['lz4', 'liblz4'])
+lz4_dep = dependency(
+  'liblz4',
+  method: 'pkg-config',
+  version: '>=1.9',
+  fallback: ['lz4', 'liblz4'],
+)
+ROOT_dep = dependency(
+  'ROOT',
+  method: 'cmake',
+  version: '>=6.28',
+  required: false,
+  not_found_message: 'ROOT not found; tools which depend on ROOT will not be built.',
+)
+
+# handle ROOT
+# NOTE: hipo library does NOT depend on ROOT, but some extensions and examples do
+ROOT_config = find_program('root-config', required: ROOT_dep.found())
+ROOT_cling  = find_program('rootcling', required: ROOT_dep.found())
+ROOT_libdir = ROOT_dep.found() ? run_command(ROOT_config, '--libdir', check: true).stdout().strip() : ''
+ROOT_incdir = ROOT_dep.found() ? run_command(ROOT_config, '--incdir', check: true).stdout().strip() : ''
 
 # preprocessor
 lz4_preproc_def = '-D__LZ4__'
@@ -27,13 +46,18 @@ add_project_arguments(lz4_preproc_def, language: ['cpp'])
 # build main project
 project_libs = []
 subdir('hipo4')
+
+# build examples
 subdir('examples')
 if(get_option('test_fortran'))
   subdir('examples/fortran')
 endif
+if(ROOT_dep.found())
+  subdir('examples/root')
+endif
 
 # build extensions
-if(get_option('dataframes'))
+if(get_option('dataframes') and ROOT_dep.found())
   subdir('extensions' / 'dataframes')
 endif
 
