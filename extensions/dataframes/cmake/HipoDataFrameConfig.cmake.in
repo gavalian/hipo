@@ -2,6 +2,7 @@
 # Input for cmake to create the package configuration file: HipoDataFrameConfig.cmake
 # for find_package()
 #
+# TODO: use this with meson?
 @PACKAGE_INIT@
 include(CMakeFindDependencyMacro)
 find_dependency(hipo4 REQUIRED CONFIG PATHS ${CMAKE_CURRENT_LIST_DIR} )
