@@ -17,7 +17,7 @@ Use command:
  git clone --recurse-submodules git@github.com:gavalian/hipo.git
 ```
 
-to clone the distribution. Then compile using 'make', or 'cmake', and start using.
+to clone the distribution. Then compile using 'make', or 'cmake' (you need `pkg-config` for cmake), and start using.
 
 ## Usage
 
