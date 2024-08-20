@@ -6,9 +6,9 @@ example_root_sources = [
 ]
 
 foreach ex : example_root_sources
-  example_name = fs.stem(ex['sources'][0])
+  example_name = 'hipo_' + fs.stem(ex['sources'][0])
   example_exe = executable(
-    f'@example_name@.exe',
+    example_name,
     sources:             ex['sources'],
     include_directories: [ hipo_inc, include_directories(ROOT_incdir) ],
     link_with:           [ hipo_lib ],

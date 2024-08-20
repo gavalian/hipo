@@ -30,9 +30,9 @@ example_sources = [
 ]
 
 foreach ex : example_sources
-  example_name = fs.stem(ex['sources'][0])
+  example_name = 'hipo_' + fs.stem(ex['sources'][0])
   example_exe = executable(
-    f'@example_name@.exe',
+    example_name,
     sources:             ex['sources'],
     include_directories: [ hipo_inc ],
     link_with:           project_libs,
@@ -45,7 +45,7 @@ foreach ex : example_sources
       example_exe,
       suite:       [ 'example' ],
       args:        ex.get('test_args', []),
-      priority:    ex.get('first', false) ? -1 : 0,       # make sure 'first' tests start before any other
+      priority:    ex.get('first', false) ? 1 : 0,        # make sure 'first' tests start before any other
       is_parallel: ex.get('first', false) ? false : true, # make sure 'first' tests finish before any other
     )
   endif

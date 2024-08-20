@@ -1,5 +1,5 @@
 fortran_example_exe = executable(
-  'freader.exe',
+  'hipo_freader',
   'freader.F',
   link_with:  project_libs,
   install:    get_option('install_examples'),
@@ -8,7 +8,7 @@ fortran_example_exe = executable(
 
 if(have_external_test_file)
   test(
-    'freader',
+    'hipo_freader',
     fortran_example_exe,
     suite: [ 'example' ],
     args:  [ external_test_file ],
