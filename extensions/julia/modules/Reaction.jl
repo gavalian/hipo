@@ -19,7 +19,7 @@ export Descriptor
 
 function __init__()
   @printf("loading the Julia interface library\n")
-  libjulia = dlopen("libjulia.so")
+  libjulia = dlopen("libhipo4.so") # FIXME: how to find this library; use get(ENV, "HIPO") ?
 end
 
 function extract_braces_content(input_string::String)

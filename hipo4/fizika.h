@@ -22,7 +22,6 @@
 #ifndef __VECTOR_LIB__
 #define __VECTOR_LIB__
 
-namespace fizika {
 
 #include <iostream>
 #include <string>
@@ -30,6 +29,8 @@ namespace fizika {
 #include <fstream>
 #include <iomanip>
 #include <cmath>
+
+namespace fizika {
 
 class vector3 {
 private:

@@ -6,6 +6,7 @@ hipo_sources = files(
   'fusion.cpp',
   'node.cpp',
   'parser.cpp',
+  'reaction.cpp',
   'reader.cpp',
   'record.cpp',
   'recordbuilder.cpp',
