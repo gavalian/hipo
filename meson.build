@@ -61,7 +61,7 @@ endif
 # packaging
 pkg.generate(
   name:        meson.project_name(),
-  description: 'High Performance Output Data format for experimental Physics',
+  description: 'High Performance Output Data format for experimental physics',
   libraries:   project_libs,
   requires:    [ lz4_dep ],
 )
