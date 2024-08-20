@@ -2,13 +2,13 @@ external_test_file = get_option('test_file')
 test_external = external_test_file != '' # true if a user specified a test file
 
 example_sources = [
-  # {
-  #   'sources':    list of source code files; the example name will be based off the first one
-  #   'test_this':  boolean, whether or not to run this example as a test
-  #   'test_args':  list of arguments for this example, used for testing
-  #   'first':      boolean, whether this test should be run before any others (default = false)
-  #   'build_this': whether or not to build this (default = true)
-  # },
+  ### {
+  ###   'sources':    list of source code files; the example name will be based off the first one
+  ###   'test_this':  boolean, whether or not to run this example as a test
+  ###   'test_args':  list of arguments for this example, used for testing
+  ###   'first':      boolean, whether this test should be run before any others (default = false)
+  ###   'build_this': whether or not to build this (default = true)
+  ### },
   { 'sources': [ 'bankRowList.cc' ],        'test_this': test_external, 'test_args': [ external_test_file ] },
   { 'sources': [ 'builder.cc' ],            'test_this': false,         'test_args': [] },
   { 'sources': [ 'dataframe.cc' ],          'test_this': false,         'test_args': [] },
@@ -26,7 +26,7 @@ example_sources = [
   { 'sources': [ 'tupleFile.cc' ],          'test_this': true,          'test_args': [] },
   { 'sources': [ 'writeEvents.cc' ],        'test_this': false,         'test_args': [] },
   { 'sources': ['writeFile.cc' ],           'test_this': true,          'test_args': [], 'first': true },
-  # { 'sources': [ 'writeFileComposite.cc' ], 'test_this': false,         'test_args': [] }, # FIXME: does not compile
+  { 'sources': [ 'writeFileComposite.cc' ], 'test_this': false,         'test_args': [], 'build_this': false }, # FIXME: does not compile
   { 'sources': [ 'writeUserHeader.cc' ],    'test_this': true,          'test_args': [] },
   ##### benchmarks/
   { 'sources': [ 'benchmarks/ana_benchmark.cc' ], 'test_this': false, 'test_args': [] },
