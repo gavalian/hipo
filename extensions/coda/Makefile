@@ -2,11 +2,10 @@
 # MAKEFILE for BUILDING EXAMPLES FOR HIPO4 LIBRARY
 # AUTHOR: GAVALIAN DATE: 10/24/2018
 #********************************************************
-HIPOCFLAGS  := -I../../hipo4 -Ievio
-HIPOLIBS    := -L../../lib -lhipo4
 
-LZ4LIBS     := -L../../lz4/lib -llz4
-LZ4INCLUDES := -I../../lz4/lib
+include ../../meson/Makefile_config.mk
+
+EVIOCFLAGS  := -Ievio
 
 CXX       := g++
 CC        := gcc
@@ -32,6 +31,6 @@ clean:
 	@rm -rf *.o *~ *.exe example*hipo 
 
 %.o: %.cc
-	$(CXX) -c $< -O3 $(CXXFLAGS) $(HIPOCFLAGS) $(LZ4INCLUDES)
+	$(CXX) -c $< -O3 $(CXXFLAGS) $(HIPOCFLAGS) $(EVIOCFLAGS) $(LZ4INCLUDES)
 %.o: %.c
-	$(CC) -c $< -O3 $(HIPOCFLAGS) $(LZ4INCLUDES)
+	$(CC) -c $< -O3 $(HIPOCFLAGS) $(EVIOCFLAGS) $(LZ4INCLUDES)

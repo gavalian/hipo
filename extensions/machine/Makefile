@@ -1,13 +1,10 @@
+include ../../meson/Makefile_config.mk
 
 SOURCES := $(wildcard *.cpp)
 OBJECTS := $(SOURCES:.cpp=.o)
 
 LIBDIR   = ../lib
 SLIBDIR  = ../slib
-BINDIR   = ../bin
-
-#LZ4INCLUDES := -I../Lz4/lib/
-LZ4INCLUDES := -I../lz4/lib/ -I../hipo4
 
 CXXFLAGS = -std=c++11
 
@@ -38,6 +35,6 @@ clean:
 	@rm -rf *~ *.o *.exe
 
 %.o: %.cpp
-	$(CXX) -fPIC -c $< -O2 -D__LZ4__ $(CXXFLAGS) $(LZ4INCLUDES)
+	$(CXX) -fPIC -c $< -O2 -D__LZ4__ $(CXXFLAGS) $(LZ4INCLUDES) $(HIPOCFLAGS)
 %.o: %.cc
 	$(CXX) -fPIC -c $< -O2 -D__LZ4__ $(CXXFLAGS) $(LZ4INCLUDES)
