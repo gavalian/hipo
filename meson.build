@@ -6,6 +6,7 @@ project(
     'cpp_std':         'c++17',
     'buildtype':       'release',
     'libdir':          'lib',
+    'libexecdir':      'libexec',
     'default_library': 'both',
     'pkgconfig.relocatable': 'true',
   },
@@ -64,4 +65,6 @@ pkg.generate(
   description: 'High Performance Output Data format for experimental physics',
   libraries:   project_libs,
   requires:    [ lz4_dep ],
+  variables:   [ 'bindir=${prefix}' / get_option('bindir') ],
 )
+subdir('meson')

@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+#
+# `source` this file to set environment variables relevant for this `hipo` installation
+# NOTE: this file is only needed if you are testing HIPO installations and consumers; for
+#       all other testing, just use your build directory
+#
+
+# workaround older versions of macOS not having `realpath`
+get_realpath() {
+  echo $(cd $1 && pwd -P)
+}
+
+# installation prefix
+export HIPO=$(get_realpath $(dirname ${BASH_SOURCE[0]:-$0})/..)
+
+# prepend to PKG_CONFIG_PATH
+export PKG_CONFIG_PATH=$HIPO/@libdir@/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}
+
+# prepend to PATH
+hipo_path=$(pkg-config --variable bindir hipo4)
+[ -n "${hipo_path-}" ] && export PATH=$(get_realpath $hipo_path)${PATH:+:${PATH}}
+unset hipo_path
+
+# prepend to @ld_path@
+hipo_libdir=$(pkg-config --variable libdir hipo4)
+[ -n "${hipo_libdir-}" ] && export @ld_path@=$hipo_libdir${@ld_path@:+:${@ld_path@}}
+unset hipo_libdir
+
+# prepend to ROOT_INCLUDE_PATH
+if @root@; then
+  hipo_incdir=$(pkg-config --variable includedir hipo4)
+  [ -n "${hipo_incdir-}" ] && export ROOT_INCLUDE_PATH=$hipo_incdir${ROOT_INCLUDE_PATH:+:${ROOT_INCLUDE_PATH}}
+  unset hipo_incdir
+fi
+
+# cleanup
+unset -f get_realpath
