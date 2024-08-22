@@ -19,11 +19,12 @@ fs  = import('fs')
 pkg = import('pkgconfig')
 
 # dependencies
+lz4_minver = '1.9'
 lz4_dep = dependency(
   'liblz4',
   method: 'pkg-config',
-  version: '>=1.9',
-  fallback: ['lz4', 'liblz4'],
+  version: f'>=@lz4_minver@',
+  fallback: ['lz4', 'liblz4_dep'],
 )
 ROOT_dep = dependency(
   'ROOT',
@@ -71,7 +72,7 @@ pkg.generate(
   name:        meson.project_name(),
   description: 'High Performance Output Data format for experimental physics',
   libraries:   project_libs,
-  requires:    [ lz4_dep ],
+  requires:    [ f'liblz4 >= @lz4_minver@' ], # FIXME: can't use `lz4_dep` here when WrapDB is used; this string is a workaround
   variables: [
     'bindir=${prefix}' / get_option('bindir'),
     f'with_dataframes=@build_dataframes@',
