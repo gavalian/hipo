@@ -53,8 +53,10 @@ project_libs = []
 subdir('hipo4')
 
 # build examples
-subdir('examples')
-if(ROOT_dep.found())
+if(get_option('build_examples'))
+  subdir('examples')
+endif
+if(ROOT_dep.found() and get_option('install_root_tools'))
   subdir('examples/root')
 endif
 
