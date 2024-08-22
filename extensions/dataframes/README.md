@@ -16,17 +16,8 @@ flag -DCMAKE_CXX_STANDARD=17, so that it has the RDataFrame library.
 
 ### Recommended Way
 It is recommended that you build the libHipoDataFrame.so 
-(.dylib on Mac) library together with the HIPO library using "cmake".
-
-Here are the steps:
-```bash
-git clone https://github.com/gavalian/hipo.git
-cd hipo
-mkdir build
-cd build
-cmake -DCMAKE_INSTALL_PREFIX=/path/to/install/location ..
-make -j8 install
-```
+(.dylib on Mac) library together with the HIPO library using Meson.
+See the [main README](/README.md) for guidance.
 This will install the hipo4 and HipoDataFrame libraries in
 `/path/to/install/location/lib`
 
