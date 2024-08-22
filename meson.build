@@ -32,6 +32,10 @@ ROOT_dep = dependency(
   required: false,
   not_found_message: 'ROOT not found; tools which depend on ROOT will not be built.',
 )
+thread_dep = dependency(
+  'threads',
+  required: false,
+)
 
 # handle ROOT
 # NOTE: hipo library does NOT depend on ROOT, but some extensions and examples do

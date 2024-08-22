@@ -8,12 +8,13 @@ example_sources = [
   ###   'test_args':  list of arguments for this example, used for testing
   ###   'first':      boolean, whether this test should be run before any others (default = false)
   ###   'build_this': whether or not to build this (default = true)
+  ###   'deps':       additional dependencies (default = [])
   ### },
   { 'sources': [ 'bankRowList.cc' ],        'test_this': test_external, 'test_args': [ external_test_file ] },
   { 'sources': [ 'builder.cc' ],            'test_this': false,         'test_args': [] },
   { 'sources': [ 'dataframe.cc' ],          'test_this': false,         'test_args': [] },
   { 'sources': [ 'histograms.cc' ],         'test_this': test_external, 'test_args': [ external_test_file ] },
-  { 'sources': [ 'multithread.cc' ],        'test_this': false,         'test_args': [] },
+  { 'sources': [ 'multithread.cc' ],        'test_this': false,         'test_args': [], 'deps': [ thread_dep ], 'build_this': thread_dep.found() },
   { 'sources': [ 'readEvents.cc' ],         'test_this': false,         'test_args': [] },
   { 'sources': [ 'readFile.cc' ],           'test_this': true,          'test_args': [ 'example_output.hipo' ] },
   { 'sources': [ 'readFileDebug.cc' ],      'test_this': false,         'test_args': [] },
@@ -43,6 +44,7 @@ foreach ex : example_sources
       sources:             ex['sources'],
       include_directories: [ hipo_inc ],
       link_with:           project_libs,
+      dependencies:        ex.get('deps', []),
       install:             get_option('install_examples'),
       cpp_args:            [ '-Wno-sign-compare' ], # FIXME: fix the warnings; they are suppressed by these args
     )
