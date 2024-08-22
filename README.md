@@ -39,17 +39,18 @@ ninja test      # runs the tests
 ninja clean     # clean the build directory, if you need to start over
 ```
 
-### Building with Your Analysis Code
+### Integrating HIPO with Your Analysis Code
 
-To use the HIPO installation (`./install` from the above commands) with your analysis code, use `pkg-config`. The installation's `lib/pkgconfig` directory
+To build your analysis code with the HIPO installation, whether the one in `./install` or an installation on `ifarm` in `$HIPO`, use `pkg-config`. The installation's `lib/pkgconfig` directory
 must be in your `$PKG_CONFIG_PATH`, or use your build automation tool's options.
 For convenience, you may set `$PKG_CONFIG_PATH` by one of:
 ```bash
 source install/libexec/this_hipo.sh    # for bash or zsh
 source install/libexec/this_hipo.tcsh  # for tcsh
 ```
+On the `ifarm` installation, this is already set for you (by `module load hipo`).
 
-Here how to use ("consume") HIPO with common build automation tools:
+Here is how to use ("consume") HIPO with common build automation tools:
 
 #### 🔸 CMake
 ```cmake
