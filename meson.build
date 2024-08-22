@@ -59,7 +59,8 @@ if(ROOT_dep.found())
 endif
 
 # build extensions
-if(get_option('dataframes') and ROOT_dep.found())
+build_dataframes = get_option('dataframes') and ROOT_dep.found()
+if(build_dataframes)
   subdir('extensions' / 'dataframes')
 endif
 
@@ -69,6 +70,9 @@ pkg.generate(
   description: 'High Performance Output Data format for experimental physics',
   libraries:   project_libs,
   requires:    [ lz4_dep ],
-  variables:   [ 'bindir=${prefix}' / get_option('bindir') ],
+  variables: [
+    'bindir=${prefix}' / get_option('bindir'),
+    f'with_dataframes=@build_dataframes@',
+  ],
 )
 subdir('meson')
