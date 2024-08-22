@@ -11,15 +11,15 @@ functionality that exists in C++ and Java libraries.
 ## Installing the Package
 
 ### Dependencies
-#### [Meson](https://mesonbuild.com/) and [Ninja](https://ninja-build.org/)
-Likely available in your package manager (`apt`, `brew`, `dnf`, etc.),
+#### 🔸 [Meson](https://mesonbuild.com/) and [Ninja](https://ninja-build.org/)
+Likely available in your package manager (`apt`, `brew`, `dnf`, _etc_.),
 but the versions may be too old, in which case, use `pip`:
 ```bash
 python -m pip install meson ninja
 ```
-#### [LZ4](https://lz4.org/)
-Likely available in your package manager (`apt`, `brew`, `dnf`, etc.)
-#### Optional: [ROOT](https://root.cern.ch/)
+#### 🔸 [LZ4](https://lz4.org/)
+Likely available in your package manager, but if you do not have it, it will be installed locally for you
+#### 🔸 Optional: [ROOT](https://root.cern.ch/)
 _Only_ needed for certain extensions, such as [`HipoDataFrame`](/extensions/dataframes)
 
 ### Building
@@ -28,14 +28,14 @@ Use standard Meson commands to build HIPO.
 
 First, create a **build** directory; let's name it `./build` and set the installation location to `./install`:
 ```bash
-meson setup build --prefix=`pwd`
+meson setup build --prefix=`pwd`/install
 ```
 The build directory is where you can compile, test, and more:
 ```bash
 cd build
 ninja           # compiles
 ninja install   # installs to ../install/
-meson test      # run the tests
+meson test      # runs the tests
 ```
 
 > [!TIP]
@@ -50,8 +50,7 @@ meson test      # run the tests
 
 To use the HIPO installation (`./install` from the above commands) with your analysis code, use `pkg-config`. The installation's `lib/pkgconfig` directory
 must be in your `$PKG_CONFIG_PATH`, or use your build automation tool's options.
-
-For convenience, set `$PKG_CONFIG_PATH` by one of:
+For convenience, you may set `$PKG_CONFIG_PATH` by one of:
 ```bash
 source install/libexec/this_hipo.sh    # for bash or zsh
 source install/libexec/this_hipo.tcsh  # for tcsh
@@ -79,7 +78,7 @@ pkg-config --cflags hipo4
 pkg-config --libs hipo4
 ```
 You can do this in a Makefile:
-```
+```make
 HIPO_LIBS := $(shell pkg-config --cflags hipo4)
 HIPO_INCS := $(shell pkg-config --libs hipo4)
 ```
