@@ -10,14 +10,79 @@ functionality that exists in C++ and Java libraries.
 
 ## Installing the Package
 
-Package has a dependency on LZ4 compression library, which is a submodule.
-Use command:
-
+### Dependencies
+#### [Meson](https://mesonbuild.com/) and [Ninja](https://ninja-build.org/)
+Likely available in your package manager (`apt`, `brew`, `dnf`, etc.),
+but the versions may be too old, in which case, use `pip`:
+```bash
+python -m pip install meson ninja
 ```
- git clone --recurse-submodules git@github.com:gavalian/hipo.git
+#### [LZ4](https://lz4.org/)
+Likely available in your package manager (`apt`, `brew`, `dnf`, etc.)
+#### Optional: [ROOT](https://root.cern.ch/)
+_Only_ needed for certain extensions, such as [`HipoDataFrame`](/extensions/dataframes)
+
+### Building
+
+Use standard Meson commands to build HIPO.
+
+First, create a **build** directory; let's name it `./build` and set the installation location to `./install`:
+```bash
+meson setup build --prefix=`pwd`
+```
+The build directory is where you can compile, test, and more:
+```bash
+cd build
+ninja           # compiles
+ninja install   # installs to ../install/
+meson test      # run the tests
 ```
 
-to clone the distribution. Then compile using 'make', or 'cmake', and start using.
+> [!TIP]
+> If you want a "clean" build, don't remove the build directory!
+> Instead, "wipe" it:
+> ```bash
+> meson setup --wipe
+> ```
+<!--`-->
+
+### Building with Your Analysis Code
+
+To use the HIPO installation (`./install` from the above commands) with your analysis code, use `pkg-config`. The installation's `lib/pkgconfig` directory
+must be in your `$PKG_CONFIG_PATH`, or use your build automation tool's options.
+
+For convenience, set `$PKG_CONFIG_PATH` by one of:
+```bash
+source install/libexec/this_hipo.sh    # for bash or zsh
+source install/libexec/this_hipo.tcsh  # for tcsh
+```
+
+Here how to use ("consume") HIPO with common build automation tools:
+
+#### CMake
+```cmake
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(hipo4 REQUIRED IMPORTED_TARGET hipo4)
+# this creates the target 'PkgConfig::hipo4', so for example:
+target_link_libraries(my_analysis_lib PUBLIC PkgConfig::hipo4)
+```
+
+#### Meson
+```meson
+hipo_dep = dependency('hipo4')
+```
+
+#### Makefile or Command Line
+You need the compiler and linker flags, which you can get from running `pkg-config`
+```bash
+pkg-config --cflags hipo4
+pkg-config --libs hipo4
+```
+You can do this in a Makefile:
+```
+HIPO_LIBS := $(shell pkg-config --cflags hipo4)
+HIPO_INCS := $(shell pkg-config --libs hipo4)
+```
 
 ## Usage
 
