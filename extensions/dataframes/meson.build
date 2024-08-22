@@ -1,4 +1,6 @@
-dataframe_headers = files('RHipoDS.hxx')
+dataframe_headers = [ # NOTE: headers must be absolute paths, for rootcling's generated `#include` directives to work correctly
+  meson.current_source_dir() / 'RHipoDS.hxx',
+]
 dataframe_sources = files('RHipoDS.cxx')
 dataframe_linkdef = files('RHipoDS_LinkDef.h')
 
