@@ -35,16 +35,9 @@ The build directory is where you can compile, test, and more:
 cd build
 ninja           # compiles
 ninja install   # installs to ../install/
-meson test      # runs the tests
+ninja test      # runs the tests
+ninja clean     # clean the build directory, if you need to start over
 ```
-
-> [!TIP]
-> If you want a "clean" build, don't remove the build directory!
-> Instead, "wipe" it:
-> ```bash
-> meson setup --wipe
-> ```
-<!--`-->
 
 ### Building with Your Analysis Code
 
@@ -58,7 +51,7 @@ source install/libexec/this_hipo.tcsh  # for tcsh
 
 Here how to use ("consume") HIPO with common build automation tools:
 
-#### CMake
+#### 🔸 CMake
 ```cmake
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(hipo4 REQUIRED IMPORTED_TARGET hipo4)
@@ -66,12 +59,12 @@ pkg_check_modules(hipo4 REQUIRED IMPORTED_TARGET hipo4)
 target_link_libraries(my_analysis_lib PUBLIC PkgConfig::hipo4)
 ```
 
-#### Meson
+#### 🔸 Meson
 ```meson
 hipo_dep = dependency('hipo4')
 ```
 
-#### Makefile or Command Line
+#### 🔸 Makefile or Command Line
 You need the compiler and linker flags, which you can get from running `pkg-config`
 ```bash
 pkg-config --cflags hipo4
