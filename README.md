@@ -19,10 +19,7 @@ Click each for details
 > - Ninja: <https://ninja-build.org/>
 >
 > Likely available in your package manager (`apt`, `brew`, `dnf`, _etc_.),
-> but the versions may be too old, in which case, use `pip`:
-> ```bash
-> python -m pip install meson ninja
-> ```
+> but the versions may be too old, in which case, use `pip` (`python -m pip install meson ninja`)
 </details>
 
 <details>
