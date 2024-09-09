@@ -4,7 +4,7 @@ option('install_examples', type: 'boolean', value: false, description: 'install 
 
 # ROOT extensions and tools
 option('dataframes',         type: 'boolean', value: true,  description: 'install HIPO dataframes extension')
-option('install_root_tools', type: 'boolean', value: true,  description: 'install ROOT tools such as "hipo_hist2root"')
+option('install_root_tools', type: 'boolean', value: false, description: 'install ROOT tools such as "hipo_hist2root"')
 
 # testing
 option('test_file',    type: 'string',  value: '',    description: 'sample HIPO file to use for certain tests; if unspecified, those tests will not run; must be an absolute path')
