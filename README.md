@@ -20,7 +20,8 @@ python -m pip install meson ninja
 #### 🔸 [LZ4](https://lz4.org/)
 Likely available in your package manager, but if you do not have it, it will be installed locally for you
 #### 🔸 Optional: [ROOT](https://root.cern.ch/)
-_Only_ needed for certain extensions, such as [`HipoDataFrame`](/extensions/dataframes)
+ROOT is _optional_ and _only_ needed for certain extensions and examples, such as [`HipoDataFrame`](/extensions/dataframes);
+if you do not have ROOT, the complete HIPO library will still be built.
 
 ### Building
 
