@@ -14,6 +14,6 @@ foreach ex : example_root_sources
     link_with:           [ hipo_lib ],
     link_args:           [ '-L' + ROOT_libdir, '-lCore', '-lRIO', '-lHist', '-lTree', '-lPhysics' ],
     install:             ex['install_this'],
-    cpp_args:            [ '-Wno-unused-variable', '-Wno-unused-but-set-variable', '-Wno-sign-compare' ], # FIXME: fix the warnings
+    cpp_args:            get_option('suppress_warnings') ? [ '-Wno-unused-variable', '-Wno-unused-but-set-variable', '-Wno-sign-compare' ] : [], # FIXME: fix the warnings
   )
 endforeach
