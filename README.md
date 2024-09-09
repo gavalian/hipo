@@ -34,10 +34,9 @@ meson setup build --prefix=`pwd`/install
 ```
 <details>
 <summary>Click here for more details</summary>
-> [!NOTE]
-> - you may run this command from _any_ directory; in that case, provide the path to the source code directory (_e.g._,
->   `meson setup build /path/to/source`)
-> - the installation prefix must be an _absolute path_; you can change it later (`meson configure`)
+- you may run this command from _any_ directory; in that case, provide the path to the source code directory (_e.g._,
+  `meson setup build /path/to/source`)
+- the installation prefix must be an _absolute path_; you can change it later (`meson configure`)
 </details>
 
 The build directory is where you can compile, test, and more:
