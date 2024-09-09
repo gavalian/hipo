@@ -27,15 +27,24 @@ if you do not have ROOT, the complete HIPO library will still be built.
 
 Use standard Meson commands to build HIPO.
 
-First, create a **build** directory; let's name it `./build` and set the installation location to `./install`:
+For example, first create a **build** directory; let's name it `./build`, set the installation location to `./install`, and
+run the following command from the source code directory:
 ```bash
 meson setup build --prefix=`pwd`/install
 ```
+<details>
+<summary>Click here for more details</summary>
+> [!NOTE]
+> - you may run this command from _any_ directory; in that case, provide the path to the source code directory (_e.g._,
+>   `meson setup build /path/to/source`)
+> - the installation prefix must be an _absolute path_; you can change it later (`meson configure`)
+</details>
+
 The build directory is where you can compile, test, and more:
 ```bash
 cd build
 ninja           # compiles
-ninja install   # installs to ../install/
+ninja install   # installs to your specified prefix (../install/, in the example)
 ninja test      # runs the tests
 ninja clean     # clean the build directory, if you need to start over
 ```
