@@ -6,9 +6,10 @@ hipo_sources = files(
   'fusion.cpp',
   'node.cpp',
   'parser.cpp',
+  'reaction.cpp',
   'reader.cpp',
-  'recordbuilder.cpp',
   'record.cpp',
+  'recordbuilder.cpp',
   'tuple.cpp',
   'utils.cpp',
   'wrapper.cpp',
@@ -28,8 +29,8 @@ hipo_headers = files(
   'parser.h',
   'reaction.h',
   'reader.h',
-  'recordbuilder.h',
   'record.h',
+  'recordbuilder.h',
   'tuple.h',
   'twig.h',
   'utils.h',
@@ -39,13 +40,14 @@ hipo_headers = files(
 hipo_lib = library(
   meson.project_name(),
   hipo_sources,
-  dependencies: [lz4_dep],
+  dependencies: [ lz4_dep ],
   cpp_args: [ # FIXME: fix the warnings; they are suppressed by these args
     '-Wno-sign-compare',
     '-Wno-unused-variable',
     '-Wno-unused-but-set-variable',
     '-Wno-misleading-indentation',
     '-Wno-format',
+    '-Wno-stringop-overflow',
     ],
   install: true
 )

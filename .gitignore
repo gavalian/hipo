@@ -4,4 +4,6 @@
 lib
 slib
 __pycache__
-build
+/build*/
+/install*/
+/.cache

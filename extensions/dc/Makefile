@@ -2,11 +2,10 @@
 # MAKEFILE for BUILDING EXAMPLES FOR HIPO4 LIBRARY
 # AUTHOR: GAVALIAN DATE: 10/24/2018
 #********************************************************
-HIPOCFLAGS  := -I../../hipo4 -I./submodules/install/include
-HIPOLIBS    := -L../../lib -lhipo4
 
-LZ4LIBS     := -L../../lz4/lib -llz4 -lpthread
-LZ4INCLUDES := -I../../lz4/lib
+include ../../meson/Makefile_config.mk
+
+SUBMODULECFLAGS := -I./submodules/install/include
 
 CXX       := g++
 CXXFLAGS  += -Wall -fPIC -std=c++14 -Wunknown-pragmas
@@ -40,5 +39,5 @@ submodules:
 	$(MAKE) -C submodules all
 
 %.o: %.cc
-	$(CXX) -c $< -O3 $(CXXFLAGS) $(HIPOCFLAGS) $(LZ4INCLUDES)
+	$(CXX) -c $< -O3 $(CXXFLAGS) $(HIPOCFLAGS) $(SUBMODULECFLAGS) $(LZ4INCLUDES)
 
