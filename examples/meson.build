@@ -46,7 +46,7 @@ foreach ex : example_sources
       link_with:           project_libs,
       dependencies:        ex.get('deps', []),
       install:             get_option('install_examples'),
-      cpp_args:            [ '-Wno-sign-compare' ], # FIXME: fix the warnings; they are suppressed by these args
+      cpp_args:            get_option('suppress_warnings') ? [ '-Wno-sign-compare' ] : [], # FIXME: fix the warnings; they are suppressed by these args
     )
     if(ex.get('test_this', true))
       test(
