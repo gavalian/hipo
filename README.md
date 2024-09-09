@@ -11,21 +11,40 @@ functionality that exists in C++ and Java libraries.
 ## Installing the Package
 
 ### Dependencies
-#### 🔸 [Meson](https://mesonbuild.com/) and [Ninja](https://ninja-build.org/)
-Likely available in your package manager (`apt`, `brew`, `dnf`, _etc_.),
-but the versions may be too old, in which case, use `pip`:
-```bash
-python -m pip install meson ninja
-```
-#### 🔸 [LZ4](https://lz4.org/)
-Likely available in your package manager, but if you do not have it, it will be installed locally for you
-#### 🔸 Optional: [ROOT](https://root.cern.ch/)
-ROOT is _optional_ and _only_ needed for certain extensions and examples, such as [`HipoDataFrame`](/extensions/dataframes);
-if you do not have ROOT, the complete HIPO library will still be built.
+Click each for details
+<details>
+<summary>🔸 Meson and Ninja</summary>
+
+> - Meson: <https://mesonbuild.com/>
+> - Ninja: <https://ninja-build.org/>
+>
+> Likely available in your package manager (`apt`, `brew`, `dnf`, _etc_.),
+> but the versions may be too old, in which case, use `pip`:
+> ```bash
+> python -m pip install meson ninja
+> ```
+</details>
+
+<details>
+<summary>🔸 LZ4</summary>
+
+> - LZ4: <https://lz4.org/>
+>
+> Likely available in your package manager, but if you do not have it, it will be installed locally for you
+</details>
+
+<details>
+<summary>🔸 ROOT (optional)</summary>
+
+> - ROOT: <https://root.cern.ch/>
+>
+> ROOT is _optional_ and _only_ needed for certain extensions and examples, such as [`HipoDataFrame`](/extensions/dataframes);
+> if you do not have ROOT, the complete HIPO library will still be built.
+</details>
 
 ### Building
 
-Use standard Meson commands to build HIPO.
+Use standard [Meson commands](https://mesonbuild.com/Quick-guide.html) to build HIPO.
 
 For example, first create a **build** directory; let's name it `./build`, set the installation location to `./install`, and
 run the following command from the source code directory:
@@ -34,9 +53,10 @@ meson setup build --prefix=`pwd`/install
 ```
 <details>
 <summary>Click here for more details</summary>
-- you may run this command from _any_ directory; in that case, provide the path to the source code directory (_e.g._,
-  `meson setup build /path/to/source`)
-- the installation prefix must be an _absolute path_; you can change it later (`meson configure`)
+
+> - you may run this command from _any_ directory; in that case, provide the path to the source code directory (_e.g._,
+>   `meson setup build /path/to/source`)
+> - the installation prefix must be an _absolute path_; you can change it later (`meson configure`)
 </details>
 
 The build directory is where you can compile, test, and more:
@@ -59,22 +79,30 @@ source install/libexec/this_hipo.tcsh  # for tcsh
 ```
 On the `ifarm` installation, this is already set for you (by `module load hipo`).
 
-Here is how to use ("consume") HIPO with common build automation tools:
+Here is how to use ("consume") HIPO with common build automation tools (click each to see details):
 
-#### 🔸 CMake
+<details>
+<summary>🔸 CMake</summary>
+
 ```cmake
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(hipo4 REQUIRED IMPORTED_TARGET hipo4)
 # this creates the target 'PkgConfig::hipo4', so for example:
 target_link_libraries(my_analysis_lib PUBLIC PkgConfig::hipo4)
 ```
+</details>
 
-#### 🔸 Meson
+<details>
+<summary>🔸 Meson</summary>
+  
 ```meson
 hipo_dep = dependency('hipo4')
 ```
+</details>
 
-#### 🔸 Makefile or Command Line
+<details>
+<summary>🔸 Makefile or Command Line</summary>
+  
 You need the compiler and linker flags, which you can get from running `pkg-config`
 ```bash
 pkg-config --cflags hipo4
@@ -85,6 +113,7 @@ You can do this in a Makefile:
 HIPO_LIBS := $(shell pkg-config --cflags hipo4)
 HIPO_INCS := $(shell pkg-config --libs hipo4)
 ```
+</details>
 
 ## Usage
 
