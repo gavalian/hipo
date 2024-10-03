@@ -72,7 +72,7 @@ namespace hipo {
       structure(int size){ allocate(size);}
       structure(int __group, int __item, std::string &str);
 
-      virtual     ~structure();
+      virtual     ~structure()= default;
       bool         allocate(int size);
       
       int          getSize() const noexcept{
