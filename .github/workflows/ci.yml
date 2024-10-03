@@ -44,7 +44,8 @@ jobs:
             --prefix=`pwd`/install            \
             -D install_examples=true          \
             -D test_file=`pwd`/test_data.hipo \
-            -D test_fortran=true
+            -D test_fortran=true              \
+            ${{ matrix.opts }}
       - run: meson install
         working-directory: build
       - name: dump build log
