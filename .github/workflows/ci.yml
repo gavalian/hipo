@@ -102,7 +102,7 @@ jobs:
         with:
           key: test_data
           path: test_data.hipo
-      - run: meson test --print-errorlogs
+      - run: meson test --print-errorlogs --max-lines=10000
         working-directory: build
       - name: upload test logs
         uses: actions/upload-artifact@v4
