@@ -6,12 +6,6 @@ on:
     branches: [ master ]
     tags: [ '*' ]
 
-env:
-  job_matrix: >-
-    {
-      "runner": [ "ubuntu-latest", "macos-latest" ]
-    }
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
@@ -22,11 +16,23 @@ defaults:
 
 jobs:
 
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    outputs:
+      job_matrix: ${{ steps.matrix.outputs.job_matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: setup job matrix
+        id: matrix
+        run: echo job_matrix=$(jq . -c .github/job_matrix.json) | tee -a $GITHUB_OUTPUT
+
   build:
     name: Build
+    needs: [ setup ]
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(env.job_matrix) }}
+      matrix: ${{ fromJson(needs.setup.outputs.job_matrix) }}
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -75,10 +81,10 @@ jobs:
 
   test:
     name: Test
-    needs: [ download_test_data, build ]
+    needs: [ download_test_data, build, setup ]
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(env.job_matrix) }}
+      matrix: ${{ fromJson(needs.setup.outputs.job_matrix) }}
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
