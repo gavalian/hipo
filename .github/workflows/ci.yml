@@ -108,6 +108,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-${{ matrix.id }}
+          name: test-logs-${{ matrix.id }}
           retention-days: 5
-          path: build/meson-logs/*
+          path: build/meson-logs/testlog.txt
