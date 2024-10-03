@@ -6,6 +6,12 @@ on:
     branches: [ master ]
     tags: [ '*' ]
 
+env:
+  job_matrix: >-
+    {
+      "runner": [ "ubuntu-latest", "macos-latest" ]
+    }
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
@@ -20,8 +26,7 @@ jobs:
     name: Build
     strategy:
       fail-fast: false
-      matrix:
-        runner: [ ubuntu-latest, macos-latest ]
+      matrix: ${{ fromJson(env.job_matrix) }}
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -73,8 +78,7 @@ jobs:
     needs: [ download_test_data, build ]
     strategy:
       fail-fast: false
-      matrix:
-        runner: [ ubuntu-latest, macos-latest ]
+      matrix: ${{ fromJson(env.job_matrix) }}
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
