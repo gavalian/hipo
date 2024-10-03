@@ -56,6 +56,7 @@ foreach ex : example_sources
         args:        ex.get('test_args', []),
         priority:    ex.get('first', false) ? 1 : 0,        # make sure 'first' tests start before any other
         is_parallel: ex.get('first', false) ? false : true, # make sure 'first' tests finish before any other
+        timeout:     120,
       )
     endif
   endif
