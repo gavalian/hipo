@@ -48,24 +48,30 @@ jobs:
           retention-days: 5
           path: build.tar.zst
 
-  download_test_data:
+  download_test_data: # FIXME: it would be better to generate our own HIPO file here, rather than assuming this file will continue to exist
     name: Download test data
     runs-on: ubuntu-latest
-    env:
-      type: physics
     steps:
       - uses: actions/cache@v4
         id: cache
         with:
-          key: test_data
+          key: test_data_xrootd
           path: test_data.hipo
           lookup-only: true
+      - name: install xrootd-client
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+        run: |
+          sudo apt -y update
+          sudo apt -y upgrade
+          sudo apt -y install xrootd-client
       - name: download
         if: ${{ steps.cache.outputs.cache-hit != 'true' }}
         run: |
-          # FIXME: it would be better to generate our own HIPO file here, rather than assuming this file will continue to exist
-          wget -nv --no-check-certificate http://clasweb.jlab.org/clas12offline/distribution/clas12-timeline/validation_files_${{ env.type }}.tar.zst
-          tar xvf validation_files_${{ env.type }}.tar.zst
+          xrdcp xroot://sci-xrootd.jlab.org//osgpool/hallb/clas12/validation/recon/dst/validation_files.tar.zst ./
+      - name: rename
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+        run: |
+          tar xvf validation_files.tar.zst
           mv -v $(find validation_files -type f -name "*.hipo" | head -n1) test_data.hipo
 
   test:
@@ -89,7 +95,7 @@ jobs:
       - name: get test data
         uses: actions/cache/restore@v4
         with:
-          key: test_data
+          key: test_data_xrootd
           path: test_data.hipo
       - run: meson test
         working-directory: build
