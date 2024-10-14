@@ -41,14 +41,14 @@ hipo_lib = library(
   meson.project_name(),
   hipo_sources,
   dependencies: [ lz4_dep ],
-  cpp_args: [ # FIXME: fix the warnings; they are suppressed by these args
+  cpp_args: get_option('suppress_warnings') ? [ # FIXME: fix the warnings; they are suppressed by these args
     '-Wno-sign-compare',
     '-Wno-unused-variable',
     '-Wno-unused-but-set-variable',
     '-Wno-misleading-indentation',
     '-Wno-format',
     '-Wno-stringop-overflow',
-    ],
+    ] : [],
   install: true
 )
 

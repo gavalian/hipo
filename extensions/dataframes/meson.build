@@ -43,7 +43,7 @@ dataframe_lib = library(
   link_with:           [ hipo_lib ],
   link_args:           [ '-L' + ROOT_libdir, '-lCore', '-lROOTDataFrame', '-lROOTVecOps' ],
   build_rpath:         ROOT_libdir,
-  cpp_args:            [ '-Wno-sign-compare' ], # FIXME: fix these warnings
+  cpp_args:            get_option('suppress_warnings') ? [ '-Wno-sign-compare' ] : [], # FIXME: fix these warnings
   install: true
 )
 install_headers(dataframe_headers, subdir: meson.project_name())
