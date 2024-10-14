@@ -46,7 +46,12 @@ namespace hipo {
     tuple::tuple(const char *format){
     }
 
-    tuple::~tuple()= default;
+    tuple::~tuple(){
+      for(auto& branch : branches) {
+        if(branch) delete branch;
+      }
+      branches.clear();
+    }
 
    void tuple::initBranches(int size){
         for(int i = 0; i < size; i++) branches.push_back(new hipo::structure());
