@@ -24,46 +24,52 @@ void example1(const char *file){
   printf("===== EXAMPLE 1 =====\n");
   hipo::reader   r(file);
   hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
+  auto b_particle     = hipo::getBanklistIndex(list, "REC::Particle");
+  auto b_event        = hipo::getBanklistIndex(list, "REC::Event");
+
   int counter = 0;
   while( r.next(list)&&counter<350){
     counter++;
-    int nrows = list[0].getRows();
+    int nrows = list[b_particle].getRows();
     printf("\n>>> NEW EVENT <<<\n");
     printf(" rows = %d\n",nrows);
 
     // first, loop over all the rows
     printf(" loop over all rows:\n");
-    for(auto const& row : list[0].getRowList())
-      printf("\t pid [%d] = %d\n", row, list[0].getInt(0,row));
+    for(auto const& row : list[b_particle].getRowList())
+      printf("\t pid [%d] = %d\n", row, list[b_particle].getInt(0,row));
 
     // then, set the rowlist to contain only a few rows, and loop over those
     if(nrows>6){
 
       // set the list of rows, then loop over those
       printf(" there are more than 6 rows, let's loop over some specific rows: 0, 1, and 4\n");
-      list[0].getMutableRowList().setList({0, 1, 4});
-      for(auto const& row : list[0].getRowList())
-        printf("\t pid [%d] = %d\n", row, list[0].getInt(0,row));
-      assert((list[0].getRowList().size() == 3)); // test
+      list[b_particle].getMutableRowList().setList({0, 1, 4});
+      for(auto const& row : list[b_particle].getRowList())
+        printf("\t pid [%d] = %d\n", row, list[b_particle].getInt(0,row));
+      assert((list[b_particle].getRowList().size() == 3)); // test
 
       // it's still possible to access the full set of rows
       printf(" we can still loop over all the rows with `getFullRowList()`\n");
-      for(auto const& row : list[0].getFullRowList())
-        printf("\t pid [%d] = %d\n", row, list[0].getInt(0,row));
+      for(auto const& row : list[b_particle].getFullRowList())
+        printf("\t pid [%d] = %d\n", row, list[b_particle].getInt(0,row));
       printf(" or similarly with `getRows()`\n");
-      for(int row=0; row<list[0].getRows(); row++)
-        printf("\t pid [%d] = %d\n", row, list[0].getInt(0,row));
-      assert((static_cast<int>(list[0].getFullRowList().size()) == list[0].getRows())); // test
+      for(int row=0; row<list[b_particle].getRows(); row++)
+        printf("\t pid [%d] = %d\n", row, list[b_particle].getInt(0,row));
+      assert((static_cast<int>(list[b_particle].getFullRowList().size()) == list[b_particle].getRows())); // test
 
       // you may also reset the list to its original, full state
       printf(" resetting the rowlist restores the full row list\n");
-      list[0].getMutableRowList().reset();
-      for(auto const& row : list[0].getRowList())
-        printf("\t pid [%d] = %d\n", row, list[0].getInt(0,row));
-      assert((static_cast<int>(list[0].getRowList().size()) == list[0].getRows())); // test
+      list[b_particle].getMutableRowList().reset();
+      for(auto const& row : list[b_particle].getRowList())
+        printf("\t pid [%d] = %d\n", row, list[b_particle].getInt(0,row));
+      assert((static_cast<int>(list[b_particle].getRowList().size()) == list[b_particle].getRows())); // test
     }
 
   }
+
+  assert((b_particle == 0)); // test: validate `hipo::getBanklistIndex` returned the correct indices
+  assert((b_event == 1));
 }
 
 // example showing how to filter a bank's rowlist with an expression
@@ -71,16 +77,17 @@ void example2(const char *file){
   printf("===== EXAMPLE 2 =====\n");
   hipo::reader   r(file);
   hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
+  auto b_particle = hipo::getBanklistIndex(list, "REC::Particle");
   int counter = 0;
   while( r.next(list)&&counter<350){
     counter++;
     printf("\n>>> NEW EVENT <<<\n");
     printf("=== BEFORE ==================================\n");
-    list[0].show();
-    list[0].getMutableRowList().filter("charge!=0");
+    list[b_particle].show();
+    list[b_particle].getMutableRowList().filter("charge!=0");
     printf("=== AFTER ===================================\n");
-    list[0].show();
-    // list[0].show(true); // call `show(true)` if you still need to see the full (not filtered) bank
+    list[b_particle].show();
+    // list[b_particle].show(true); // call `show(true)` if you still need to see the full (not filtered) bank
   }
 }
 
@@ -90,6 +97,7 @@ void example3(const char *file){
 
   hipo::reader   r(file);
   hipo::banklist list = r.getBanks({"REC::Particle","REC::Event"});
+  auto b_particle = hipo::getBanklistIndex(list, "REC::Particle");
   std::function charged = [](hipo::bank &b, int row) { return b.getInt("charge",row)!=0 ? 1.0 : 0.0;};
 
   int counter = 0;
@@ -97,11 +105,11 @@ void example3(const char *file){
     counter++;
     printf("\n>>> NEW EVENT <<<\n");
     printf("=== BEFORE ==================================\n");
-    list[0].show();
-    list[0].getMutableRowList().filter(charged);
+    list[b_particle].show();
+    list[b_particle].getMutableRowList().filter(charged);
     printf("=== AFTER ===================================\n");
-    list[0].show();
-    // list[0].show(true); // call `show(true)` if you still need to see the full (not filtered) bank
+    list[b_particle].show();
+    // list[b_particle].show(true); // call `show(true)` if you still need to see the full (not filtered) bank
   }
 }
 
@@ -113,25 +121,27 @@ void example4(const char *file){
   printf("===== EXAMPLE 4 =====\n");
   hipo::reader   r(file);
   hipo::banklist list = r.getBanks({"REC::Particle","REC::Calorimeter"});
+  auto b_particle = hipo::getBanklistIndex(list, "REC::Particle");
+  auto b_cal      = hipo::getBanklistIndex(list, "REC::Calorimeter");
   int const pindex_column = 1; // of REC::Calorimeter
   int const electron_row = 0;
   int counter = 0;
 
   while( r.next(list)&&counter<350){
     counter++;
-    int status = list[0].getInt("status",electron_row);
-    if(list[0].getInt("pid",electron_row)==11&&abs(status)>=2000&&abs(status)<3000){
+    int status = list[b_particle].getInt("status",electron_row);
+    if(list[b_particle].getInt("pid",electron_row)==11&&abs(status)>=2000&&abs(status)<3000){
       printf("\n>>> NEW EVENT <<<\n");
       printf("found electron in row %d\n", electron_row);
       double energy = 0.0;
-      for(auto const& it : list[1].getRowListLinked(electron_row, pindex_column)){
-        auto e = list[1].getFloat("energy",it);
+      for(auto const& it : list[b_cal].getRowListLinked(electron_row, pindex_column)){
+        auto e = list[b_cal].getFloat("energy",it);
         printf(" => links REC::Calorimeter row=%d, which has energy %f\n", it, e);
         energy += e;
       }
       printf("=========================\ntotal energy = %f\n=========================\n",energy);
-      list[0].show();
-      list[1].show();
+      list[b_particle].show();
+      list[b_cal].show();
     }
   }
 }
