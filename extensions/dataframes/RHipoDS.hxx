@@ -34,7 +34,12 @@ public:
 //   };
 
    bool fHipoReadOnlyPhysicsEvents = true;
-
+   //
+   // The following list of type names is actually very important for the proper functioning of the RDataFrame.
+   // The data itself is stored in a memory block with a type-less pointer to it (void *). This block is interpreted
+   // according to the types in the list below.
+   // Note that we are up-casting the char type to short. (In HIPO every getByte, getShort or getInt actually
+   // returns an int!)
    const std::vector<std::string> fgCollTypeNumToString{ // ORDER is important here. C++ so go +1
       "zero", "short", "short", "int", "float", "double", "long", "None1", "long"};
    std::vector<std::string> fHeaders;
@@ -79,11 +84,15 @@ public:
    std::vector< std::vector<void *> > fColumnPointers; // [active_index][slot] - The anonymous store of the pointers to the data.
 
    // The data, one of each type, per slot. data_index = fIndexToData[active_index]
+   //std::vector< std::vector<char> > fCharData;
+   std::vector< std::vector<short> > fShortData;
    std::vector< std::vector<int> > fIntData;      // [data_index][slot] - to integer.
    std::vector< std::vector<long> > fLongData;
    std::vector< std::vector<float> > fFloatData;
    std::vector< std::vector<double> > fDoubleData;
 
+   //std::vector< std::vector< std::vector<char> > > fVecCharData;
+   std::vector< std::vector< std::vector<short> > > fVecShortData;
    std::vector< std::vector< std::vector<int> > > fVecIntData; // [data_index][slot] to vector.
    std::vector< std::vector< std::vector<long> > > fVecLongData;
    std::vector< std::vector< std::vector<float> > > fVecFloatData;
