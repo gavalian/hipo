@@ -413,9 +413,6 @@ void RHipoDS::ClearData(int slot){
       return;
    }
 
-//   for(auto &vecvec: fVecCharData){
-//      vecvec[slot].clear();
-//   }
    for(auto &vecvec: fVecShortData){
       vecvec[slot].clear();
    }
@@ -482,18 +479,11 @@ bool RHipoDS::SetEntry(unsigned int slot, ULong64_t entry){
       // So here, we can assume that the bank has the data we are interested in.
       int nrows = fBanks[bank_index].getRows();
       int data_index = fIndexToData[active_index];
-      char cnum  = 0;
-      short snum = 0;
       if( fColumnTypeIsVector[col_index] ){
          for(int irow=0; irow < nrows; ++irow) {
             switch (fColumnType.at(col_index)) {
-               case 1: // vector<char>
-                  cnum = fBanks[bank_index].getByte(fColumnItem[col_index], irow);
-                  fVecShortData.at(data_index).at(slot).push_back( (short) cnum );
-//                   short snum = fBanks[bank_index].getByte(fColumnItem[col_index], irow);
-//                   fVecCharData.at(data_index).at(slot).push_back(cnum);
-                  break;
-               case 2: //
+               case 1: // vector<char>  -- is upcast to short.
+               case 2: // vector<short>
                   fVecShortData.at(data_index).at(slot).push_back( (short) fBanks[bank_index].getShort(fColumnItem[col_index], irow));
                   break;
                case 3: // vector<int>
