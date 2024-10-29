@@ -31,10 +31,13 @@ jobs:
         run: |
           meson setup build .                 \
             --prefix=`pwd`/install            \
+            -D buildtype=debug                \
             -D install_examples=true          \
             -D test_file=`pwd`/test_data.hipo \
             -D test_fortran=true
-      - run: meson install
+      - run: ninja -v
+        working-directory: build
+      - run: ninja install
         working-directory: build
       - name: dump build log
         if: always()
