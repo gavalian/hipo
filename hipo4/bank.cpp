@@ -37,6 +37,8 @@
 #include "bank.h"
 #include "parser.h"
 
+#include <algorithm>
+
 namespace hipo {
 
   //==============================================================
@@ -558,6 +560,13 @@ void bank::printValue(int schemaEntry, int row) const {
       printf("%14ld ", getLong(schemaEntry, row));
       break;
   }
+}
+
+banklist::size_type getBanklistIndex(banklist& banks, std::string const& bankName) noexcept(false) {
+  auto predicate = [&bankName](auto& bank) { return bank.getSchema().getName() == bankName; };
+  if(auto it{std::find_if(banks.begin(), banks.end(), predicate)}; it != banks.end())
+    return std::distance(banks.begin(), it);
+  throw std::runtime_error("bank named '" + bankName + "' not found in banklist");
 }
 
 }

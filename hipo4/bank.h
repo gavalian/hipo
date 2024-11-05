@@ -660,5 +660,13 @@ namespace hipo {
     }
 
     using banklist=std::vector<bank>;
+
+    // @returns the index of the bank in `banklist` `banks` which has the name `bankName`; if there is more
+    // than one, only the index of the first such bank will be returned. A runtime exception is thrown
+    // if the bank is not found
+    // @param banks the `banklist` to search
+    // @param bankName the bank name
+    banklist::size_type getBanklistIndex(banklist& banks, std::string const& bankName) noexcept(false);
+
 }
 #endif /* BANK_H */
