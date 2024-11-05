@@ -45,6 +45,17 @@ ROOT_cling  = find_program('rootcling', required: ROOT_dep.found())
 ROOT_libdir = ROOT_dep.found() ? run_command(ROOT_config, '--libdir', check: true).stdout().strip() : ''
 ROOT_incdir = ROOT_dep.found() ? run_command(ROOT_config, '--incdir', check: true).stdout().strip() : ''
 
+# sanitizer settings
+project_test_env = environment()
+project_test_env.set(
+  'UBSAN_OPTIONS',
+  'halt_on_error=1',
+  'abort_on_error=1',
+  'print_summary=1',
+  'print_stacktrace=1',
+  'suppressions=' + meson.project_source_root() / 'meson' / 'ubsan.supp',
+)
+
 # preprocessor
 lz4_preproc_def = '-D__LZ4__'
 add_project_arguments(lz4_preproc_def, language: ['cpp'])

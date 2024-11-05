@@ -58,6 +58,7 @@ foreach ex : example_sources
         priority:    ex.get('first', false) ? 1 : 0,        # make sure 'first' tests start before any other
         is_parallel: ex.get('first', false) ? false : ex.get('parallel', true),
         timeout:     120,
+        env:         project_test_env,
       )
     endif
   endif
