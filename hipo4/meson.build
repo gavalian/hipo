@@ -47,7 +47,7 @@ hipo_lib = library(
     '-Wno-unused-but-set-variable',
     '-Wno-misleading-indentation',
     '-Wno-format',
-    '-Wno-stringop-overflow',
+    '-Wno-shift-overflow',
     ] : [],
   install: true
 )
