@@ -10,8 +10,19 @@
 # implementation on how the casting and writing of different variable types is
 # correct, and there are no bugs there.
 ##################################################################################
-alignment:hipo::structure::getDoubleAt
-alignment:hipo::structure::getFloatAt
+
+alignment:hipo::structure::getIntAt
 alignment:hipo::structure::getShortAt
-alignment:hipo::structure::putDoubleAt
+alignment:hipo::structure::getByteAt
+alignment:hipo::structure::getFloatAt
+alignment:hipo::structure::getDoubleAt
+alignment:hipo::structure::getLongAt
+alignment:hipo::structure::getStringAt
+
 alignment:hipo::structure::putIntAt
+alignment:hipo::structure::putShortAt
+alignment:hipo::structure::putByteAt
+alignment:hipo::structure::putFloatAt
+alignment:hipo::structure::putDoubleAt
+alignment:hipo::structure::putLongAt
+alignment:hipo::structure::putStringAt
