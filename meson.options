@@ -1,3 +1,6 @@
+# compiling
+option('suppress_warnings', type: 'boolean', value: true, description: 'if true, suppress compiler warnings; this option exists until warnings are fixed')
+
 # examples
 option('build_examples',   type: 'boolean', value: true,  description: 'build examples; see also "install_examples"')
 option('install_examples', type: 'boolean', value: false, description: 'install examples; requires "build_examples" to be true')

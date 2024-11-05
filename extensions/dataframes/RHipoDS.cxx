@@ -413,6 +413,9 @@ void RHipoDS::ClearData(int slot){
       return;
    }
 
+   for(auto &vecvec: fVecShortData){
+      vecvec[slot].clear();
+   }
    for(auto &vecvec: fVecIntData){
       vecvec[slot].clear();
    }
@@ -479,8 +482,10 @@ bool RHipoDS::SetEntry(unsigned int slot, ULong64_t entry){
       if( fColumnTypeIsVector[col_index] ){
          for(int irow=0; irow < nrows; ++irow) {
             switch (fColumnType.at(col_index)) {
-               case 1: // vector<char>
+               case 1: // vector<char>  -- is upcast to short.
                case 2: // vector<short>
+                  fVecShortData.at(data_index).at(slot).push_back( (short) fBanks[bank_index].getShort(fColumnItem[col_index], irow));
+                  break;
                case 3: // vector<int>
                   fVecIntData.at(data_index).at(slot).push_back(fBanks[bank_index].getInt(fColumnItem[col_index], irow));
                   break;
@@ -503,6 +508,11 @@ bool RHipoDS::SetEntry(unsigned int slot, ULong64_t entry){
          switch (fColumnType.at(col_index)) {
             case 1: // char
             case 2: // short
+               if(nrows>0){
+                  fShortData.at(data_index).at(slot) = fBanks[bank_index].getShort(fColumnItem[col_index], 0);
+               } else
+                  fShortData.at(data_index).at(slot) = 0;
+               break;
             case 3: // int
                if(nrows>0){
                   fIntData.at(data_index).at(slot) = fBanks[bank_index].getInt(fColumnItem[col_index], 0);
@@ -569,8 +579,16 @@ std::vector<void *> RHipoDS::GetColumnReadersImpl(std::string_view col_name, con
       fActiveColumns.push_back(col_index);
       if( fColumnTypeIsVector.at(col_index)) {   // VECTORS
          switch (fColumnType.at(col_index)) {
-            case 1: // vector<char>
+            case 1: // vector<char> is up-cast to vector<short>
             case 2: // vector<short>
+               fVecShortData.emplace_back( fNSlots, std::vector<short>(fNColumnDepth));
+               fIndexToData.push_back((int)fVecShortData.size()-1);
+               fColumnPointers.emplace_back(fNSlots);
+               for(int i=0; i<fNSlots; ++i){
+                  fColumnPointers.back()[i] = (void *)&fVecShortData.back()[i];
+                  ret[i] = &fColumnPointers.back()[i];
+               }
+               break;
             case 3: // vector<int>
                fVecIntData.emplace_back( fNSlots, std::vector<int>(fNColumnDepth));
                fIndexToData.push_back((int)fVecIntData.size()-1);
@@ -616,6 +634,14 @@ std::vector<void *> RHipoDS::GetColumnReadersImpl(std::string_view col_name, con
             switch (fColumnType.at(col_index)) {
                case 1:  // char
                case 2:  // short
+                  fShortData.emplace_back(fNSlots);
+                  fIndexToData.push_back((int)fShortData.size()-1);
+                  fColumnPointers.emplace_back(fNSlots);
+                  for(int i=0; i<fNSlots; ++i){
+                     fColumnPointers.back()[i] = (void *)&fShortData.back()[i];
+                     ret[i] = &fColumnPointers.back()[i];
+                  }
+                  break;
                case 3:  // int
                   fIntData.emplace_back(fNSlots);
                   fIndexToData.push_back((int)fIntData.size()-1);
