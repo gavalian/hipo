@@ -36,6 +36,7 @@ void writeTuple(){
        nt.fill(array);
    }
    nt.close();
+   delete[] array;
 }
 
 /**
