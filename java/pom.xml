@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>j4np</groupId>
+    <artifactId>hipo5</artifactId>
+    <version>${revision}</version>
+    <packaging>jar</packaging>
+
+    <dependencies>
+      <dependency>
+        <groupId>j4np</groupId>
+        <artifactId>j4np-data</artifactId>
+        <version>${version}</version>
+      </dependency>
+    </dependencies>
+
+    <repositories>
+      <repository>
+	<id>clas12-maven</id>
+	<url>https://clasweb.jlab.org/clas12maven/j4np/maven</url>
+      </repository>
+    </repositories>
+
+    <distributionManagement>
+      <repository>
+	<id>github</id>
+	<name>Twig Distribution</name>
+        <url>https://maven.pkg.github.com/gavalian/hipo</url>
+      </repository>
+    </distributionManagement>
+    
+    <build>
+      <extensions>
+        <extension>
+          <groupId>org.apache.maven.wagon</groupId>
+          <artifactId>wagon-ssh-external</artifactId>
+          <version>2.8</version>
+        </extension>
+      </extensions>
+      <plugins>
+        <plugin>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>2.6</version>
+          <configuration>
+	    <archive>
+              <manifest>
+		<addClasspath>true</addClasspath>
+		<mainClass>twig.demo.RunDemo</mainClass>
+              </manifest>
+            </archive>
+	    <finalName>hipo5-${revision}-core</finalName>
+	    <appendAssemblyId>false</appendAssemblyId>
+            <descriptorRefs>
+              <descriptorRef>jar-with-dependencies</descriptorRef>
+            </descriptorRefs>
+          </configuration>
+          <executions>
+            <execution>
+              <id>make-assembly</id> <!-- this is used for inheritance merges -->
+              <phase>package</phase> <!-- bind to the packaging phase -->
+              <goals>
+                <goal>single</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </build>
+    
+<!--
+    <distributionManagement>
+      <repository>
+	<id>ssh-clasweb</id>
+	<url>scpexe://clas12@jlabl1.jlab.org/group/clas/www/clasweb/html/jhep/maven</url>
+      </repository>
+    </distributionManagement>    
+-->
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+	<revision>5.0.0</revision>
+	<version>1.1.1</version>
+    </properties>
+
+</project>
