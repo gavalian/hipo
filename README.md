@@ -71,6 +71,122 @@ while(r.nextEvent(banks)){
 }
 ```
 
+## Write File Example (C++)
+
+``` c++
+    hipo::schema  schemaPart("event::particle",100,1);
+    hipo::schema  schemaDet( "event::detector",100,2);
+    //---------------------------------------------------------
+    // Defining structure of the schema (bank)
+    // The columns in the banks (or leafs, if you like ROOT)
+    // are given comma separated with type after the name.
+    // Available types : I-integer, S-short, B-byte, F-float,
+    //                   D-double, L-long
+    schemaPart.parse("pid/S,px/F,py/F,pz/F");
+    schemaDet.parse("pindex/I,detectorid/I,x/F,y/F,z/F,time/F,energy/F");
+    //---------------------------------------------------------
+    // Open a writer and register schemas with the writer.
+    // The schemas have to be added to the writer before openning
+    // the file, since they are written into the header of the file.
+    hipo::writer  writer;
+    writer.getDictionary().addSchema(schemaPart);
+    writer.getDictionary().addSchema(schemaDet);
+    writer.open("outputFile.h5");
+
+    //hipo::bank partBank(schemaPart,30);
+    //hipo::bank detBank( schemaDet ,30);
+
+    hipo::event outEvent;
+
+    for(int i = 0; i < 25000; i++){
+
+        int  nparts = 2 + rand()%10;
+        int   ndets = 5 + rand()%20;
+        //-------------------------------------------------
+        // Create banks with random rows based on schemas
+        hipo::bank partBank(schemaPart,nparts);
+        hipo::bank detBank( schemaDet ,ndets);
+        // Fill banks with random numbers
+        dataFill(partBank); 
+        dataFill(detBank);
+        // Printout on the screen content of the banks
+        printf("particles = %d, detectors = %d\n",nparts, ndets);
+        partBank.show();
+        detBank.show();
+        //-------------------------------------------------
+        // Clear output event Event append banks to the Event
+        // and write to the output file
+        outEvent.reset();
+        outEvent.addStructure(partBank);
+        outEvent.addStructure(detBank);
+        writer.addEvent(outEvent);
+   }
+  writer.close();
+```
+
+Here is the subroutine that fills the banks:
+
+``` c++
+void dataFill(hipo::bank &bank){
+    int    nrows = bank.getRows();
+    int nentries = bank.getSchema().getEntries();
+    for(int row = 0; row < nrows; row++){
+       for(int e = 0 ; e < nentries; e++){
+           int type = bank.getSchema().getEntryType(e);
+           if(type==1||type==2||type==3){
+              int inum = rand()%20;
+              bank.putInt(bank.getSchema().getEntryName(e).c_str(),row,inum);
+           }
+           if(type==4){
+             float ifloat = ((float) rand()) / (float) RAND_MAX;
+             bank.putFloat(bank.getSchema().getEntryName(e).c_str(),row,ifloat);
+           }
+       }
+    }
+}
+```
+
+## Reading File Example (C++)
+
+Example of reading file created with previous example, and showing the content of the banks.
+
+``` c++
+   hipo::reader  reader;
+   reader.open("outputFile.h5");
+   hipo::dictionary  factory;
+   reader.readDictionary(factory);
+
+   factory.show();
+
+   hipo::bank  particles(factory.getSchema("event::particle"));
+   hipo::bank  detectors(factory.getSchema("event::detector"));
+   hipo::event      event;
+   int counter = 0;
+   while(reader.next()==true){
+      reader.read(event);
+
+      event.read(particles);
+      event.read(detectors);
+
+      particles.show();
+      detectors.show();
+
+      int nrows = particles.getRows();
+      printf("---------- PARTICLE BANK CONTENT -------\n");
+      for(int row = 0; row < nrows; row++){
+         int   pid = particles.getInt("pid",row);
+         float  px = particles.getFloat("px",row);
+         float  py = particles.getFloat("py",row);
+         float  pz = particles.getFloat("pz",row);
+         printf("%6d : %6d %8.4f %8.4f %8.4f\n",row,pid,px,py,pz);
+      }
+      printf("---------- END OF PARTICLE BANK -------\n");
+
+      counter++;
+   }
+   printf("processed events = %d\n",counter);
+}
+```
 
 ## Installing the Package (Java)
 
