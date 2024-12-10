@@ -17,6 +17,64 @@ import java.util.Random;
  * @author gavalian
  */
 public class WriteFile {
+    public static Random rand = new Random(123456);
+    /**
+     * create schema for holding cluster information.
+     * @return 
+     */
+    public static Schema createSchema(){
+         SchemaBuilder b = new SchemaBuilder("data::clusters",12,1)
+                .addEntry("type","B","cluster type") // B - type Byte
+                .addEntry("n", "S", "cluster multiplicity") // S - Type Short
+                .addEntry("x", "F", "x position") // F - type float
+                .addEntry("y","F","y position") // F - type float
+                .addEntry("z", "F", "z position"); // F - type Float
+        
+        Schema schema = b.build();
+        return schema;
+    }
+    
+    /**
+     * populate the cluster bank with random numbers.
+     * @param bank 
+     */
+    public static void populate(Bank bank){
+        int nrows = bank.getRows();
+        for(int row = 0; row < nrows; row++){
+                bank.putByte( "type", row,  (byte) (rand.nextInt(8)+1));
+                bank.putShort(   "n", row, (short) (rand.nextInt(15)+1));
+                bank.putFloat(   "x", row, rand.nextFloat());
+                bank.putFloat(   "y", row, rand.nextFloat());
+                bank.putFloat(   "z", row, rand.nextFloat());
+            }
+    }
+    /**
+     * write a similar file as in writeFileWithBank method, but separate the events
+     * in different buckets depending on the number of rows in of the bank.
+     * Any criteria can be used to tag the event. 
+     */
+    public static void writeFileWithBankTags(){
+        Schema schema = WriteFile.createSchema();
+        
+        HipoWriter w = new HipoWriter();
+        w.getSchemaFactory().addSchema(schema);
+        w.open("clusters_tagged.h5");
+        Event event = new Event();
+        for(int i = 0; i < 1200; i++){
+            int nrows = rand.nextInt(6, 19); // random number between 6-18 inclusive
+            Bank bank = new Bank(schema,nrows);
+            WriteFile.populate(bank);
+            event.reset();
+            event.write(bank);
+            //-------------------------------------------------------------------
+            // This part separates in the file events with rows <10 and rows>10
+            // into separate buckets, byt assigning tag to the event. When reading
+            // the file only specific tag can be read, minimizing I/O
+            if(bank.getRows()>10) event.setEventTag(1); else event.setEventTag(2);
+            w.addEvent(event);
+        }
+        w.close();
+    }
     /**
      * This example writes a file with one bank (table like structure) 
      * in each event, the schema must be first created and added to 
@@ -61,7 +119,10 @@ public class WriteFile {
         }        
         w.close();
     }
-    
+    /**
+     * Write a HIPO file with nodes in each event, three nodes are created with
+     * random number of length and different types, byte, integer, and float.
+     */
     public static void writeFileWithNodes(){
         Random r = new Random();
         r.setSeed(123456);
@@ -71,9 +132,9 @@ public class WriteFile {
         Event  event = new Event();
         
         for(int i = 0; i < 200; i++){
-            int  nbytes = r.nextInt(24)+6;
-            int nfloats = r.nextInt(24)+6;
-            int   nints = r.nextInt(24)+6;
+            int  nbytes = r.nextInt(3,12);
+            int nfloats = r.nextInt(3,12);
+            int   nints = r.nextInt(3,12);
             
             byte[]  barray = new   byte[nbytes];
             int[]   iarray = new    int[nints];
@@ -99,5 +160,6 @@ public class WriteFile {
         
         WriteFile.writeFileWithBank();                
         WriteFile.writeFileWithNodes();
+        WriteFile.writeFileWithBankTags();
     }
 }

@@ -6,6 +6,7 @@ package j4np.hipo5.examples;
 
 import j4np.hipo5.data.Bank;
 import j4np.hipo5.data.Event;
+import j4np.hipo5.data.Node;
 import j4np.hipo5.io.HipoReader;
 
 /**
@@ -39,7 +40,42 @@ public class ReadFile {
             }
         }
     }
-    
+    /**
+     * Reading file containing different types of nodes, the file is originally
+     * created by code from class WriteFile, and contains 3 nodes in each
+     * event of the file. The reader reads every event in the file, reads nodes
+     * and prints the content on the screen, also calculated the average 
+     * of the numbers in the node with the type float.
+     */
+    public static void readFileWithNodes(){
+        HipoReader r = new HipoReader("nodes.h5");
+        Event event = new Event();
+        int counter = 0;
+        
+        double accumulate = 0.0;
+        int       nvalues = 0;
+        while(r.next(event)==true){
+            
+            counter++;
+            // each node has unique identifiers, group and item
+            // these numbers can be used to group relevant nodes together
+            // otherwise they are arbitrary numbers used at users discretion.
+            
+            Node nb = event.read(12, 1); // 12,1 are unique identifiers of the node
+            Node ni = event.read(12, 2); 
+            Node nf = event.read(12, 3);
+            
+            //-- iterating over the node
+            for(int j = 0; j < nf.getDataSize(); j++){
+                accumulate += nf.getFloat(j);
+            }
+            nvalues += nf.getDataSize();
+            System.out.println("---- event # " + counter);
+            nb.show(); ni.show(); nf.show();
+        }
+        
+        System.out.printf("\n\n>>> average for float node (12,3) = %f\n",accumulate/nvalues);
+    }
     /**
      * Reads each event in the file and prints out the information about the
      * content of the event. prints all the objects in the event, with their 
@@ -58,5 +94,7 @@ public class ReadFile {
     public static void main(String[] args){
         ReadFile.readFileWithBank();
         ReadFile.showFileContent("nodes.h5");
+        
+        ReadFile.readFileWithNodes();
     }
 }
