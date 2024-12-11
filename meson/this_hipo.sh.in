@@ -7,6 +7,7 @@
 
 # workaround older versions of macOS not having `realpath`
 get_realpath() {
+  [ ! -d "$1" ] && echo "ERROR: path '$1' does not exist; this should never happen, please contact the maintainers" >&2
   echo $(cd $1 && pwd -P)
 }
 
@@ -18,7 +19,9 @@ export PKG_CONFIG_PATH=$HIPO/@libdir@/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_
 
 # prepend to PATH
 hipo_path=$(pkg-config --variable bindir hipo4)
-[ -n "${hipo_path-}" ] && export PATH=$(get_realpath $hipo_path)${PATH:+:${PATH}}
+if [ -n "${hipo_path-}" ]; then
+  [ -d "$hipo_path" ] && export PATH=$(get_realpath $hipo_path)${PATH:+:${PATH}}
+fi
 unset hipo_path
 
 # prepend to @ld_path@
