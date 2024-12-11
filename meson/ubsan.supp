@@ -1,0 +1,28 @@
+##################################################################################
+# NOTE from Gagik Gavalian:
+# =========================
+# The structures in HIPO contain arrays of various types (byte, short, integer,
+# float), and columns (or variables) are stored back-to-back and depending on the
+# number of rows, they do not necessarily have a length multipliable by 4. The
+# sanitizer complains when trying to write an integer (32-bit) value by casing a
+# certain position in the buffer that is not multiple of 4. It assumes that this
+# is a bug and can lead to memory corruption of seg faults. The library
+# implementation on how the casting and writing of different variable types is
+# correct, and there are no bugs there.
+##################################################################################
+
+alignment:hipo::structure::getIntAt
+alignment:hipo::structure::getShortAt
+alignment:hipo::structure::getByteAt
+alignment:hipo::structure::getFloatAt
+alignment:hipo::structure::getDoubleAt
+alignment:hipo::structure::getLongAt
+alignment:hipo::structure::getStringAt
+
+alignment:hipo::structure::putIntAt
+alignment:hipo::structure::putShortAt
+alignment:hipo::structure::putByteAt
+alignment:hipo::structure::putFloatAt
+alignment:hipo::structure::putDoubleAt
+alignment:hipo::structure::putLongAt
+alignment:hipo::structure::putStringAt
