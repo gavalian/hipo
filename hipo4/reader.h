@@ -316,6 +316,12 @@ class readerstream {
    
    hipo::reader &reader(){return hr;}
    hipo::dictionary &dictionary(){ return factory;}
+
+   void pull(hipo::record &record, int index){
+       std::unique_lock<std::mutex> lock(obj);
+       hr.loadRecord(record,index);
+   }
+
    void pull(std::vector<hipo::event> &events){
         
         std::unique_lock<std::mutex> lock(obj);
