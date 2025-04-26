@@ -51,21 +51,33 @@ public:
    std::vector<std::string>  fHipoFiles;
    int fHipoFiles_index=0;
 
-   hipo::reader fHipoReader;
-   hipo::record fHipoRecord;
+  hipo::reader fHipoReader;
 
-   int fHipoCurrentRecord=0;
-   int fHipoCurrentMaxRecord=0;
-   // int fHipoCurrentEvent=0;
-   int fHipoCurrentMaxEvent = 0;
+  //we need a record and reader for each slot
+  std::vector<hipo::record> fHipoRecords;
+  std::vector<hipo::reader> fHipoReaders;
+
+  int fHipoCurrentRecord=0;
+  int fHipoCurrentMaxRecord=0;
+  int fHipoCurrentMaxEvent = 0;
+  int fBatchSize = 512;
+  
+  std::vector<ULong64_t> fHipoCurrentSlotMaxEvent;
+  std::vector<ULong64_t> fHipoCurrentSlotRecord;
 
    hipo::dictionary fHipoDict;
    hipo::event  fHipoEvent;
    std::vector<std::string> fAllBankNames;  // ALL possible bank names existing in schema.
 
    std::map<std::string, int> fBanksToIndex; // Bank name -> bank_index for all banks in run.
+  
    std::vector<hipo::bank>  fBanks;          // [bank_index] - Index to bank. Found banks.
+  std::vector<std::pair<ULong64_t,ULong64_t> > fFirstEntryToRecord;
+  std::vector<std::pair<ULong64_t,ULong64_t> > fEntryToEvent;
 
+  //we need banks for each slot
+  std::vector< std::vector<hipo::bank>> fSlotBanks;
+  
    // Use map to rapidly find the column [col_index]
    bool fColumnNameTranslation=true;   // If true, translate :: and . symbols in the name to _ for C++/Python compatibility.
    std::vector<std::string> fAllColumns;   // [col_index] All possible columns
@@ -91,15 +103,20 @@ public:
    std::vector< std::vector<float> > fFloatData;
    std::vector< std::vector<double> > fDoubleData;
 
+  //Prefer RVec over std::vector
+  template<typename T>
+  using DataVector = ROOT::VecOps::RVec<T>;
+  const std::string fDataVectorClass = "ROOT::VecOps::RVec";
+  
    //std::vector< std::vector< std::vector<char> > > fVecCharData;
-   std::vector< std::vector< std::vector<short> > > fVecShortData;
-   std::vector< std::vector< std::vector<int> > > fVecIntData; // [data_index][slot] to vector.
-   std::vector< std::vector< std::vector<long> > > fVecLongData;
-   std::vector< std::vector< std::vector<float> > > fVecFloatData;
-   std::vector< std::vector< std::vector<double> > > fVecDoubleData;
+   std::vector< std::vector< DataVector<short> > > fVecShortData;
+   std::vector< std::vector< DataVector<int> > > fVecIntData; // [data_index][slot] to vector.
+   std::vector< std::vector< DataVector<long> > > fVecLongData;
+   std::vector< std::vector< DataVector<float> > > fVecFloatData;
+   std::vector< std::vector< DataVector<double> > > fVecDoubleData;
 
 public:
-   int fDebug;
+   int fDebug=0;
 // private:
 public:
    std::vector<void *> GetColumnReadersImpl(std::string_view, const std::type_info &) override;
@@ -108,9 +125,9 @@ protected:
    std::string AsString() override;
 
 public:
-   explicit RHipoDS(){};
-   explicit RHipoDS(std::string_view file_pattern, int nevt_inspect=10000, int debug=0);
-   explicit RHipoDS(std::vector<std::string> &files, int nevt_inspect=1000, int debug=0);
+  explicit RHipoDS() {};
+   explicit RHipoDS(const std::string_view file_pattern, int nevt_inspect=10000, int debug=0);
+   explicit RHipoDS(const std::vector<std::string> &files, int nevt_inspect=1000, int debug=0);
    ~RHipoDS() override= default;
 
    void Finalize()
@@ -148,7 +165,14 @@ public:
    bool SetEntry(unsigned int slot, ULong64_t entry) override;
    void SetNSlots(unsigned int nSlots) override;
    virtual std::string GetLabel() override { return "Hipo Datasource"; }
+   void InitSlot(unsigned int slot, ULong64_t firstEntry) override;
+  void InitRecord(const unsigned int slot,const  ULong64_t entry);
 
+  ULong64_t GetRecordFromFirstEntry(ULong64_t firstEntry);
+  ULong64_t GetRecordFromEntry(ULong64_t entry);
+
+  //   ULong64_t GetEventIdxFromEntry(ULong64_t entry);
+  // void SetBatchSize(int bsize){fBatchSize=bsize;}
    // Not required utility methods.
    int getEntries(){ return fHipoReader.getEntries(); }
 

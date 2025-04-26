@@ -57,15 +57,18 @@ the RDataFrame.
  **/
 
 #include "RHipoDS.hxx"
+#include <algorithm>
 
 ////////////////////////////////////////////////////////////////////////
 /// \brief Constructor to create a Hipo RDataSource for RDataFrame.
 /// \param[in] fileName Path of the Hipo file, or glob pattern for the files.
 /// \param[in] nevt_inspect Number of events to inspect to determine the schema. See Init() for details.
 /// \param[in] debug Debug level, 0 is no debug [default], 1 is some debug, 2 is a lot of debug.
-RHipoDS::RHipoDS(std::string_view file_pattern, int nevt_inspect, int debug): fDebug(debug) {
+RHipoDS::RHipoDS(const std::string_view file_pattern, int nevt_inspect, int debug):fDebug(debug) {
    AddFiles(file_pattern);
    Init(nevt_inspect);
+
+   std::cout<<" RHipoDS::RHipoDS "<<file_pattern<<" "<<nevt_inspect<<" "<<fHipoFiles.size()<<std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -73,12 +76,13 @@ RHipoDS::RHipoDS(std::string_view file_pattern, int nevt_inspect, int debug): fD
 /// \param[in] vector<std::string> files, a vector of file names.
 /// \param[in] nevt_inspect Number of events to inspect to determine the schema. See Init() for details.
 /// \param[in] debug Debug level, 0 is no debug [default], 1 is some debug, 2 is a lot of debug.
-RHipoDS::RHipoDS(std::vector<std::string> &files, int nevt_inspect, int debug): fDebug(debug) {
+RHipoDS::RHipoDS(const std::vector<std::string> &files, int nevt_inspect, int debug): fDebug(debug){
 
    for(auto &file_name: files) {
       AddFiles(file_name);
    }
    Init(nevt_inspect);
+   std::cout<<" RHipoDS::RHipoDS "<<files.size()<<" "<<nevt_inspect<<" "<<fHipoFiles.size()<<" "<<GetNFiles()<<std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -104,6 +108,7 @@ void RHipoDS::Init(int nevt_inspect) {
    if(fHipoFiles.empty()) return;
    fHipoReader.setTags(0);
    fHipoReader.open(fHipoFiles[0].c_str());
+      
    fHipoCurrentMaxEvent = fHipoReader.getEntries();
    fHipoCurrentMaxRecord = fHipoReader.getNRecords();
 
@@ -207,6 +212,7 @@ int RHipoDS::AddHipoBank(std::string name, int nrows) {
 
       fBanks.emplace_back(this_bank);   // Put the bank in the bank store.
 
+      
       for (int i = 0; i < sch.getEntries(); ++i) {
          std::string full_name = name + "." + sch.getEntryName(i);
 
@@ -278,8 +284,10 @@ unsigned long RHipoDS::GetEntries(bool current_file_only) {
       fHipoReader.open(file.c_str());
       total_events += fHipoReader.getEntries();
    }
-   if(save_hipo_file_index>=0) fHipoReader.open(fHipoFiles[save_hipo_file_index].c_str());
-
+   if(save_hipo_file_index>=0){
+     fHipoReader.open(fHipoFiles[save_hipo_file_index].c_str());
+   }
+   if(fDebug>0)std::cout<<"RHipoDS::GetEntries "<<total_events<<std::endl;
    return total_events;
 }
 
@@ -287,7 +295,22 @@ unsigned long RHipoDS::GetEntries(bool current_file_only) {
 /// \brief Return the number of slots. Used internally for RDataFrame.
 /// \return The number of slots.
 void RHipoDS::SetNSlots(unsigned int nSlots) {
-   fNSlots = nSlots;
+  fNSlots = nSlots;
+  //need to create, reader, record objects for each slot
+  fHipoRecords.resize(nSlots);
+  fHipoReaders.resize(nSlots);
+  for(auto& reader:fHipoReaders){
+    reader.setTags(0);
+  }
+  fHipoCurrentSlotMaxEvent.resize(nSlots);
+  fHipoCurrentSlotRecord.resize(nSlots);
+  
+  //need to create hipo banks for each slot
+  //At this point we can just copy the configured banks
+  for(size_t i = 0; i<nSlots; i++){
+    fSlotBanks.push_back(fBanks);
+    fHipoCurrentSlotRecord[i]=-1;//so no valid entry number
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -312,37 +335,92 @@ const std::vector<std::string> &RHipoDS::GetColumnNames() const{
 std::vector<std::pair<ULong64_t, ULong64_t>> RHipoDS::GetEntryRanges(){
 // Note:
 // Because this is HIPO, this requires *reading* the next Record (or Block) from file.
+  // We will define entry ranges corresponding to
+  // all records in the current hipo file
+  // when file is finished we will come back here
+  // to open new file and define new ranges
+  std::vector<std::pair<ULong64_t, ULong64_t>>  entryRanges;
 
-   std::vector<std::pair<ULong64_t, ULong64_t>> entryRanges;
-   if(fHipoCurrentRecord >= fHipoCurrentMaxRecord){
-      if( ++fHipoFiles_index >= fHipoFiles.size()) return entryRanges;
-      fHipoReader.open(fHipoFiles[fHipoFiles_index].c_str());
-      fHipoCurrentMaxEvent = fHipoReader.getEntries();
-      fHipoCurrentMaxRecord = fHipoReader.getNRecords();
-      fHipoCurrentRecord=0;
-   }
+  //check if at end of files
+  if( fHipoFiles_index >= fHipoFiles.size()) return entryRanges;
 
-   fHipoReader.loadRecord(fHipoRecord, fHipoCurrentRecord);
-   fHipoCurrentRecord++;
+  //open new file
+  fHipoReader.open(fHipoFiles[fHipoFiles_index].c_str());
+  //also open reader for each slot
+  for(auto& reader:fHipoReaders){
+    reader.open(fHipoFiles[fHipoFiles_index].c_str());
+  }
+  fHipoCurrentMaxEvent = fHipoReader.getEntries();
+  fHipoCurrentMaxRecord = fHipoReader.getNRecords();
+  fHipoCurrentRecord=0;
+  fHipoFiles_index++;
 
-   fHipoCurrentMaxEvent = fHipoRecord.getEventCount();
+  if(fDebug>0)std::cout<< "Create entry ranges in file "<< fHipoFiles_index-1<<" with records = "<<fHipoCurrentMaxRecord<<" and nevents = "<<fHipoCurrentMaxEvent<<" for slots = "<<fNSlots<<std::endl;
 
-   // Divide up the event in the record over the slots.
-   unsigned int chunkSize = fHipoCurrentMaxEvent / fNSlots;
-   unsigned int remainder =  ( fNSlots == 1? 0 : fHipoReader.getEntries() % fNSlots );
 
-   unsigned int start = 0;
-   unsigned int end = start;
+  //We wish to use a record to define the range to minimise load record calls
+  ULong64_t  prevMaxEvent = -1;
+  hipo::record record;
+  
+  fFirstEntryToRecord.clear();
+  // Loop over all records and get max and min whole file entry number
+  // for each record.
+  // Note, When setting event we need to use local record entry number
+  for(auto irecord=0; irecord<fHipoCurrentMaxRecord; ++irecord){
+    fHipoReader.loadRecord(record, irecord);
+    ULong64_t   ev_start = prevMaxEvent+1;
+    ULong64_t   ev_end = prevMaxEvent + record.getEventCount()+1;
+    prevMaxEvent = ev_end-1;
+    entryRanges.emplace_back(ev_start, ev_end);
+    // We must call InitSlot with firstEntry before processing each range
+    // We need to know which record this corresponds to, so save info
+    fFirstEntryToRecord.push_back(std::make_pair(ev_start,irecord));
+  }
+  
+  return entryRanges;
 
-   for(unsigned int i=0; i< fNSlots; ++i){
-      start = end;
-      end += chunkSize;
-      entryRanges.emplace_back(start, end);
-   }
-   entryRanges.back().second += remainder;  // Last few events are added to the last slot.
-   return entryRanges;
 }
 
+////////////////////////////////////////////////////////////////////////
+/// \brief Initiliase new record for slot processing
+/// \param[in] slot : the current slot
+/// \param[in] firstEntry : global number in hipo file of first entry
+/// This is used internally for the RDataFrame
+void RHipoDS::InitSlot(unsigned int slot, ULong64_t firstEntry)
+{
+  if(fNSlots==1){
+    //Will call InitRecord instead
+    return;
+  }
+  
+  if(fDebug>1)std::cout<<"RHipoDS::InitSlot " <<slot <<" "<<firstEntry<<" "<<GetRecordFromFirstEntry(firstEntry)<<std::endl;
+
+  // load the current record from the reader
+  // After this we can read all banks from the record
+  // for each event
+  fHipoReaders[slot].loadRecord(fHipoRecords[slot], GetRecordFromFirstEntry(firstEntry) );
+  // keep track of record number
+  fHipoCurrentSlotRecord[slot] = GetRecordFromFirstEntry(firstEntry);
+  //fHipoRecordMaxEntry[slot]  = fHipoRecords[slot].getEntries();
+ }
+void RHipoDS::InitRecord(const unsigned int slot,const  ULong64_t entry)
+{
+  
+  if(fDebug>1)std::cout<<"RHipoDS::InitRecord " <<slot <<" "<<GetRecordFromEntry(entry)<<" for entry "<<entry<<" current record "<<fHipoCurrentSlotRecord[slot]<<std::endl;
+
+  auto irecord = GetRecordFromEntry(entry);
+  if(irecord == fHipoCurrentSlotRecord[slot]){
+    return; //still in current record
+  }
+
+  // load the current record from the reader
+  // After this we can read all banks from the record
+  // for each event
+  fHipoReaders[slot].loadRecord(fHipoRecords[slot], irecord );
+  // keep track of record number
+  fHipoCurrentSlotRecord[slot] = irecord;
+  //  fHipoRecordMaxEntry[slot]  = fHipoRecords[slot].getEntries();
+ }
 ////////////////////////////////////////////////////////////////////////
 /// \brief Check if column exists in the data source.
 /// \param[in] colName The name of the column to check.
@@ -384,7 +462,8 @@ int RHipoDS::GetTypeNum(std::string_view colName) const{
 std::string RHipoDS::GetTypeName(int column_index) const {
    // Get the type name from the index.
    if( fColumnTypeIsVector[column_index] ){
-      return "vector<" + fgCollTypeNumToString[fColumnType[column_index]] + ">";
+     //return "vector<" + fgCollTypeNumToString[fColumnType[column_index]] + ">";
+     return fDataVectorClass + "<" + fgCollTypeNumToString[fColumnType[column_index]] +  ">";
    }else
       return fgCollTypeNumToString[fColumnType[column_index]];
 }
@@ -444,15 +523,22 @@ bool RHipoDS::SetEntry(unsigned int slot, ULong64_t entry){
    // Set the Hipo reader to the correct entry, or record, in the file.
 
    ClearData(slot);
+   if(fDebug>2) std::cout << "SetEntry: slot: " << slot << " entry: " << entry
+			  << " current record: " << fHipoCurrentSlotRecord[slot]<<std::endl;
 
-   if(entry > fHipoCurrentMaxEvent) return false;
 
-   if(fDebug>1) std::cout << "SetEntry: slot: " << slot << " entry: " << entry
-            << " current record: " << fHipoCurrentRecord << std::endl;
-
-//   fHipoReader.gotoEvent(entry); // Issue: this may jump around a Block border, slowing the reading.
-//   fHipoReader.read(fHipoEvent);
-
+   // For 1 slot case, specifically when ROOT::EnableImplicitMT
+   // not called, InitSlot is called once, so check record change
+   // InitRecord method instead
+   if(fNSlots==1) InitRecord(slot,entry);
+   
+   //get the current local record entry number
+   // we just need to subtract off the record firstEntry
+   // from given entry
+   // We need to use the record corresponding to slot
+   // See also InitSlot
+   entry-= fFirstEntryToRecord[fHipoCurrentSlotRecord[slot]].first;
+ 
    if(fHipoReadOnlyPhysicsEvents){
 
    }
@@ -461,7 +547,8 @@ bool RHipoDS::SetEntry(unsigned int slot, ULong64_t entry){
    for(int active_index=0; active_index < fActiveColumns.size(); ++active_index){
       int col_index = fActiveColumns[active_index];
       int bank_index = fColumnBank[col_index];
-// #define DO_BANK_SEARCH
+      
+      /*// #define DO_BANK_SEARCH
 #ifdef DO_BANK_SEARCH
       // 16.62698 16.81025 16.77813 17.15750
       if( !std::binary_search(banks_seen.begin(), banks_seen.end(), bank_index) ){
@@ -469,35 +556,38 @@ bool RHipoDS::SetEntry(unsigned int slot, ULong64_t entry){
          banks_seen.push_back(bank_index);
          std::sort(banks_seen.begin(), banks_seen.end());
 //         fHipoEvent.getStructure(fBanks[bank_index]);     // Fill the bank with data.
-         fHipoRecord.read(fBanks[bank_index], entry);
+         fHipoRecords[slot].read(fSlotBanks[slot][bank_index], entry);
       }
-#else
+#else 
       // Reading the bank each time is faster? - seems so, but marginal difference.
       // 16.76788 16.71784 16.64359 16.63519
-      fHipoRecord.read(fBanks[bank_index], entry);
-#endif
+      */
+      
+      fHipoRecords[slot].read(fSlotBanks[slot][bank_index], entry);
+      /*#endif*/
+      
       // So here, we can assume that the bank has the data we are interested in.
-      int nrows = fBanks[bank_index].getRows();
+      int nrows = fSlotBanks[slot][bank_index].getRows();
       int data_index = fIndexToData[active_index];
       if( fColumnTypeIsVector[col_index] ){
          for(int irow=0; irow < nrows; ++irow) {
             switch (fColumnType.at(col_index)) {
                case 1: // vector<char>  -- is upcast to short.
                case 2: // vector<short>
-                  fVecShortData.at(data_index).at(slot).push_back( (short) fBanks[bank_index].getShort(fColumnItem[col_index], irow));
+                  fVecShortData.at(data_index).at(slot).push_back( (short) fSlotBanks[slot][bank_index].getShort(fColumnItem[col_index], irow));
                   break;
                case 3: // vector<int>
-                  fVecIntData.at(data_index).at(slot).push_back(fBanks[bank_index].getInt(fColumnItem[col_index], irow));
+                  fVecIntData.at(data_index).at(slot).push_back(fSlotBanks[slot][bank_index].getInt(fColumnItem[col_index], irow));
                   break;
                case 4: // vector<float>
-                  fVecFloatData.at(data_index).at(slot).push_back(fBanks[bank_index].getFloat(fColumnItem[col_index], irow));
+                  fVecFloatData.at(data_index).at(slot).push_back(fSlotBanks[slot][bank_index].getFloat(fColumnItem[col_index], irow));
                   break;
                case 5: // vector<double>
-                  fVecDoubleData.at(data_index).at(slot).push_back(fBanks[bank_index].getDouble(fColumnItem[col_index], irow));
+                  fVecDoubleData.at(data_index).at(slot).push_back(fSlotBanks[slot][bank_index].getDouble(fColumnItem[col_index], irow));
                   break;
                case 6:
                case 8:
-                  fVecLongData.at(data_index).at(slot).push_back(fBanks[bank_index].getLong(fColumnItem[col_index], irow));
+                  fVecLongData.at(data_index).at(slot).push_back(fSlotBanks[slot][bank_index].getLong(fColumnItem[col_index], irow));
                   break;
                default:
                   std::cout << "We got a column type issue. ColIndex: " << col_index << " ColType:"
@@ -509,32 +599,32 @@ bool RHipoDS::SetEntry(unsigned int slot, ULong64_t entry){
             case 1: // char
             case 2: // short
                if(nrows>0){
-                  fShortData.at(data_index).at(slot) = fBanks[bank_index].getShort(fColumnItem[col_index], 0);
+                  fShortData.at(data_index).at(slot) = fSlotBanks[slot][bank_index].getShort(fColumnItem[col_index], 0);
                } else
                   fShortData.at(data_index).at(slot) = 0;
                break;
             case 3: // int
                if(nrows>0){
-                  fIntData.at(data_index).at(slot) = fBanks[bank_index].getInt(fColumnItem[col_index], 0);
+                  fIntData.at(data_index).at(slot) = fSlotBanks[slot][bank_index].getInt(fColumnItem[col_index], 0);
                } else
                   fIntData.at(data_index).at(slot) = 0;
                break;
             case 4: // float
                if(nrows>0){
-                  fFloatData.at(data_index).at(slot) = fBanks[bank_index].getFloat(fColumnItem[col_index], 0);
+                  fFloatData.at(data_index).at(slot) = fSlotBanks[slot][bank_index].getFloat(fColumnItem[col_index], 0);
                } else
                   fFloatData.at(data_index).at(slot) = 0.;
                break;
             case 5: // double
                if(nrows>0){
-                  fDoubleData.at(data_index).at(slot) = fBanks[bank_index].getDouble(fColumnItem[col_index], 0);
+                  fDoubleData.at(data_index).at(slot) = fSlotBanks[slot][bank_index].getDouble(fColumnItem[col_index], 0);
                } else
                   fDoubleData.at(data_index).at(slot) = 0.;
                break;
             case 6:
             case 8:
                if(nrows>0){
-                  fLongData.at(data_index).at(slot) = fBanks[bank_index].getLong(fColumnItem[col_index], 0);
+                  fLongData.at(data_index).at(slot) = fSlotBanks[slot][bank_index].getLong(fColumnItem[col_index], 0);
                } else
                   fLongData.at(data_index).at(slot) = 0.;
                break;
@@ -567,7 +657,7 @@ std::vector<void *> RHipoDS::GetColumnReadersImpl(std::string_view col_name, con
    if(fDebug>1) std::cout << "GetColumnReadersImpl:: " << col_name << ": colType:" << colType << " type name:" << ti.name()  << std::endl;
 
    std::vector<void *> ret(fNSlots);
-
+ 
    std::string column_name = col_name.data();
    int col_index = fColumnNameToIndex.at(column_name);
    if(fDebug>1) std::cout << "Index " << col_index << " for column " << column_name.data() << std::endl;
@@ -693,6 +783,28 @@ std::vector<void *> RHipoDS::GetColumnReadersImpl(std::string_view col_name, con
 
    return ret;
 }
+///////////////////////////////////////////////////////////////////
+/// \brief Connect firstEntry in given range to Hipo record
+/// \param[in] firstEntry first entry defined in current range from GetRanges()
+ULong64_t RHipoDS::GetRecordFromFirstEntry(ULong64_t firstEntry){
+  auto it = std::find_if(
+        fFirstEntryToRecord.begin(), fFirstEntryToRecord.end(),
+        [&firstEntry](const auto& p) { return p.first == firstEntry; });
+  if (it != fFirstEntryToRecord.end()) return it->second;
+  return -1;
+}
+///////////////////////////////////////////////////////////////////
+/// \brief Connect firstEntry in given range to Hipo record
+/// \param[in] firstEntry first entry defined in current range from GetRanges()
+ULong64_t RHipoDS::GetRecordFromEntry(ULong64_t entry){
+  if(entry == fFirstEntryToRecord[0].first) return fFirstEntryToRecord[0].second; 
+  for(auto& firstEntry : fFirstEntryToRecord){
+    if (entry < firstEntry.first ) return firstEntry.second -1;
+  }
+  return fFirstEntryToRecord.back().second;//return last record
+}
+
+ 
 
 ClassImp(RHipoDS);
 
