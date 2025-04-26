@@ -1,12 +1,16 @@
 #include <iostream>
 #include "reader.h"
 #include "event.h"
+#include "fusion.h"
 
 hipo::reader      hipo_FORT_Reader;
 hipo::event       hipo_FORT_Event;
 hipo::dictionary  hipo_FORT_Dictionary;
 
 std::map<std::string, hipo::bank *> eventStore;
+
+
+hipo::fusion hFusion;
 
 extern "C" {
 
@@ -24,7 +28,7 @@ extern "C" {
     hipo_FORT_Reader.open(filename);
     hipo_FORT_Reader.readDictionary(hipo_FORT_Dictionary);
   }
-  
+
   int hipo_file_next_(int* fstatus){
     bool status = hipo_FORT_Reader.next();
     if(status==false){
@@ -132,6 +136,38 @@ extern "C" {
       free(buffer_item);
   }
 
+  void hipo_read_double_(const char *group, const char *item, int *nread, double *buffer, int *maxRows,
+      int length_group, int length_item){
+
+      char *buffer_group = (char * ) malloc(length_group+1);
+      memcpy(buffer_group,group,length_group);
+      buffer_group[length_group] = '\0';
+
+      char *buffer_item = (char * ) malloc(length_item+1);
+      memcpy(buffer_item,item,length_item);
+      buffer_item[length_item] = '\0';
+
+
+      if(eventStore.count(buffer_group)==0){
+         *nread = 0;
+         free(buffer_group);
+         free(buffer_item);
+         return;
+      }
+
+      hipo::bank *bank = eventStore[buffer_group];
+      int  nrows = bank->getRows();
+      if(nrows>(*maxRows)) nrows = *(maxRows);
+      //printf("---->>>>> reading float (%s) (%s) (%d)\n",buffer_group,buffer_item,nrows);
+      for(int i = 0; i < nrows; i++){
+         buffer[i] = bank->getDouble(buffer_item, i);
+      }
+      *nread = nrows;
+
+      free(buffer_group);
+      free(buffer_item);
+  }
+
   void hipo_read_int_(const char *group, const char *item, int *nread, int *buffer, int *maxRows,
       int length_group, int length_item){
 
@@ -179,7 +215,7 @@ extern "C" {
            free(buffer_item);
            return;
         }
-        
+
         hipo::bank *bank = eventStore[buffer_group];
         int  nrows = bank->getRows();
         if(nrows>(*maxRows)) nrows = *(maxRows);
@@ -195,4 +231,69 @@ extern "C" {
 
     }*/
 
+
+    int fusion_open(const char *filename){
+         int handle = hFusion.open(filename); return handle;
+    }
+
+    int    fusion_next(int handle){ return hFusion.next(handle)==true?1:0;}
+  
+    int    fusion_schema_length(int handle, const char *bank){
+      std::string schema = hFusion.schema(handle,bank);
+      return (int) schema.length();
+    }
+
+  void fusion_schema_string(int handle, const char *bank, char *format){
+      std::string schema = hFusion.schema(handle,bank);
+      std::strcpy(format,schema.c_str());
+    }
+
+    void   fusion_define(int handle, const char *bank){ hFusion.define(handle,bank);}
+    void   fusion_describe(int handle, const char *bank){ hFusion.describe(handle,bank);}
+    int    fusion_bankSize(int handle, const char *bank){ return hFusion.getSize(handle,bank);}
+    
+    int    fusion_get_int(int handle, const char *bank, const char *entry, int row){
+      return hFusion.getInt(handle,bank,entry,row);
+    }
+
+    void fusion_get_byte_array(int handle, const char *bank, int entry, int8_t *ptr, int rows){ 
+        hFusion.getByteArray(handle,bank,entry,ptr,rows);
+    }
+
+    void fusion_get_short_array(int handle, const char *bank, int entry, int16_t *ptr, int rows){
+        hFusion.getShortArray(handle,bank,entry,ptr,rows);
+    }
+
+  void fusion_get_int_array(int handle, const char *bank, int entry, int32_t *ptr, int rows){
+        hFusion.getIntArray(handle,bank,entry,ptr,rows);
+    }
+
+  void fusion_get_float_array(int handle, const char *bank, int entry, float *ptr, int rows){
+        hFusion.getFloatArray(handle,bank,entry,ptr,rows);
+    }
+  
+  int64_t    fusion_get_long(int handle, const char *bank, const char *entry, int row){
+      return hFusion.getLong(handle,bank,entry,row);
+    }
+    float    fusion_get_float(int handle, const char *bank, const char *entry, int row){ 
+      float value = hFusion.getFloat(handle,bank,entry,row);
+      //printf(" result from wrapper = %f\n",value);
+      return value;
+    }
+
+  float    fusion_get_double(int handle, const char *bank, const char *entry, int row){
+    float value = (float) hFusion.getDouble(handle,bank,entry,row);
+      //printf(" result from wrapper = %f\n",value);                                                                                                              
+      return value;
+    }
+  
+    int fusion_entry_type(int handle, const char *bank, const char *entry){
+          return hFusion.getType(handle,bank,entry);
+    }
+
+    float *fusion_create_array(int size){
+      float *array = new float[size];
+      for(int i = 0; i < size; i++) array[i]=(i+1)*2;
+      return array;
+    }
 }

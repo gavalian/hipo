@@ -45,6 +45,7 @@
 #include <cstdlib>
 #include <map>
 #include "bank.h"
+#include "node.h"
 
 // if the library is compiled with C++11
 // support we will use unordered map which
@@ -72,16 +73,29 @@ namespace hipo {
         void   init(std::vector<char> &buffer);
         void   init(const char *buffer, int size);
         void   getStructure(hipo::structure &str, int group, int item);
-
+        void   getStructure4(hipo::structure &str, int group, int item);
+        
+        int    getTag();
+        void   setTag(int tag);
         void   getStructure(hipo::bank &b);
         void   read(hipo::bank &b);
         void   addStructure(hipo::structure &str);
+        void   override(hipo::structure &str);
+        void   remove(hipo::bank &str);
+        void   remove(int group, int item);
+        void   replace(hipo::bank  &bank);
+        
+        void   add(hipo::node &_n);
+        void   get(hipo::node &_n, int group, int item);
 
         std::pair<int,int>  getStructurePosition(int group, int item);
+        std::pair<int,int>  getStructurePosition4(int group, int item);
 
         std::vector<char>  &getEventBuffer();
         int                 getSize();
         void                reset();
+        void                write(hipo::node &node);
+        void                read(hipo::node  &node, int group, int item);
 
         //*******************************************************************
         //** static methods for reading structures from event structure
@@ -90,8 +104,12 @@ namespace hipo {
         //*******************************************************************
         static std::pair<int,int>
               getStructurePosition(const char *buffer, int group, int item);
+        //static std::pair<int,int>
+        //      getStructurePosition5(const char *buffer, int group, int item);
+        //static std::pair<int,int>  getStructurePosition(const char *buffer, int group, int item);
         static void
               getStructure(const char *buffer, hipo::structure &str, int group, int item);
+        static void   get(const char *buffer, hipo::node &_n, int group, int item);      
         static void
               getStructureNoCopy(const char *buffer, hipo::structure &str, int group, int item);
     };

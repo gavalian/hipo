@@ -79,10 +79,12 @@ namespace hipo {
            benchmarkName = name;
            running_time = 0;counter = 0; printoutFrequency = -1;
          }
+    
         benchmark(){ running_time = 0;counter = 0; printoutFrequency = -1;}
         benchmark(int freq){ running_time = 0;counter = 0; printoutFrequency = freq;}
        ~benchmark(){}
 
+    void     reset(){ running_time = 0;counter = 0; printoutFrequency = -1;}
        void     setName(const char *name){ benchmarkName = name;}
        void     resume();
        void     pause();

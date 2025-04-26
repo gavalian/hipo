@@ -1,0 +1,10 @@
+*.o
+*.exe
+*.hipo
+lib
+slib
+__pycache__
+/build*/
+/install*/
+/.cache
+/java/target/

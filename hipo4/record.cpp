@@ -126,7 +126,7 @@ namespace hipo {
         //showBuffer(&recordBuffer[0], 10, 200);
         //unzipBenchmark.resume();
         if(recordHeader.compressionType==0){
-          printf("compression type = 0 data length = %d\n",decompressedLength);
+          // printf("compression type = 0 data length = %d\n",decompressedLength);
           memcpy((&recordBuffer[0]),(&recordCompressedBuffer[0]),decompressedLength);
         } else {
           int unc_result = getUncompressed((&recordCompressedBuffer[0]) , (&recordBuffer[0]),
@@ -240,7 +240,7 @@ namespace hipo {
       readBenchmark.pause();
       unzipBenchmark.resume();
       if(recordHeader.compressionType==0){
-        printf("compression type = 0 data length = %d\n",decompressedLength);
+        // printf("compression type = 0 data length = %d\n",decompressedLength);
         memcpy((&recordBuffer[0]),(&recordCompressedBuffer[0]),decompressedLength);
       } else {
         int unc_result = getUncompressed((&recordCompressedBuffer[0]) , (&recordBuffer[0]),
@@ -417,7 +417,67 @@ namespace hipo {
         data.setDataSize(last_position-first_position);
         data.setDataOffset(first_position + offset);
     }
+void   record::read(hipo::bank &b, int event){
+   hipo::data event_data;
+   getData(event_data,event);
+   hipo::event::getStructure(event_data.getDataPtr(),b,b.getSchema().getGroup(),b.getSchema().getItem());
+}
 
+void   record::getColumn(hipo::data &data,const char* column, hipo::bank &bank, int event){
+  int order = bank.getSchema().getEntryOrder(column);
+  getColumn(data,order,bank,event);
+}
+
+void   record::getColumn(hipo::data &data,int column, hipo::bank &bank, int event){
+    hipo::data event_data;
+    getData(event_data,event);
+    std::pair<int,int> pos = hipo::event::getStructurePosition(event_data.getDataPtr(),
+         bank.getSchema().getGroup(), bank.getSchema().getItem());
+
+    //printf(" returned position = %8d, %8d\n",pos.first,pos.second);
+
+    if(pos.second<=0) {
+      data.setDataPtr(NULL);
+      data.setDataSize(0);
+      data.setDataType(0);
+      return;
+    }
+    //printf("----- hok ---- we are here now ----\n");
+    int size = *reinterpret_cast<const uint32_t *>(&event_data.getDataPtr()[pos.first+4]);
+    //printf("----- hok ---- one more step ----\n");
+    int bankRows = size/bank.getSchema().getRowLength();
+    //printf(" returned sizes = %8d, %8d\n",size,bankRows);
+    data.setDataSize(bankRows);
+    data.setDataType(bank.getSchema().getEntryType(column));
+
+    //printf(" returned type = %d\n",data.getDataType());
+    int offset   = bank.getSchema().getOffset(column,0,bankRows);
+    //printf("============ offset = %8d\n",offset);
+    data.setDataPtr(&(event_data.getDataPtr()[pos.first+offset+8]));
+}
+
+void record::getEventsMap(std::vector<std::pair<int,int>> &emap){
+   emap.clear();
+   int offset        = recordHeader.indexDataLength
+                          + recordHeader.userHeaderLength
+                          + recordHeader.userHeaderLengthPadding;
+                          /*
+   printf(" offset for the record = %8d, %8d, %8d, %8d\n",offset,
+          recordHeader.indexDataLength
+        , recordHeader.userHeaderLength
+        , recordHeader.userHeaderLengthPadding
+        );*/
+
+   int nevents = recordHeader.numberOfEvents;
+   for(int index = 0; index < nevents; index++){
+      int first_position = 0;
+        if(index > 0){
+          first_position  = *(reinterpret_cast<uint32_t *>(&recordBuffer[(index -1)*4]));
+        }
+        int last_position = *(reinterpret_cast<uint32_t *>(&recordBuffer[index*4]));
+        emap.push_back(std::make_pair(first_position+offset,last_position+offset));
+   }
+}
     void  record::readHipoEvent(hipo::event &event, int index){
           hipo::data event_data;
           getData(event_data,index);
@@ -482,5 +542,62 @@ namespace hipo {
 
     }
 
+
+
+dataframe::dataframe(int max_events, int max_size){
+   maxEvents = max_events; maxSize = max_size;
+   dataBuffer.resize(56+maxSize);
+   reset();
+}
+
+void dataframe::reset(){
+   *(reinterpret_cast<int *>(&dataBuffer[0]))  = 56; // record length 1
+   *(reinterpret_cast<int *>(&dataBuffer[4]))  = 1; // record number 2
+   *(reinterpret_cast<int *>(&dataBuffer[8]))  = 14; // header length words 3
+   *(reinterpret_cast<int *>(&dataBuffer[12])) = 0; // event count 4
+   *(reinterpret_cast<int *>(&dataBuffer[16])) = 0; // index array length 5
+   *(reinterpret_cast<int *>(&dataBuffer[20])) = 5; // verion + bitinfo 6 
+   *(reinterpret_cast<int *>(&dataBuffer[24])) = 0; // user header length
+   *(reinterpret_cast<int *>(&dataBuffer[28])) = 0xc0da0100;
+   *(reinterpret_cast<int *>(&dataBuffer[32])) = 0; // uncompressed data length
+   *(reinterpret_cast<int *>(&dataBuffer[36])) = 0; // compressed data length
+}
+
+bool         dataframe::addEvent(hipo::event &event){ 
+  int fsize = size();
+  if( (event.getSize() + fsize + 56 ) > maxSize) return false;
+  int evCount = count();
+  if(evCount>=maxEvents) return false;
+  memcpy(&dataBuffer[fsize],&(event.getEventBuffer()[0]), event.getSize());
+  int datasize = *(reinterpret_cast<int *>(&dataBuffer[32]));
+  *(reinterpret_cast<int *>(&dataBuffer[12])) = evCount + 1;
+  *(reinterpret_cast<int *>(&dataBuffer[32])) = datasize + event.getSize();
+  *(reinterpret_cast<int *>(&dataBuffer[36])) = datasize + event.getSize();
+  *(reinterpret_cast<int *>(&dataBuffer[0]))  = fsize + event.getSize();
+  return true;
+}
+
+int          dataframe::getEventAt(int pos, hipo::event &event){ 
+    int eventsize = *(reinterpret_cast<int *>(&dataBuffer[pos+4]));
+    event.init(&dataBuffer[pos],eventsize);
+    return pos+eventsize;
+}
+
+void          dataframe::init(const char *ptr){
+    int size = *(reinterpret_cast<const int *>(ptr));
+    if(size>dataBuffer.size()) dataBuffer.resize(size+56);
+    memcpy(&dataBuffer[0],ptr,size);
+}
+
+int          dataframe::count(){ return *(reinterpret_cast<int *>(&dataBuffer[12]));}
+int          dataframe::size(){ return  (*(reinterpret_cast<int *>(&dataBuffer[0])));}
+
+void         dataframe::summary(){
+  printf("## data frame summary:\n");
+  printf("frame size       : %d\n",*(reinterpret_cast<int *>(&dataBuffer[0])));
+  printf("magic word       : %X\n",*(reinterpret_cast<int *>(&dataBuffer[28])));
+  printf("number of events : %d\n",*(reinterpret_cast<int *>(&dataBuffer[12])));
+  printf("data length      : %d\n",*(reinterpret_cast<int *>(&dataBuffer[32]))); 
+}
 
 }

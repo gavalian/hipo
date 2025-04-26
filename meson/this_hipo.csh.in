@@ -1,0 +1,18 @@
+#!/usr/bin/env @shell@
+set user_command = ($_)
+set HIPO_CSH_ENV_FILE=`readlink -f $user_command[2]`
+unset user_command
+echo 'Creating `@shell@` sub-shell for HIPO environment.'
+echo ''
+echo 'NOTE: using HIPO with this sub-shell is not well-tested; please report'
+echo '      any problems or consider using `bash` or `zsh` and sourcing'
+echo '      `this_hipo.sh` instead.'
+echo ''
+echo 'NOTE: to preserve the history of commands run in this sub-shell, `$savehist`'
+echo '      should be set to enable merging, e.g. in your `~/.cshrc` file:'
+echo '        set history=10000'
+echo '        set savehist=(10000 merge)'
+echo ''
+bash -c "source `dirname $HIPO_CSH_ENV_FILE`/this_hipo.sh && exec @shell@"
+echo 'Exited HIPO `@shell@` sub-shell.'
+unset HIPO_CSH_ENV_FILE

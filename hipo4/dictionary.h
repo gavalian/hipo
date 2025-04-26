@@ -25,13 +25,23 @@
 
 namespace hipo {
 
-  typedef struct {
+  typedef struct schemaEntry_t {
     std::string  name;
     std::string  type;
     int          typeId{};
     int          typeSize{};
     int          offset{};
   } schemaEntry_t;
+
+  enum Type {
+    kByte   = 1,
+    kShort  = 2,
+    kInt    = 3,
+    kFloat  = 4,
+    kDouble = 5,
+    kLong   = 8
+  };
+
 
 class schema {
   private:
@@ -68,7 +78,7 @@ class schema {
     virtual ~schema()= default;
 
     void  parse(const std::string& schString);
-    std::string   getName(){ return schemaName;}
+    std::string   getName() const { return schemaName;}
     int   getGroup(){ return groupid;}
     int   getItem(){ return itemid;}
     int   getSizeForRows(int rows);
@@ -99,6 +109,14 @@ class schema {
     int   getEntryType(int item) const noexcept {
       return schemaEntries[item].typeId;
     }
+    int   getEntryType(const char *name) const noexcept {
+      auto item = getEntryOrder(name);
+      if(item >= 0)
+        return schemaEntries[item].typeId;
+      else
+        return -1;
+    }
+
     std::string getEntryName(int item)  const noexcept { return schemaEntries[item].name;}
     int   getEntries() const noexcept { return schemaEntries.size();}
     void  show();
@@ -121,7 +139,7 @@ class schema {
    
    if(warningCount>0 ) { warningCount--; std::cout<<"Warning , hipo::schema getEntryOrder(const char *name) item :" <<name<<" not found, for bank "<<schemaName<<" data for this item is not valid "<<std::endl;
    }
-   return 0;
+   return -1;
  }
  
  
@@ -135,7 +153,13 @@ class schema {
     std::vector<std::string> getSchemaList();
     void    addSchema(schema sc){ factory[sc.getName()] = sc;}
     bool    hasSchema(const char *name) { return (factory.count(name)!=0);}
-    schema &getSchema(const char *name){ return factory[name];}
+    schema &getSchema(const char *name){ 
+      if(factory.count(name)==0){
+        printf("\n\nhipo::dictionary (ERROR) schema {%s} does not exist... exiting\n\n",name);
+           exit(1);
+      }
+      return factory[name];
+    }
     bool    parse(const char *schemaString);
     void    show();
   };

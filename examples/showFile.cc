@@ -27,12 +27,12 @@ int main(int argc, char** argv) {
    char inputBank[256];
 
    if(argc>2) {
-      sprintf(inputFile,"%s",argv[1]);
-      sprintf(inputBank,"%s",argv[2]);
+     snprintf(inputFile,256,"%s",argv[1]);
+     snprintf(inputBank,256,"%s",argv[2]);
       //sprintf(outputFile,"%s",argv[2]);
    } else {
-      std::cout << " *** please provide a file name..." << std::endl;
-     exit(0);
+      std::cout << " *** please provide a file name and bank..." << std::endl;
+     exit(1);
    }
 
    hipo::reader  reader;

@@ -32,30 +32,30 @@ namespace hipo {
 
   int   schema::getTypeByString(std::string &typeName){
       if(typeName=="B"){
-        return 1;
+        return kByte;
       } else if(typeName=="S") {
-        return 2;
+        return kShort;
       } else if(typeName=="I") {
-        return 3;
+        return kInt;
       } else if(typeName=="F") {
-        return 4;
+        return kFloat;
       } else if(typeName=="D") {
-        return 5;
+        return kDouble;
       } else if(typeName=="L") {
-        return 8;
+        return kLong;
       }
       return -1;
   }
 
   int  schema::getTypeSize(int id){
     switch(id){
-      case 1: return 1;
-      case 2: return 2;
-      case 3: return 4;
-      case 4: return 4;
-      case 5: return 8;
-      case 8: return 8;
-      default: return 0;
+      case kByte:   return 1;
+      case kShort:  return 2;
+      case kInt:    return 4;
+      case kFloat:  return 4;
+      case kDouble: return 8;
+      case kLong:   return 8;
+      default:      return 0;
     }
     return 0;
   }
@@ -82,10 +82,10 @@ namespace hipo {
   std::string  schema::getSchemaString(){
     char parts[256];
     std::string result;
-    sprintf(parts,"{%s/%d/%d}{",schemaName.c_str(),groupid,itemid);
+    snprintf(parts,256,"{%s/%d/%d}{",schemaName.c_str(),groupid,itemid);
     result.append(parts);
     for(int loop = 0; loop < schemaEntries.size(); loop++){
-      sprintf(parts,"%s/%s",schemaEntries[loop].name.c_str(), schemaEntries[loop].type.c_str());
+      snprintf(parts,256,"%s/%s",schemaEntries[loop].name.c_str(), schemaEntries[loop].type.c_str());
       if(loop!=0) result.append(",");
       result.append(parts);
     }
@@ -96,12 +96,12 @@ namespace hipo {
   std::string  schema::getSchemaStringJson(){
      char parts[256];
     std::string result;
-    sprintf(parts,"{ \"name\": \"%s\", \"group\": %d, \"item\": %d, \"info\": \" \",",
+    snprintf(parts,256,"{ \"name\": \"%s\", \"group\": %d, \"item\": %d, \"info\": \" \",",
                schemaName.c_str(),groupid,itemid);
     result.append(parts);
     result.append("\"entries\": [ ");
     for(int loop = 0; loop < schemaEntries.size(); loop++){
-      sprintf(parts,"{\"name\":\"%s\", \"type\":\"%s\", \"info\":\" \"}",
+      snprintf(parts,256,"{\"name\":\"%s\", \"type\":\"%s\", \"info\":\" \"}",
        schemaEntries[loop].name.c_str(), schemaEntries[loop].type.c_str());
       if(loop!=0) result.append(",");
       result.append(parts);

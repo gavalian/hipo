@@ -2,14 +2,11 @@
 # MAKEFILE for BUILDING EXAMPLES FOR HIPO4 LIBRARY
 # AUTHOR: GAVALIAN DATE: 10/24/2018
 #********************************************************
-HIPOCFLAGS  := -I../../hipo4
-HIPOLIBS    := -L../../lib -lhipo4
 
-LZ4LIBS     := -L../../lz4/lib -llz4
-LZ4INCLUDES := -I../../lz4/lib
+include ../../meson/Makefile_config.mk
 
-XROOTDINCLUDES := -I/usr/local/Cellar/xrootd/4.10.1/include/xrootd
-XROOTDLIBS     := -L/usr/local/lib -lXrdClient
+XROOTDINCLUDES := -I/opt/homebrew/Cellar/xrootd/5.4.3/include/xrootd
+XROOTDLIBS     := -L/opt/homebrew/Cellar/xrootd/5.4.3/lib -lXrdClient
 
 CXX       := g++
 CXXFLAGS  += -Wall -fPIC -std=c++11

@@ -31,6 +31,7 @@
   * File:   reader.cpp
   * Author: gavalian
   *
+  * Additions by: dglazier
   * Created on April 11, 2017, 2:07 PM
   */
 
@@ -210,6 +211,7 @@ bool  reader::hasNext(){ return readerEventIndex.canAdvance();}
  * @return true if the event was successfully read, and false otherwise
  */
 bool  reader::next(hipo::event &dataevent){
+    if(readerEventIndex.canAdvance()==false) return false;
     int recordNumber = readerEventIndex.getRecordNumber();
     readerEventIndex.advance();
     int recordToBeRead = readerEventIndex.getRecordNumber();
@@ -262,12 +264,66 @@ void  reader::getStructureNoCopy(hipo::structure &structure,int group, int item)
   inputRecord.getData(data,eventNumberInRecord);
   event::getStructureNoCopy(data.getDataPtr(),structure,group,item);
 }
+
+bool  reader::next(std::vector<hipo::bank> &list){
+  bool status = next();
+  if(status==false) return false;
+  read(event);
+  //printf("---------- reader::next() event with next()\n");
+  //event.show();
+  for(int k = 0; k < list.size(); k++){
+    event.read(list[k]);
+  }
+  return true;
+}
+
+std::vector<hipo::bank> reader::getBanks(std::vector<std::string> names){
+  std::vector<hipo::bank> list;
+  readDictionary(factory);
+  for(int k = 0; k < names.size(); k++){
+    hipo::bank b(factory.getSchema(names[k].c_str()),48);
+     list.push_back(b);
+  }
+  return list;
+}
+
+  void reader::readUserConfig(std::map<std::string,std::string> &mapConfig){
+  
+  if(inputStream.is_open()==false){
+    printf("\n\nhipo::reader (ERROR) file is not open.... exiting...\n\n");
+    exit(1);
+  }
+  long position = header.headerLength*4;
+  hipo::record  dictRecord;
+  dictRecord.readRecord(inputStream,position,0);
+  int nevents = dictRecord.getEventCount();
+  /* printf(" reading record at position %8lu, number of entries = %5d\n", 
+      position,dictRecord.getEventCount()); */
+  hipo::structure sKey;
+  hipo::structure sConfig;
+  hipo::event  event;
+  for(int i = 0; i < nevents; i++){
+    dictRecord.readHipoEvent(event,i);
+    event.getStructure(sKey,32555,1);
+    event.getStructure(sConfig,32555,2);
+    if(sKey.getSize()>0){
+      mapConfig[std::string(sKey.getStringAt(0).c_str())] = std::string(sConfig.getStringAt(0).c_str());
+    }
+    //printf("schema : %s\n",schemaStructure.getStringAt(0).c_str());
+    //dict.parse(schemaStructure.getStringAt(0).c_str());
+  }
+}
+  
 /**
  * Reads the dictionary for the file. C++ API is reading packed dictionary
  * format from node (120,2), parses each schema and creates schema dictionary.
  * @param dict - reference to dictionary object.
  */
 void  reader::readDictionary(hipo::dictionary &dict){
+  if(inputStream.is_open()==false){
+    printf("\n\nhipo::reader (ERROR) file is not open.... exiting...\n\n");
+    exit(1);
+  }
   long position = header.headerLength*4;
   hipo::record  dictRecord;
   dictRecord.readRecord(inputStream,position,0);
@@ -312,9 +368,18 @@ bool  reader::next(){
  */
 bool reader::gotoEvent(int eventNumber){
   int recordNumber = readerEventIndex.getRecordNumber();
-  readerEventIndex.gotoEvent(eventNumber);
+
+  //goto event in index if exists, if not return
+  if(readerEventIndex.gotoEvent(eventNumber)==false){
+    printf("[WARNING] hipo::reader::gotoEvent event %d greater than max events = %d, will stay at current event\n",
+	   eventNumber, readerEventIndex.getMaxEvents());
+    return false;
+  }
+
   int recordToBeRead = readerEventIndex.getRecordNumber();
+  
   if(recordToBeRead!=recordNumber){
+    //readerEventIndex.show(); - commented out by gg, this was for debugging
     long position = readerEventIndex.getPosition(recordToBeRead);
     inputRecord.readRecord(inputStream,position,0);
     /*printf(" record changed from %d to %d at event %d total event # %d\n",
@@ -345,6 +410,43 @@ bool  reader::loadRecord(int irec){
     inputRecord.readRecord(inputStream,position,0);
     return readerEventIndex.loadRecord(irec);
 }
+
+  bool  reader::loadRecord(hipo::record &record, int irec){
+    long position = readerEventIndex.getPosition(irec);
+    record.readRecord(inputStream,position,0);
+    return true;
+}
+
+std::vector<int>   reader::getInt(  const char *bank, const char *column, int max ){
+   std::vector<int> rowvec;
+   std::vector<hipo::bank> b = getBanks({bank});
+   int item = b[0].getSchema().getEntryOrder(column);
+   int counter = 0;
+   while(next(b)==true){
+        for(int row = 0 ; row < b[0].getRows();row++){
+            rowvec.push_back(b[0].getInt(item,row));
+            counter++;
+        }
+        if(max>0&&counter>max) break;
+   }
+   return rowvec;
+}
+
+std::vector<float> reader::getFloat(const char *bank, const char *column, int max ){
+  std::vector<float> rowvec;
+   std::vector<hipo::bank> b = getBanks({bank});
+   int item = b[0].getSchema().getEntryOrder(column);
+   int counter = 0;
+   while(next(b)==true){
+        for(int row = 0 ; row < b[0].getRows();row++){
+            rowvec.push_back(b[0].getFloat(item,row));
+            counter++;
+        }
+        if(max>0&&counter>max) break;
+   }
+   return rowvec;
+}
+
 //dglazier
 bool  reader::nextInRecord(){
   if(readerEventIndex.canAdvanceInRecord()==false) return false;
@@ -420,17 +522,35 @@ bool readerIndex::advance(){
  * @return true - if event number is valid event, false - otherwise
  */
 bool readerIndex::gotoEvent(int eventNumber){
-    // The proper record number is found by binary search through records array
+  //check if event exists
+  if(eventNumber>=getMaxEvents()) return false;
+  // The proper record number is found by binary search through records array
+  //------ 
+  // G.Gavalian (July 25/2022)
+  // Changed the eventNumber -> eventNumber+1 in binary search. Now it changes the
+  // record number properly and starts with record event number from 0
+  // I think this was a bug.
+  
     std::vector<int>::iterator l_bound =
-      std::lower_bound(recordEvents.begin(), recordEvents.end(), eventNumber);
+      std::lower_bound(recordEvents.begin(), recordEvents.end(), eventNumber+1);
     std::vector<int>::iterator u_bound =
-      std::lower_bound(recordEvents.begin(), recordEvents.end(), eventNumber);
+      std::lower_bound(recordEvents.begin(), recordEvents.end(), eventNumber+1);
+
+  
     long  position = (l_bound - recordEvents.begin()) - 1;
+    //printf("event # %d , lbound = %ld\n",eventNumber,position);
     currentRecord       = position;
     currentRecordEvent  = eventNumber - recordEvents[currentRecord];
     currentEvent        = eventNumber;
     return true;
 }
+
+
+  void readerIndex::show(){
+    for(int i = 0; i < recordEvents.size(); i++){
+      printf("record = %8d, %8d\n",i,recordEvents[i]);
+    }
+  }
 /**
  * Returns maximum number of events available to read.
  * @return maximum number of events.
