@@ -34,6 +34,8 @@ example_sources = [
   { 'sources': [ 'benchmarks/map_benchmark.cc' ], 'test_this': false, 'test_args': [] },
   ##### fortran/
   { 'sources': [ 'fortran/freader.F' ], 'test_this': test_external, 'test_args': [ external_test_file ], 'build_this': get_option('test_fortran') },
+
+  { 'sources': [ 'readFileIterator.cc' ],           'test_this': true,          'test_args': [ 'example_output.hipo' ] },
 ]
 
 foreach ex : example_sources

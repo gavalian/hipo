@@ -14,6 +14,7 @@ hipo_sources = files(
   'utils.cpp',
   'wrapper.cpp',
   'writer.cpp',
+  'hipoeventiterator.cpp',
 )
 hipo_headers = files(
   'bank.h',
@@ -35,6 +36,7 @@ hipo_headers = files(
   'twig.h',
   'utils.h',
   'writer.h',
+  'hipoeventiterator.h',
 )
 
 hipo_lib = library(
