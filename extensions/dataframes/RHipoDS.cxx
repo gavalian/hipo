@@ -82,7 +82,7 @@ RHipoDS::RHipoDS(const std::vector<std::string> &files, int nevt_inspect, int de
       AddFiles(file_name);
    }
    Init(nevt_inspect);
-   std::cout<<" RHipoDS::RHipoDS "<<files.size()<<" "<<nevt_inspect<<" "<<fHipoFiles.size()<<" "<<GetNFiles()<<std::endl;
+  
 }
 
 ////////////////////////////////////////////////////////////////////////
