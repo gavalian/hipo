@@ -1,0 +1,18 @@
+{
+  "id": [
+    "linux",
+    "macOS",
+    "address-sanitizer",
+    "thread-sanitizer",
+    "undefined-sanitizer",
+    "leak-sanitizer"
+  ],
+  "include": [
+    { "id": "linux",               "runner": "ubuntu-latest", "CC": "gcc",   "CXX": "g++",     "opts": "-Dbuildtype=release -Dtest_fortran=true"   },
+    { "id": "macOS",               "runner": "macos-latest",  "CC": "gcc",   "CXX": "g++",     "opts": "-Dbuildtype=release -Dtest_fortran=true"   },
+    { "id": "address-sanitizer",   "runner": "ubuntu-latest", "CC": "clang", "CXX": "clang++", "opts": "-Dbuildtype=debug   -Db_sanitize=address   -Dtest_fortran=false -Db_lundef=false -Db_pie=true" },
+    { "id": "thread-sanitizer",    "runner": "ubuntu-latest", "CC": "clang", "CXX": "clang++", "opts": "-Dbuildtype=debug   -Db_sanitize=thread    -Dtest_fortran=true  -Db_lundef=false -Db_pie=true" },
+    { "id": "undefined-sanitizer", "runner": "ubuntu-latest", "CC": "clang", "CXX": "clang++", "opts": "-Dbuildtype=debug   -Db_sanitize=undefined -Dtest_fortran=true  -Db_lundef=false -Db_pie=true" },
+    { "id": "leak-sanitizer",      "runner": "ubuntu-latest", "CC": "clang", "CXX": "clang++", "opts": "-Dbuildtype=debug   -Db_sanitize=leak      -Dtest_fortran=true  -Db_lundef=false -Db_pie=true" }
+  ]
+}

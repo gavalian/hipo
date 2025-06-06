@@ -7,6 +7,7 @@ example_sources = [
   ###   'test_this':  boolean, whether or not to run this example as a test
   ###   'test_args':  list of arguments for this example, used for testing
   ###   'first':      boolean, whether this test should be run before any others (default = false)
+  ###   'parallel':   sets 'is_parallel' (default = true)
   ###   'build_this': whether or not to build this (default = true)
   ###   'deps':       additional dependencies (default = [])
   ### },
@@ -14,7 +15,7 @@ example_sources = [
   { 'sources': [ 'builder.cc' ],            'test_this': false,         'test_args': [] },
   { 'sources': [ 'dataframe.cc' ],          'test_this': false,         'test_args': [] },
   { 'sources': [ 'histograms.cc' ],         'test_this': test_external, 'test_args': [ external_test_file ] },
-  { 'sources': [ 'multithread.cc' ],        'test_this': false,         'test_args': [], 'deps': [ thread_dep ], 'build_this': thread_dep.found() },
+  { 'sources': [ 'multithread.cc' ],        'test_this': test_external, 'test_args': [ external_test_file ], 'deps': [ thread_dep ], 'build_this': thread_dep.found(), 'parallel': false },
   { 'sources': [ 'readEvents.cc' ],         'test_this': false,         'test_args': [] },
   { 'sources': [ 'readFile.cc' ],           'test_this': true,          'test_args': [ 'example_output.hipo' ] },
   { 'sources': [ 'readFileDebug.cc' ],      'test_this': false,         'test_args': [] },
@@ -55,7 +56,9 @@ foreach ex : example_sources
         suite:       [ 'example' ],
         args:        ex.get('test_args', []),
         priority:    ex.get('first', false) ? 1 : 0,        # make sure 'first' tests start before any other
-        is_parallel: ex.get('first', false) ? false : true, # make sure 'first' tests finish before any other
+        is_parallel: ex.get('first', false) ? false : ex.get('parallel', true),
+        timeout:     120,
+        env:         project_test_env,
       )
     endif
   endif

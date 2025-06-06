@@ -16,12 +16,23 @@ defaults:
 
 jobs:
 
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    outputs:
+      job_matrix: ${{ steps.matrix.outputs.job_matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: setup job matrix
+        id: matrix
+        run: echo job_matrix=$(jq . -c .github/job_matrix.json) | tee -a $GITHUB_OUTPUT
+
   build:
     name: Build
+    needs: [ setup ]
     strategy:
       fail-fast: false
-      matrix:
-        runner: [ ubuntu-latest, macos-latest ]
+      matrix: ${{ fromJson(needs.setup.outputs.job_matrix) }}
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -33,7 +44,7 @@ jobs:
             --prefix=`pwd`/install            \
             -D install_examples=true          \
             -D test_file=`pwd`/test_data.hipo \
-            -D test_fortran=true
+            ${{ matrix.opts }}
       - run: meson install
         working-directory: build
       - name: dump build log
@@ -44,7 +55,7 @@ jobs:
         run: tar cavf build{.tar.zst,}
       - uses: actions/upload-artifact@v4
         with:
-          name: build-${{ matrix.runner }}
+          name: build-${{ matrix.id }}
           retention-days: 5
           path: build.tar.zst
 
@@ -70,11 +81,10 @@ jobs:
 
   test:
     name: Test
-    needs: [ download_test_data, build ]
+    needs: [ download_test_data, build, setup ]
     strategy:
       fail-fast: false
-      matrix:
-        runner: [ ubuntu-latest, macos-latest ]
+      matrix: ${{ fromJson(needs.setup.outputs.job_matrix) }}
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -83,7 +93,7 @@ jobs:
       - name: download build
         uses: actions/download-artifact@v4
         with:
-          name: build-${{ matrix.runner }}
+          name: build-${{ matrix.id }}
       - name: untar artifacts
         run: ls *.tar.zst | xargs -I{} tar xvf {}
       - name: get test data
@@ -91,12 +101,12 @@ jobs:
         with:
           key: test_data
           path: test_data.hipo
-      - run: meson test
+      - run: meson test --print-errorlogs --max-lines=10000
         working-directory: build
       - name: upload test logs
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-${{ matrix.runner }}
+          name: test-logs-${{ matrix.id }}
           retention-days: 5
-          path: build/meson-logs/*
+          path: build/meson-logs/testlog.txt
