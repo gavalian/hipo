@@ -92,6 +92,16 @@ namespace hipo {
     result.append("}");
     return result;
   }
+  std::string  schema::getFormatString(){
+    char parts[256];
+    std::string result;
+    for(int loop = 0; loop < schemaEntries.size(); loop++){
+      snprintf(parts,256,"%s/%s",schemaEntries[loop].name.c_str(), schemaEntries[loop].type.c_str());
+      if(loop!=0) result.append(",");
+      result.append(parts);
+    }
+    return result;
+  }
 
   std::string  schema::getSchemaStringJson(){
      char parts[256];

@@ -122,6 +122,7 @@ class schema {
     void  show();
 
     std::string  getSchemaString();
+    std::string  getFormatString();
     std::string  getSchemaStringJson();
     
     void operator = (const schema &D ) {
