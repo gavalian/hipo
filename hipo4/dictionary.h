@@ -117,6 +117,11 @@ class schema {
         return -1;
     }
 
+  schema  getCopy(const char *name, int group, int item){
+    schema sc(name,group,item); sc.parse(getFormatString().c_str());
+    printf("COPY: %s from %s\n",sc.getSchemaString().c_str(),getFormatString().c_str());
+    return sc;
+  }
     std::string getEntryName(int item)  const noexcept { return schemaEntries[item].name;}
     int   getEntries() const noexcept { return schemaEntries.size();}
     void  show();

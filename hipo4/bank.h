@@ -283,7 +283,7 @@ namespace hipo {
         ~bank() override;
 
         schema  &getSchema() { return bankSchema;}
-
+      void   copy(bank& b);
         int    getRows()  const noexcept{ return bankRows;}
         void   setRows(   int rows);
         int    getInt(    int item, int index) const noexcept;

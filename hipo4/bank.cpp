@@ -443,6 +443,32 @@ void    bank::setRows(int rows){
    //allocate(size+12);
 }
 
+  void   bank::copy(bank& b){
+    int rows = getRows();
+    b.setRows(rows);
+    schema& sd = b.getSchema();
+    int ne = bankSchema.getEntries();
+    for(int i = 0; i < ne ; i++){
+      int         type = bankSchema.getEntryType(i);
+      std::string name = bankSchema.getEntryName(i);
+      int        order = sd.getEntryOrder(name.c_str());
+      //printf("type %d, order %d, name %s\n",type,order,name.c_str());
+      if(order>=0){
+	for(int j = 0; j < rows; j++){	  
+	  switch(type){
+	  case kByte: b.putByte(order, j, getByte(i, j)); break;
+	  case kShort: b.putShort(order, j, getShort(i, j)); break;
+	  case kInt: b.putInt(order, j, getInt(i, j)); break;
+	  case kFloat:  b.putFloat(order, j, getFloat(i, j)); break;
+	  case kDouble: b.putDouble(order, j, getDouble(i, j)); break;
+	  case kLong: b.putLong(order, j, getLong(i, j)); break;
+	  default: break;
+	  }
+	}
+      }
+    }
+}
+  
 void bank::reset(){
    setSize(0);
    bankRows = 0;
